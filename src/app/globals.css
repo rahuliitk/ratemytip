@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+:root {
+  --color-primary: #1A365D;
+  --color-accent: #2B6CB0;
+  --color-success: #276749;
+  --color-danger: #C53030;
+  --color-warning: #C05621;
+  --color-bg: #F7FAFC;
+  --color-surface: #FFFFFF;
+  --color-text: #1A202C;
+  --color-muted: #718096;
+
+  /* Score color coding */
+  --score-excellent: #276749;
+  --score-very-good: #2F855A;
+  --score-good: #2B6CB0;
+  --score-average: #C05621;
+  --score-below-avg: #C53030;
+  --score-poor: #9B2C2C;
+}
+
+@theme inline {
+  --color-primary: var(--color-primary);
+  --color-accent: var(--color-accent);
+  --color-success: var(--color-success);
+  --color-danger: var(--color-danger);
+  --color-warning: var(--color-warning);
+  --color-bg: var(--color-bg);
+  --color-surface: var(--color-surface);
+  --color-text: var(--color-text);
+  --color-muted: var(--color-muted);
+
+  --color-score-excellent: var(--score-excellent);
+  --color-score-very-good: var(--score-very-good);
+  --color-score-good: var(--score-good);
+  --color-score-average: var(--score-average);
+  --color-score-below-avg: var(--score-below-avg);
+  --color-score-poor: var(--score-poor);
+
+  --font-sans: var(--font-inter);
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Tabular numbers for scores and financial data */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}

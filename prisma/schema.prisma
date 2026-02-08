@@ -1,0 +1,521 @@
+// prisma/schema.prisma
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearchPostgres"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ════════════════════════════════════════
+// ADMIN USERS (Phase 1: only admins have accounts)
+// ════════════════════════════════════════
+
+model AdminUser {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String    @map("password_hash")
+  name          String
+  role          AdminRole @default(MODERATOR)
+  isActive      Boolean   @default(true) @map("is_active")
+  lastLoginAt   DateTime? @map("last_login_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  moderationActions ModerationAction[]
+  reviewActions     ReviewAction[]
+
+  @@map("admin_users")
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  MODERATOR
+}
+
+// ════════════════════════════════════════
+// CREATORS (Influencers / Analysts being tracked)
+// ════════════════════════════════════════
+
+model Creator {
+  id              String      @id @default(cuid())
+  slug            String      @unique
+  displayName     String      @map("display_name")
+  bio             String?
+  profileImageUrl String?     @map("profile_image_url")
+  isVerified      Boolean     @default(false) @map("is_verified")
+  isClaimed       Boolean     @default(false) @map("is_claimed")
+  isActive        Boolean     @default(true) @map("is_active")
+  tier            CreatorTier @default(UNRATED)
+
+  specializations String[] @default([])
+
+  totalTips     Int @default(0) @map("total_tips")
+  activeTips    Int @default(0) @map("active_tips")
+  completedTips Int @default(0) @map("completed_tips")
+  followerCount Int @default(0) @map("follower_count")
+
+  firstTipAt DateTime? @map("first_tip_at")
+  lastTipAt  DateTime? @map("last_tip_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  platforms         CreatorPlatform[]
+  tips              Tip[]
+  currentScore      CreatorScore?      @relation("CurrentScore")
+  scoreSnapshots    ScoreSnapshot[]
+  moderationActions ModerationAction[]
+
+  @@index([slug])
+  @@index([tier])
+  @@index([totalTips])
+  @@index([isActive])
+  @@index([createdAt])
+  @@map("creators")
+}
+
+enum CreatorTier {
+  UNRATED
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+  DIAMOND
+}
+
+// ════════════════════════════════════════
+// CREATOR PLATFORMS (Social media accounts)
+// ════════════════════════════════════════
+
+model CreatorPlatform {
+  id             String   @id @default(cuid())
+  creatorId      String   @map("creator_id")
+  platform       Platform
+  platformUserId String   @map("platform_user_id")
+  platformHandle String   @map("platform_handle")
+  platformUrl    String   @map("platform_url")
+  followerCount  Int      @default(0) @map("follower_count")
+  isActive       Boolean  @default(true) @map("is_active")
+  lastScrapedAt  DateTime? @map("last_scraped_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  creator  Creator   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  rawPosts RawPost[]
+
+  @@unique([platform, platformUserId])
+  @@index([creatorId])
+  @@index([platform])
+  @@map("creator_platforms")
+}
+
+enum Platform {
+  TWITTER
+  YOUTUBE
+  TELEGRAM
+  WEBSITE
+}
+
+// ════════════════════════════════════════
+// RAW POSTS (Scraped social media posts before parsing)
+// ════════════════════════════════════════
+
+model RawPost {
+  id                String   @id @default(cuid())
+  creatorPlatformId String   @map("creator_platform_id")
+  platformPostId    String   @map("platform_post_id")
+  content           String
+  mediaUrls         String[] @default([]) @map("media_urls")
+  postedAt          DateTime @map("posted_at")
+  scrapedAt         DateTime @default(now()) @map("scraped_at")
+  isParsed          Boolean  @default(false) @map("is_parsed")
+  isTipContent      Boolean? @map("is_tip_content")
+  parseConfidence   Float?   @map("parse_confidence")
+  metadata          Json?
+
+  // Relations
+  creatorPlatform CreatorPlatform @relation(fields: [creatorPlatformId], references: [id], onDelete: Cascade)
+  tips            Tip[]
+
+  @@unique([creatorPlatformId, platformPostId])
+  @@index([isParsed])
+  @@index([isTipContent])
+  @@index([postedAt])
+  @@map("raw_posts")
+}
+
+// ════════════════════════════════════════
+// STOCKS (Master stock list)
+// ════════════════════════════════════════
+
+model Stock {
+  id          String     @id @default(cuid())
+  symbol      String     @unique
+  exchange    Exchange
+  name        String
+  sector      String?
+  industry    String?
+  marketCap   MarketCap? @map("market_cap")
+  isIndex     Boolean    @default(false) @map("is_index")
+  isActive    Boolean    @default(true) @map("is_active")
+  lastPrice   Float?     @map("last_price")
+  lastPriceAt DateTime?  @map("last_price_at")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  // Relations
+  tips         Tip[]
+  priceHistory StockPrice[]
+
+  @@index([symbol])
+  @@index([exchange])
+  @@index([isActive])
+  @@map("stocks")
+}
+
+enum Exchange {
+  NSE
+  BSE
+  MCX
+  CRYPTO
+  INDEX
+}
+
+enum MarketCap {
+  LARGE
+  MID
+  SMALL
+  MICRO
+}
+
+// ════════════════════════════════════════
+// STOCK PRICES (Historical price data)
+// ════════════════════════════════════════
+
+model StockPrice {
+  id      String   @id @default(cuid())
+  stockId String   @map("stock_id")
+  date    DateTime @db.Date
+  open    Float
+  high    Float
+  low     Float
+  close   Float
+  volume  BigInt?
+  source  String   @default("YAHOO")
+
+  // Relations
+  stock Stock @relation(fields: [stockId], references: [id], onDelete: Cascade)
+
+  @@unique([stockId, date])
+  @@index([stockId, date(sort: Desc)])
+  @@map("stock_prices")
+}
+
+// ════════════════════════════════════════
+// TIPS (The core entity — IMMUTABLE after creation)
+// ════════════════════════════════════════
+
+model Tip {
+  id        String  @id @default(cuid())
+  creatorId String  @map("creator_id")
+  stockId   String  @map("stock_id")
+  rawPostId String? @map("raw_post_id")
+
+  // Immutable Tip Data
+  direction  TipDirection
+  assetClass AssetClass   @map("asset_class")
+  entryPrice Float        @map("entry_price")
+  target1    Float
+  target2    Float?
+  target3    Float?
+  stopLoss   Float        @map("stop_loss")
+  timeframe  TipTimeframe
+  conviction Conviction   @default(MEDIUM)
+  rationale  String?
+  sourceUrl  String?      @map("source_url")
+
+  // Integrity Fields
+  contentHash String   @unique @map("content_hash")
+  tipTimestamp DateTime @map("tip_timestamp")
+  priceAtTip  Float?   @map("price_at_tip")
+
+  // Mutable Status Fields
+  status          TipStatus @default(PENDING_REVIEW)
+  statusUpdatedAt DateTime? @map("status_updated_at")
+  target1HitAt    DateTime? @map("target1_hit_at")
+  target2HitAt    DateTime? @map("target2_hit_at")
+  target3HitAt    DateTime? @map("target3_hit_at")
+  stopLossHitAt   DateTime? @map("stoploss_hit_at")
+  expiresAt       DateTime  @map("expires_at")
+  closedPrice     Float?    @map("closed_price")
+  closedAt        DateTime? @map("closed_at")
+
+  // Computed Performance
+  returnPct       Float? @map("return_pct")
+  riskRewardRatio Float? @map("risk_reward_ratio")
+  maxDrawdownPct  Float? @map("max_drawdown_pct")
+
+  // Review Fields
+  reviewStatus    ReviewStatus @default(PENDING) @map("review_status")
+  reviewedAt      DateTime?    @map("reviewed_at")
+  reviewNote      String?      @map("review_note")
+  parseConfidence Float?       @map("parse_confidence")
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  creator       Creator        @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  stock         Stock          @relation(fields: [stockId], references: [id])
+  rawPost       RawPost?       @relation(fields: [rawPostId], references: [id])
+  amendments    TipAmendment[]
+  reviewActions ReviewAction[]
+
+  @@index([creatorId, status])
+  @@index([creatorId, tipTimestamp(sort: Desc)])
+  @@index([stockId, tipTimestamp(sort: Desc)])
+  @@index([status])
+  @@index([reviewStatus])
+  @@index([expiresAt])
+  @@index([tipTimestamp(sort: Desc)])
+  @@map("tips")
+}
+
+enum TipDirection {
+  BUY
+  SELL
+}
+
+enum AssetClass {
+  EQUITY_NSE
+  EQUITY_BSE
+  INDEX
+  FUTURES
+  OPTIONS
+  CRYPTO
+  COMMODITY
+}
+
+enum TipTimeframe {
+  INTRADAY
+  SWING
+  POSITIONAL
+  LONG_TERM
+}
+
+enum Conviction {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum TipStatus {
+  PENDING_REVIEW
+  ACTIVE
+  TARGET_1_HIT
+  TARGET_2_HIT
+  TARGET_3_HIT
+  ALL_TARGETS_HIT
+  STOPLOSS_HIT
+  EXPIRED
+  REJECTED
+}
+
+enum ReviewStatus {
+  PENDING
+  AUTO_APPROVED
+  MANUALLY_APPROVED
+  REJECTED
+  NEEDS_EDIT
+}
+
+// ════════════════════════════════════════
+// TIP AMENDMENTS (Logged changes — for transparency)
+// ════════════════════════════════════════
+
+model TipAmendment {
+  id        String   @id @default(cuid())
+  tipId     String   @map("tip_id")
+  field     String
+  oldValue  String   @map("old_value")
+  newValue  String   @map("new_value")
+  reason    String?
+  amendedAt DateTime @default(now()) @map("amended_at")
+
+  // Relations
+  tip Tip @relation(fields: [tipId], references: [id], onDelete: Cascade)
+
+  @@index([tipId])
+  @@map("tip_amendments")
+}
+
+// ════════════════════════════════════════
+// CREATOR SCORES (Current score — one per creator)
+// ════════════════════════════════════════
+
+model CreatorScore {
+  id                String @id @default(cuid())
+  creatorId         String @unique @map("creator_id")
+
+  // Component Scores (0-100 each)
+  accuracyScore     Float @map("accuracy_score")
+  riskAdjustedScore Float @map("risk_adjusted_score")
+  consistencyScore  Float @map("consistency_score")
+  volumeFactorScore Float @map("volume_factor_score")
+
+  // Composite Score
+  rmtScore           Float @map("rmt_score")
+  confidenceInterval Float @map("confidence_interval")
+
+  // Raw Metrics
+  accuracyRate       Float @map("accuracy_rate")
+  avgReturnPct       Float @map("avg_return_pct")
+  avgRiskRewardRatio Float @map("avg_risk_reward_ratio")
+  winStreak          Int   @default(0) @map("win_streak")
+  lossStreak         Int   @default(0) @map("loss_streak")
+  bestTipReturnPct   Float? @map("best_tip_return_pct")
+  worstTipReturnPct  Float? @map("worst_tip_return_pct")
+
+  // Breakdown by Timeframe
+  intradayAccuracy   Float? @map("intraday_accuracy")
+  swingAccuracy      Float? @map("swing_accuracy")
+  positionalAccuracy Float? @map("positional_accuracy")
+  longTermAccuracy   Float? @map("long_term_accuracy")
+
+  // Metadata
+  totalScoredTips  Int      @map("total_scored_tips")
+  scorePeriodStart DateTime @map("score_period_start")
+  scorePeriodEnd   DateTime @map("score_period_end")
+  calculatedAt     DateTime @map("calculated_at")
+
+  // Relations
+  creator Creator @relation("CurrentScore", fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@index([rmtScore(sort: Desc)])
+  @@index([accuracyRate(sort: Desc)])
+  @@map("creator_scores")
+}
+
+// ════════════════════════════════════════
+// SCORE SNAPSHOTS (Daily score history for charts)
+// ════════════════════════════════════════
+
+model ScoreSnapshot {
+  id              String   @id @default(cuid())
+  creatorId       String   @map("creator_id")
+  date            DateTime @db.Date
+  rmtScore        Float    @map("rmt_score")
+  accuracyRate    Float    @map("accuracy_rate")
+  totalScoredTips Int      @map("total_scored_tips")
+
+  // Relations
+  creator Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@unique([creatorId, date])
+  @@index([creatorId, date(sort: Desc)])
+  @@map("score_snapshots")
+}
+
+// ════════════════════════════════════════
+// SCRAPE JOBS (Job tracking for scrapers)
+// ════════════════════════════════════════
+
+model ScrapeJob {
+  id                String        @id @default(cuid())
+  platform          Platform
+  jobType           ScrapeJobType @map("job_type")
+  status            JobStatus     @default(QUEUED)
+  creatorPlatformId String?       @map("creator_platform_id")
+  postsFound        Int           @default(0) @map("posts_found")
+  tipsExtracted     Int           @default(0) @map("tips_extracted")
+  errorMessage      String?       @map("error_message")
+  startedAt         DateTime?     @map("started_at")
+  completedAt       DateTime?     @map("completed_at")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  metadata          Json?
+
+  @@index([status])
+  @@index([platform])
+  @@index([createdAt(sort: Desc)])
+  @@map("scrape_jobs")
+}
+
+enum ScrapeJobType {
+  FULL_SCRAPE
+  INCREMENTAL
+  SINGLE_CREATOR
+  BACKFILL
+}
+
+enum JobStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+// ════════════════════════════════════════
+// REVIEW ACTIONS (Audit trail for human reviews)
+// ════════════════════════════════════════
+
+model ReviewAction {
+  id        String           @id @default(cuid())
+  tipId     String           @map("tip_id")
+  adminId   String           @map("admin_id")
+  action    ReviewActionType
+  note      String?
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  // Relations
+  tip   Tip       @relation(fields: [tipId], references: [id], onDelete: Cascade)
+  admin AdminUser @relation(fields: [adminId], references: [id])
+
+  @@index([tipId])
+  @@index([adminId])
+  @@map("review_actions")
+}
+
+enum ReviewActionType {
+  APPROVED
+  REJECTED
+  EDITED_AND_APPROVED
+  SENT_BACK_FOR_REVIEW
+}
+
+// ════════════════════════════════════════
+// MODERATION ACTIONS (Creator-level moderation)
+// ════════════════════════════════════════
+
+model ModerationAction {
+  id        String         @id @default(cuid())
+  creatorId String         @map("creator_id")
+  adminId   String         @map("admin_id")
+  action    ModerationType
+  reason    String
+  createdAt DateTime       @default(now()) @map("created_at")
+
+  // Relations
+  creator Creator   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  admin   AdminUser @relation(fields: [adminId], references: [id])
+
+  @@index([creatorId])
+  @@map("moderation_actions")
+}
+
+enum ModerationType {
+  ACTIVATED
+  DEACTIVATED
+  FLAGGED
+  UNFLAGGED
+  NOTE_ADDED
+}
