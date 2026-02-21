@@ -4,7 +4,11 @@
 export type ParsedDirection = "BUY" | "SELL";
 
 /** Exchange where the stock trades */
-export type ParsedExchange = "NSE" | "BSE" | "INDEX";
+export type ParsedExchange =
+  | "NYSE" | "NASDAQ" | "TSX"
+  | "LSE" | "XETRA" | "EURONEXT"
+  | "NSE" | "BSE" | "TSE" | "HKEX" | "ASX" | "KRX" | "SGX"
+  | "MCX" | "CRYPTO" | "INDEX";
 
 /** Timeframe of a parsed tip */
 export type ParsedTimeframe = "INTRADAY" | "SWING" | "POSITIONAL" | "LONG_TERM";

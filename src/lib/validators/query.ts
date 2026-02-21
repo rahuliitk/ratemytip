@@ -16,7 +16,7 @@ export const leaderboardQuerySchema = paginationSchema.extend({
 export const creatorTipsQuerySchema = paginationSchema.extend({
   status: z.enum(["PENDING_REVIEW", "ACTIVE", "TARGET_1_HIT", "TARGET_2_HIT", "TARGET_3_HIT", "ALL_TARGETS_HIT", "STOPLOSS_HIT", "EXPIRED", "REJECTED"]).optional(),
   timeframe: z.enum(["INTRADAY", "SWING", "POSITIONAL", "LONG_TERM"]).optional(),
-  assetClass: z.enum(["EQUITY_NSE", "EQUITY_BSE", "INDEX", "FUTURES", "OPTIONS", "CRYPTO", "COMMODITY"]).optional(),
+  assetClass: z.enum(["EQUITY", "INDEX", "FUTURES", "OPTIONS", "CRYPTO", "COMMODITY", "FOREX"]).optional(),
   sortBy: z.enum(["tip_timestamp", "return_pct"]).default("tip_timestamp"),
 });
 

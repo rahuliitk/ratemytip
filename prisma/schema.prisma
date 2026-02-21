@@ -182,8 +182,23 @@ model Stock {
 }
 
 enum Exchange {
+  // Americas
+  NYSE
+  NASDAQ
+  TSX
+  // Europe
+  LSE
+  XETRA
+  EURONEXT
+  // Asia-Pacific
   NSE
   BSE
+  TSE
+  HKEX
+  ASX
+  KRX
+  SGX
+  // Other
   MCX
   CRYPTO
   INDEX
@@ -296,13 +311,13 @@ enum TipDirection {
 }
 
 enum AssetClass {
-  EQUITY_NSE
-  EQUITY_BSE
+  EQUITY
   INDEX
   FUTURES
   OPTIONS
   CRYPTO
   COMMODITY
+  FOREX
 }
 
 enum TipTimeframe {

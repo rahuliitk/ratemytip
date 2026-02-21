@@ -42,8 +42,8 @@ export function getPriceMonitor(): PriceMonitor {
 /**
  * Fetch the current price for a stock.
  *
- * @param symbol - Stock symbol (e.g. "RELIANCE", "TCS")
- * @param exchange - Exchange code (e.g. "NSE", "BSE", "INDEX")
+ * @param symbol - Stock symbol (e.g. "AAPL", "RELIANCE", "BTC")
+ * @param exchange - Exchange code (e.g. "NYSE", "NSE", "CRYPTO")
  * @returns Current price data or null if unavailable
  */
 export async function fetchCurrentPrice(

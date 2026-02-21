@@ -11,13 +11,12 @@ import { TIP_STATUS } from "@/lib/constants";
 import { YahooFinanceService } from "./yahoo-finance";
 import type { CurrentPrice, TipStatusUpdate } from "./types";
 
-/** Exchange string to pass to the Yahoo Finance service */
+/**
+ * For asset classes that don't directly map to an exchange,
+ * the stock's own exchange field is used as a fallback.
+ * This map only provides overrides where the asset class is more specific.
+ */
 const ASSET_CLASS_TO_EXCHANGE: Record<string, string> = {
-  EQUITY_NSE: "NSE",
-  EQUITY_BSE: "BSE",
-  INDEX: "INDEX",
-  FUTURES: "NSE",
-  OPTIONS: "NSE",
   CRYPTO: "CRYPTO",
   COMMODITY: "MCX",
 };

@@ -1,5 +1,8 @@
 import Link from "next/link";
+
 import { db } from "@/lib/db";
+
+export const dynamic = "force-dynamic";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { ScoreBadge } from "@/components/shared/score-badge";
@@ -235,12 +238,12 @@ export default async function HomePage(): Promise<React.ReactElement> {
           Why RateMyTip?
         </h2>
         <p className="mt-3 text-sm leading-relaxed text-muted">
-          The Indian stock market has seen an explosion of financial influencers
-          offering stock tips on social media. But how do you know which ones to
-          trust? RateMyTip solves this by tracking every tip, measuring actual
-          performance, and producing a transparent RMT Score for each creator.
-          Our scoring algorithm considers accuracy, risk-adjusted returns,
-          consistency, and volume to give you a complete picture of a
+          Financial influencers across the globe offer stock and crypto tips on
+          social media. But how do you know which ones to trust? RateMyTip
+          solves this by tracking every tip, measuring actual performance
+          against real market data, and producing a transparent RMT Score for
+          each creator. Our scoring algorithm considers accuracy, risk-adjusted
+          returns, consistency, and volume to give you a complete picture of a
           creator&apos;s track record.
         </p>
       </section>

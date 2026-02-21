@@ -6,7 +6,27 @@ import type { TipSummary } from "./tip";
 
 // ──── Enum mirrors (match Prisma enums exactly) ────
 
-type Exchange = "NSE" | "BSE" | "MCX" | "CRYPTO" | "INDEX";
+type Exchange =
+  // Americas
+  | "NYSE"
+  | "NASDAQ"
+  | "TSX"
+  // Europe
+  | "LSE"
+  | "XETRA"
+  | "EURONEXT"
+  // Asia-Pacific
+  | "NSE"
+  | "BSE"
+  | "TSE"
+  | "HKEX"
+  | "ASX"
+  | "KRX"
+  | "SGX"
+  // Other
+  | "MCX"
+  | "CRYPTO"
+  | "INDEX";
 
 type MarketCap = "LARGE" | "MID" | "SMALL" | "MICRO";
 

@@ -2,6 +2,8 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { ScoreBadge } from "@/components/shared/score-badge";
 
+export const dynamic = "force-dynamic";
+
 async function getCreators() {
   try {
     const creators = await db.creator.findMany({
