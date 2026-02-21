@@ -1,0 +1,8 @@
+# Default owner for everything
+* @rahuliitk
+
+# Scoring algorithm — changes need careful review
+/src/lib/scoring/ @rahuliitk
+
+# Database schema
+/prisma/ @rahuliitk

@@ -1,7 +1,31 @@
 {
   "name": "ratemytip",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
+  "description": "Open source financial tip accountability platform — track, verify, and score stock market tips from Indian finfluencers",
+  "license": "MIT",
+  "author": "rahuliitk",
+  "homepage": "https://ratemytip.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rahuliitk/ratemytip.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rahuliitk/ratemytip/issues"
+  },
+  "keywords": [
+    "stock-tips",
+    "finfluencer",
+    "leaderboard",
+    "scoring-algorithm",
+    "financial-accountability",
+    "india",
+    "nse",
+    "bse",
+    "nextjs",
+    "typescript",
+    "open-source"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",

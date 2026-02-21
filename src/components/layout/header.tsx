@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Menu, X, Search, BarChart3 } from "lucide-react";
+import { Menu, X, Search, BarChart3, Github } from "lucide-react";
 
 export function Header(): React.ReactElement {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -33,6 +33,15 @@ export function Header(): React.ReactElement {
             <Search className="h-4 w-4" />
             Search
           </Link>
+          <a
+            href="https://github.com/rahuliitk/ratemytip"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-muted transition-colors hover:text-primary"
+            aria-label="GitHub repository"
+          >
+            <Github className="h-5 w-5" />
+          </a>
         </nav>
 
         {/* Mobile menu button */}
@@ -68,6 +77,16 @@ export function Header(): React.ReactElement {
             >
               Search
             </Link>
+            <a
+              href="https://github.com/rahuliitk/ratemytip"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-bg hover:text-primary"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <Github className="h-4 w-4" />
+              GitHub
+            </a>
           </nav>
         </div>
       )}

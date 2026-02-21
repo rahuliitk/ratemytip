@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions & Discussion
+    url: https://github.com/rahuliitk/ratemytip/discussions
+    about: Ask questions, share ideas, or discuss the scoring algorithm
+  - name: Scoring Algorithm Proposals
+    url: https://github.com/rahuliitk/ratemytip/discussions/categories/ideas
+    about: Propose changes to the RMT Score algorithm

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Github } from "lucide-react";
 
 export function Footer(): React.ReactElement {
   const currentYear = new Date().getFullYear();
@@ -23,11 +24,28 @@ export function Footer(): React.ReactElement {
             >
               Privacy
             </Link>
+            <a
+              href="https://github.com/rahuliitk/ratemytip"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-primary"
+            >
+              <Github className="h-4 w-4" />
+              GitHub
+            </a>
           </nav>
         </div>
         <p className="mt-4 text-center text-xs text-muted">
-          Every Call. Rated. RateMyTip tracks, verifies, and scores stock market
-          tips from influencers and analysts.
+          Every Call. Rated. RateMyTip is{" "}
+          <a
+            href="https://github.com/rahuliitk/ratemytip"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-primary"
+          >
+            open source
+          </a>
+          {" "}&mdash; track, verify, and score stock market tips from influencers and analysts.
         </p>
       </div>
     </footer>
