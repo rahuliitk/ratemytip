@@ -242,13 +242,11 @@ async function parseTipJob(
 
   // Map asset class from stock exchange
   const assetClassMap: Record<string, string> = {
-    NSE: "EQUITY_NSE",
-    BSE: "EQUITY_BSE",
     INDEX: "INDEX",
     MCX: "COMMODITY",
     CRYPTO: "CRYPTO",
   };
-  const assetClass = assetClassMap[stock.exchange] ?? "EQUITY_NSE";
+  const assetClass = assetClassMap[stock.exchange] ?? "EQUITY";
 
   // Compute content hash
   const target1 = extraction.targets[0]!;
@@ -293,7 +291,7 @@ async function parseTipJob(
         stockId: stock.id,
         rawPostId,
         direction: extraction.direction,
-        assetClass: assetClass as "EQUITY_NSE" | "EQUITY_BSE" | "INDEX" | "FUTURES" | "OPTIONS" | "CRYPTO" | "COMMODITY",
+        assetClass: assetClass as "EQUITY" | "INDEX" | "FUTURES" | "OPTIONS" | "CRYPTO" | "COMMODITY" | "FOREX",
         entryPrice: extraction.entryPrice,
         target1,
         target2,

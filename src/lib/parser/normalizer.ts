@@ -1,10 +1,10 @@
 // src/lib/parser/normalizer.ts
 
 /**
- * Stock name normalization for Indian equities.
+ * Stock name normalization for global equities, indices, and crypto.
  *
  * Maps common aliases, abbreviations, and full company names to their
- * canonical NSE symbols. This is the primary lookup used after regex
+ * canonical symbols. This is the primary lookup used after regex
  * extraction to resolve ambiguous stock references.
  *
  * When no exact match is found, a fuzzy match against the database
@@ -12,211 +12,314 @@
  */
 
 /**
- * Static alias map covering the most commonly traded NSE stocks and their
- * popular aliases used by Indian finfluencers.
+ * Static alias map covering commonly traded stocks across global exchanges,
+ * popular crypto tokens, and their aliases used by financial influencers.
  *
- * Format: "ALIAS" -> "CANONICAL_NSE_SYMBOL"
+ * Format: "ALIAS" -> "CANONICAL_SYMBOL"
  */
 const STOCK_ALIASES: Readonly<Record<string, string>> = {
-  // ──── Reliance Industries ────
+  // ═══════════════════════════════════════
+  // US STOCKS (NYSE / NASDAQ)
+  // ═══════════════════════════════════════
+
+  // ──── Apple ────
+  AAPL: "AAPL",
+  APPLE: "AAPL",
+
+  // ──── Microsoft ────
+  MSFT: "MSFT",
+  MICROSOFT: "MSFT",
+
+  // ──── Alphabet / Google ────
+  GOOGL: "GOOGL",
+  GOOG: "GOOGL",
+  GOOGLE: "GOOGL",
+  ALPHABET: "GOOGL",
+
+  // ──── Amazon ────
+  AMZN: "AMZN",
+  AMAZON: "AMZN",
+
+  // ──── Meta / Facebook ────
+  META: "META",
+  FACEBOOK: "META",
+  FB: "META",
+
+  // ──── Tesla ────
+  TSLA: "TSLA",
+  TESLA: "TSLA",
+
+  // ──── NVIDIA ────
+  NVDA: "NVDA",
+  NVIDIA: "NVDA",
+
+  // ──── AMD ────
+  AMD: "AMD",
+
+  // ──── Netflix ────
+  NFLX: "NFLX",
+  NETFLIX: "NFLX",
+
+  // ──── Berkshire Hathaway ────
+  "BRK.B": "BRK.B",
+  BERKSHIRE: "BRK.B",
+
+  // ──── JPMorgan ────
+  JPM: "JPM",
+  JPMORGAN: "JPM",
+
+  // ──── Visa ────
+  V: "V",
+  VISA: "V",
+
+  // ──── Mastercard ────
+  MA: "MA",
+  MASTERCARD: "MA",
+
+  // ──── Walmart ────
+  WMT: "WMT",
+  WALMART: "WMT",
+
+  // ──── Disney ────
+  DIS: "DIS",
+  DISNEY: "DIS",
+
+  // ──── Palantir ────
+  PLTR: "PLTR",
+  PALANTIR: "PLTR",
+
+  // ──── Coinbase ────
+  COIN: "COIN",
+  COINBASE: "COIN",
+
+  // ═══════════════════════════════════════
+  // INDIAN STOCKS (NSE / BSE)
+  // ═══════════════════════════════════════
+
   RELIANCE: "RELIANCE",
   RIL: "RELIANCE",
   "RELIANCE INDUSTRIES": "RELIANCE",
 
-  // ──── Tata Consultancy Services ────
   TCS: "TCS",
   "TATA CONSULTANCY": "TCS",
   "TATA CONSULTANCY SERVICES": "TCS",
 
-  // ──── Infosys ────
   INFY: "INFY",
   INFOSYS: "INFY",
 
-  // ──── HDFC Bank ────
   HDFCBANK: "HDFCBANK",
   "HDFC BANK": "HDFCBANK",
   HDFC: "HDFCBANK",
 
-  // ──── ICICI Bank ────
   ICICIBANK: "ICICIBANK",
   "ICICI BANK": "ICICIBANK",
   ICICI: "ICICIBANK",
 
-  // ──── State Bank of India ────
   SBIN: "SBIN",
   SBI: "SBIN",
   "STATE BANK": "SBIN",
   "STATE BANK OF INDIA": "SBIN",
 
-  // ──── Hindustan Unilever ────
   HINDUNILVR: "HINDUNILVR",
   HUL: "HINDUNILVR",
   "HINDUSTAN UNILEVER": "HINDUNILVR",
 
-  // ──── ITC ────
   ITC: "ITC",
 
-  // ──── Bharti Airtel ────
   BHARTIARTL: "BHARTIARTL",
   AIRTEL: "BHARTIARTL",
   "BHARTI AIRTEL": "BHARTIARTL",
 
-  // ──── Kotak Mahindra Bank ────
   KOTAKBANK: "KOTAKBANK",
   KOTAK: "KOTAKBANK",
   "KOTAK MAHINDRA": "KOTAKBANK",
   "KOTAK MAHINDRA BANK": "KOTAKBANK",
 
-  // ──── Axis Bank ────
   AXISBANK: "AXISBANK",
   "AXIS BANK": "AXISBANK",
   AXIS: "AXISBANK",
 
-  // ──── Larsen & Toubro ────
   LT: "LT",
   "L&T": "LT",
   "LARSEN AND TOUBRO": "LT",
   "LARSEN & TOUBRO": "LT",
 
-  // ──── Bajaj Finance ────
   BAJFINANCE: "BAJFINANCE",
   "BAJAJ FINANCE": "BAJFINANCE",
 
-  // ──── Bajaj Finserv ────
   BAJFINSV: "BAJFINSV",
   "BAJAJ FINSERV": "BAJFINSV",
 
-  // ──── Asian Paints ────
   ASIANPAINT: "ASIANPAINT",
   "ASIAN PAINTS": "ASIANPAINT",
 
-  // ──── Maruti Suzuki ────
   MARUTI: "MARUTI",
   "MARUTI SUZUKI": "MARUTI",
 
-  // ──── Tata Motors ────
   TATAMOTORS: "TATAMOTORS",
   "TATA MOTORS": "TATAMOTORS",
   TATAMTRS: "TATAMOTORS",
 
-  // ──── Tata Steel ────
   TATASTEEL: "TATASTEEL",
   "TATA STEEL": "TATASTEEL",
 
-  // ──── Sun Pharma ────
   SUNPHARMA: "SUNPHARMA",
   "SUN PHARMA": "SUNPHARMA",
   "SUN PHARMACEUTICAL": "SUNPHARMA",
 
-  // ──── Wipro ────
   WIPRO: "WIPRO",
 
-  // ──── HCL Technologies ────
   HCLTECH: "HCLTECH",
   HCL: "HCLTECH",
   "HCL TECH": "HCLTECH",
   "HCL TECHNOLOGIES": "HCLTECH",
 
-  // ──── Tech Mahindra ────
   TECHM: "TECHM",
   "TECH MAHINDRA": "TECHM",
 
-  // ──── Power Grid ────
   POWERGRID: "POWERGRID",
   "POWER GRID": "POWERGRID",
 
-  // ──── NTPC ────
   NTPC: "NTPC",
-
-  // ──── Titan ────
   TITAN: "TITAN",
 
-  // ──── Adani Enterprises ────
   ADANIENT: "ADANIENT",
   "ADANI ENTERPRISES": "ADANIENT",
   "ADANI ENT": "ADANIENT",
 
-  // ──── Adani Ports ────
   ADANIPORTS: "ADANIPORTS",
   "ADANI PORTS": "ADANIPORTS",
 
-  // ──── Mahindra & Mahindra ────
   "M&M": "M&M",
   MM: "M&M",
   MAHINDRA: "M&M",
   "MAHINDRA & MAHINDRA": "M&M",
 
-  // ──── IndusInd Bank ────
   INDUSINDBK: "INDUSINDBK",
   "INDUSIND BANK": "INDUSINDBK",
   INDUSIND: "INDUSINDBK",
 
-  // ──── JSW Steel ────
   JSWSTEEL: "JSWSTEEL",
   "JSW STEEL": "JSWSTEEL",
 
-  // ──── Cipla ────
   CIPLA: "CIPLA",
-
-  // ──── Dr Reddy's ────
   DRREDDY: "DRREDDY",
   "DR REDDY": "DRREDDY",
   "DR REDDYS": "DRREDDY",
-
-  // ──── Divis Labs ────
   DIVISLAB: "DIVISLAB",
   "DIVIS LAB": "DIVISLAB",
   "DIVIS LABS": "DIVISLAB",
-
-  // ──── Nestle India ────
   NESTLEIND: "NESTLEIND",
   NESTLE: "NESTLEIND",
   "NESTLE INDIA": "NESTLEIND",
-
-  // ──── Coal India ────
   COALINDIA: "COALINDIA",
   "COAL INDIA": "COALINDIA",
-
-  // ──── Tata Consumer ────
   TATACONSUM: "TATACONSUM",
   "TATA CONSUMER": "TATACONSUM",
-
-  // ──── Britannia ────
   BRITANNIA: "BRITANNIA",
-
-  // ──── UltraTech Cement ────
   ULTRACEMCO: "ULTRACEMCO",
   ULTRATECH: "ULTRACEMCO",
   "ULTRATECH CEMENT": "ULTRACEMCO",
-
-  // ──── Grasim ────
   GRASIM: "GRASIM",
-
-  // ──── Hindalco ────
   HINDALCO: "HINDALCO",
 
-  // ──── Indices ────
+  // ═══════════════════════════════════════
+  // GLOBAL INDICES
+  // ═══════════════════════════════════════
+
+  // US
+  "S&P 500": "SPX",
+  SPX: "SPX",
+  SPY: "SPX",
+  "DOW JONES": "DJI",
+  DJI: "DJI",
+  DJIA: "DJI",
+  "NASDAQ COMPOSITE": "IXIC",
+  IXIC: "IXIC",
+  QQQ: "QQQ",
+  VIX: "VIX",
+
+  // India
   "NIFTY 50": "NIFTY 50",
   NIFTY: "NIFTY 50",
   NIFTY50: "NIFTY 50",
-
   "NIFTY BANK": "NIFTY BANK",
   BANKNIFTY: "NIFTY BANK",
   "BANK NIFTY": "NIFTY BANK",
-
   "NIFTY IT": "NIFTY IT",
   NIFTYIT: "NIFTY IT",
-
   "NIFTY PHARMA": "NIFTY PHARMA",
   NIFTYPHARMA: "NIFTY PHARMA",
-
   "NIFTY MIDCAP 50": "NIFTY MIDCAP 50",
-
   SENSEX: "SENSEX",
+
+  // Europe
+  FTSE: "FTSE 100",
+  "FTSE 100": "FTSE 100",
+  DAX: "DAX",
+  CAC: "CAC 40",
+  "CAC 40": "CAC 40",
+
+  // Asia
+  "NIKKEI 225": "NIKKEI 225",
+  NIKKEI: "NIKKEI 225",
+  "HANG SENG": "HSI",
+  HSI: "HSI",
+
+  // ═══════════════════════════════════════
+  // CRYPTO
+  // ═══════════════════════════════════════
+
+  BITCOIN: "BTC",
+  "BTC/USDT": "BTC",
+  "BTC/USD": "BTC",
+  BTCUSDT: "BTC",
+  BTCUSD: "BTC",
+
+  ETHEREUM: "ETH",
+  "ETH/USDT": "ETH",
+  "ETH/USD": "ETH",
+  ETHUSDT: "ETH",
+  ETHUSD: "ETH",
+
+  SOLANA: "SOL",
+  SOL: "SOL",
+  "SOL/USDT": "SOL",
+
+  XRP: "XRP",
+  RIPPLE: "XRP",
+
+  CARDANO: "ADA",
+  ADA: "ADA",
+
+  DOGECOIN: "DOGE",
+  DOGE: "DOGE",
+
+  POLYGON: "MATIC",
+  MATIC: "MATIC",
+
+  AVALANCHE: "AVAX",
+  AVAX: "AVAX",
+
+  CHAINLINK: "LINK",
+  LINK: "LINK",
+
+  POLKADOT: "DOT",
+  DOT: "DOT",
+
+  LITECOIN: "LTC",
+  LTC: "LTC",
+
+  UNISWAP: "UNI",
+  UNI: "UNI",
+
+  PEPE: "PEPE",
+  SHIB: "SHIB",
+  "SHIBA INU": "SHIB",
 };
 
 /**
- * Normalize a raw stock name / symbol to its canonical NSE symbol.
+ * Normalize a raw stock name / symbol to its canonical symbol.
  *
  * Lookup order:
  * 1. Exact match in alias map (case-insensitive)
@@ -226,7 +329,7 @@ const STOCK_ALIASES: Readonly<Record<string, string>> = {
  * `fuzzyMatchStock` function which requires a database connection.
  *
  * @param input - Raw stock name or symbol extracted from text
- * @returns Canonical NSE symbol or the cleaned input if no alias found
+ * @returns Canonical symbol or the cleaned input if no alias found
  */
 export function normalizeStockName(input: string): string {
   const cleaned = input
@@ -246,13 +349,13 @@ export function normalizeStockName(input: string): string {
 }
 
 /**
- * Check if a string looks like a valid NSE-style stock symbol.
+ * Check if a string looks like a valid stock symbol.
  *
- * Valid symbols are 2-20 uppercase alpha characters, possibly with
- * an ampersand (for M&M) or digits at the end.
+ * Valid symbols are 1-20 uppercase alpha characters, possibly with
+ * an ampersand (for M&M), dots (for BRK.B), or digits at the end.
  */
 export function isValidSymbolFormat(symbol: string): boolean {
-  return /^[A-Z]{2,20}(?:&[A-Z]+)?(?:\d+)?$/.test(symbol);
+  return /^[A-Z]{1,20}(?:[&.][A-Z]+)?(?:\d+)?$/.test(symbol);
 }
 
 /**

@@ -4,7 +4,7 @@ export const createTipSchema = z.object({
   creatorId: z.string().cuid(),
   stockId: z.string().cuid(),
   direction: z.enum(["BUY", "SELL"]),
-  assetClass: z.enum(["EQUITY_NSE", "EQUITY_BSE", "INDEX", "FUTURES", "OPTIONS", "CRYPTO", "COMMODITY"]),
+  assetClass: z.enum(["EQUITY", "INDEX", "FUTURES", "OPTIONS", "CRYPTO", "COMMODITY", "FOREX"]),
   entryPrice: z.number().positive(),
   target1: z.number().positive(),
   target2: z.number().positive().optional(),

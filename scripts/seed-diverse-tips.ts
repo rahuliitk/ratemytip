@@ -461,7 +461,7 @@ async function main(): Promise<void> {
           creatorId,
           stockId,
           direction: tipData.direction,
-          assetClass: "EQUITY_NSE",
+          assetClass: "EQUITY",
           entryPrice: tipData.entryPrice,
           target1: tipData.target1,
           stopLoss: tipData.stopLoss,

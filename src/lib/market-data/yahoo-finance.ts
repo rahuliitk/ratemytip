@@ -2,7 +2,7 @@
 //
 // Yahoo Finance data fetcher.
 // Primary data source for current and historical stock prices.
-// Handles rate limiting and exchange suffix mapping for Indian markets.
+// Handles rate limiting and exchange suffix mapping for global markets.
 
 import type {
   CurrentPrice,
@@ -17,16 +17,32 @@ const YAHOO_CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart";
 
 /** Exchange suffix map for Yahoo Finance ticker symbols */
 const EXCHANGE_SUFFIX: Record<string, string> = {
+  // Americas — no suffix for US exchanges
+  NYSE: "",
+  NASDAQ: "",
+  TSX: ".TO",
+  // Europe
+  LSE: ".L",
+  XETRA: ".DE",
+  EURONEXT: ".PA",
+  // Asia-Pacific
   NSE: ".NS",
   BSE: ".BO",
-  INDEX: ".NS", // NSE indices use .NS suffix
-  MCX: ".NS",   // Fallback
+  TSE: ".T",
+  HKEX: ".HK",
+  ASX: ".AX",
+  KRX: ".KS",
+  SGX: ".SI",
+  // Other
+  MCX: ".NS",
+  CRYPTO: "-USD",  // e.g., BTC-USD
+  INDEX: "",       // Indices vary; handled in toYahooSymbol
 };
 
 /**
  * Yahoo Finance data service.
  *
- * Fetches current quotes and historical OHLCV data for Indian market stocks.
+ * Fetches current quotes and historical OHLCV data for global market stocks and crypto.
  * Implements sliding-window rate limiting to stay within the configured
  * requests-per-second threshold.
  */
@@ -44,13 +60,13 @@ export class YahooFinanceService {
   /**
    * Fetch the current quote for a single stock.
    *
-   * @param symbol - Stock symbol (e.g. "RELIANCE")
-   * @param exchange - Exchange code used to determine the Yahoo suffix (default: "NSE")
+   * @param symbol - Stock symbol (e.g. "AAPL", "RELIANCE", "BTC")
+   * @param exchange - Exchange code used to determine the Yahoo suffix (default: "NYSE")
    * @returns Current price data or null if the quote could not be fetched
    */
   async getCurrentPrice(
     symbol: string,
-    exchange = "NSE"
+    exchange = "NYSE"
   ): Promise<CurrentPrice | null> {
     const yahooSymbol = this.toYahooSymbol(symbol, exchange);
 
@@ -131,7 +147,7 @@ export class YahooFinanceService {
    */
   async getHistoricalPrices(
     params: HistoricalPriceParams,
-    exchange = "NSE"
+    exchange = "NYSE"
   ): Promise<PriceData[]> {
     const yahooSymbol = this.toYahooSymbol(params.symbol, exchange);
     const interval = params.interval ?? "1d";
@@ -261,7 +277,7 @@ export class YahooFinanceService {
 
   /**
    * Convert a stock symbol and exchange to a Yahoo Finance ticker.
-   * Indian NSE stocks require a ".NS" suffix, BSE requires ".BO".
+   * Each exchange has a specific suffix (e.g., .NS for NSE, .L for LSE, none for NYSE).
    */
   private toYahooSymbol(symbol: string, exchange: string): string {
     const suffix = EXCHANGE_SUFFIX[exchange] ?? "";

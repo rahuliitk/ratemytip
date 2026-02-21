@@ -17,12 +17,13 @@ export const metadata: Metadata = {
     "RateMyTip tracks, verifies, and scores stock market tips from influencers, brokerages, and analysts. See who actually delivers results with our transparent RMT Score.",
   keywords: [
     "stock tips",
-    "finfluencer",
-    "stock market India",
+    "crypto tips",
+    "financial influencer",
     "tip accuracy",
     "RateMyTip",
-    "financial influencer",
     "stock tip tracker",
+    "leaderboard",
+    "trading performance",
   ],
   openGraph: {
     title: "RateMyTip — Every Call. Rated.",
@@ -30,7 +31,7 @@ export const metadata: Metadata = {
       "Track, verify, and score stock market tips from influencers and analysts.",
     url: "https://ratemytip.com",
     siteName: "RateMyTip",
-    locale: "en_IN",
+    locale: "en_US",
     type: "website",
   },
   twitter: {

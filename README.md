@@ -7,7 +7,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](https://www.typescriptlang.org/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-RateMyTip is an open source platform that tracks, verifies, and scores stock market tips from Indian finfluencers, brokerages, and analysts. We bring transparency and accountability to financial advice on social media.
+RateMyTip is an open source platform that tracks, verifies, and scores stock and crypto tips from financial influencers, brokerages, and analysts worldwide. We bring transparency and accountability to financial advice on social media.
 
 **Website:** [ratemytip.com](https://ratemytip.com)
 
@@ -15,14 +15,14 @@ RateMyTip is an open source platform that tracks, verifies, and scores stock mar
 
 ## The Problem
 
-Millions of Indian retail investors follow finfluencers on Twitter/X and YouTube for stock tips. But nobody tracks whether those tips actually make money. Influencers with flashy thumbnails and 50k followers can have a 30% accuracy rate — and nobody knows until they've already lost money following the advice.
+Millions of retail investors follow financial influencers on Twitter/X and YouTube for stock and crypto tips. But nobody tracks whether those tips actually make money. Influencers with flashy thumbnails and 50k followers can have a 30% accuracy rate — and nobody knows until they've already lost money following the advice.
 
 ## How RateMyTip Works
 
 ```
 1. SCRAPE    Auto-collect tips from Twitter/X and YouTube (500+ creators)
 2. PARSE     NLP engine extracts structured data (stock, entry, targets, stop-loss)
-3. TRACK     Monitor real-time NSE/BSE prices against active tips
+3. TRACK     Monitor real-time prices across global exchanges and crypto
 4. SCORE     Calculate RMT Score — a composite of accuracy, risk-adjusted
              returns, consistency, and volume
 5. RANK      Public leaderboard so anyone can see who's actually good
@@ -33,7 +33,7 @@ Millions of Indian retail investors follow finfluencers on Twitter/X and YouTube
 - **Leaderboard** — Rank 500+ creators by RMT Score with filters for category, timeframe, and minimum tips
 - **Creator Profiles** — Full track record for every tracked finfluencer with score history charts
 - **Scoring Algorithm** — Transparent, auditable composite score (accuracy 40% + risk-adjusted return 30% + consistency 20% + volume 10%)
-- **Stock Pages** — See every tip ever posted for any NSE/BSE stock with bull/bear consensus
+- **Stock Pages** — See every tip ever posted for any stock or crypto asset with bull/bear consensus
 - **Tip Tracking** — Real-time monitoring of active tips against market data (target hit / stop-loss hit / expired)
 - **NLP Parser** — Two-stage parser (rule-based + LLM) extracts structured tips from unstructured social posts
 - **Human Review Queue** — Admin pipeline for reviewing ambiguous/low-confidence parsed tips
@@ -85,7 +85,7 @@ npm install --legacy-peer-deps
 npx prisma generate
 npx prisma migrate dev
 
-# Seed the database with NSE/BSE stocks
+# Seed the database with stocks (global exchanges + crypto)
 npm run seed:stocks
 
 # Start the development server

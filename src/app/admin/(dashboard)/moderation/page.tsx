@@ -1,5 +1,7 @@
 import { db } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 async function getModerationLog() {
   try {
     const actions = await db.moderationAction.findMany({

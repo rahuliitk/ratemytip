@@ -11,8 +11,23 @@ interface StockHeaderProps {
 }
 
 const EXCHANGE_COLORS: Record<string, string> = {
+  // Americas
+  NYSE: "bg-blue-100 text-blue-800",
+  NASDAQ: "bg-indigo-100 text-indigo-800",
+  TSX: "bg-red-100 text-red-800",
+  // Europe
+  LSE: "bg-slate-100 text-slate-800",
+  XETRA: "bg-amber-100 text-amber-800",
+  EURONEXT: "bg-sky-100 text-sky-800",
+  // Asia-Pacific
   NSE: "bg-blue-100 text-blue-800",
   BSE: "bg-purple-100 text-purple-800",
+  TSE: "bg-rose-100 text-rose-800",
+  HKEX: "bg-red-100 text-red-800",
+  ASX: "bg-teal-100 text-teal-800",
+  KRX: "bg-cyan-100 text-cyan-800",
+  SGX: "bg-lime-100 text-lime-800",
+  // Other
   MCX: "bg-orange-100 text-orange-800",
   CRYPTO: "bg-yellow-100 text-yellow-800",
   INDEX: "bg-green-100 text-green-800",

@@ -9,13 +9,13 @@ import type { StockSummary } from "./stock";
 type TipDirection = "BUY" | "SELL";
 
 type AssetClass =
-  | "EQUITY_NSE"
-  | "EQUITY_BSE"
+  | "EQUITY"
   | "INDEX"
   | "FUTURES"
   | "OPTIONS"
   | "CRYPTO"
-  | "COMMODITY";
+  | "COMMODITY"
+  | "FOREX";
 
 type TipTimeframe = "INTRADAY" | "SWING" | "POSITIONAL" | "LONG_TERM";
 

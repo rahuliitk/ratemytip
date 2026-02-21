@@ -172,7 +172,7 @@ export function buildTipFromExtraction(extraction: RawExtraction): ParsedTip | n
   const timeframe: ParsedTimeframe =
     (rawTimeframe ? normalizeTimeframe(rawTimeframe) : null) ?? "SWING"; // Default to SWING
 
-  // Determine exchange (heuristic: default to NSE for Indian stocks)
+  // Determine exchange (heuristic based on symbol patterns)
   const exchange = inferExchange(stockSymbol);
 
   // Calculate confidence
@@ -205,19 +205,25 @@ function inferDirection(entryPrice: number, targetPrice: number): ParsedDirectio
 }
 
 /**
- * Infer exchange from stock symbol.
- * Index names map to INDEX; everything else defaults to NSE.
+ * Infer exchange from stock symbol using heuristics.
+ * Returns null when the exchange can't be determined (will be resolved via DB lookup).
  */
 function inferExchange(symbol: string): ParsedExchange {
   const indexSymbols = new Set([
-    "NIFTY 50",
-    "NIFTY BANK",
-    "NIFTY IT",
-    "NIFTY PHARMA",
-    "NIFTY MIDCAP 50",
-    "SENSEX",
+    "NIFTY 50", "NIFTY BANK", "NIFTY IT", "NIFTY PHARMA", "NIFTY MIDCAP 50",
+    "SENSEX", "SPX", "DJI", "IXIC", "VIX", "QQQ",
+    "FTSE 100", "DAX", "CAC 40", "NIKKEI 225", "HSI",
   ]);
   if (indexSymbols.has(symbol)) return "INDEX";
+
+  const cryptoSymbols = new Set([
+    "BTC", "ETH", "SOL", "XRP", "ADA", "DOGE", "MATIC", "AVAX",
+    "LINK", "DOT", "LTC", "UNI", "PEPE", "SHIB",
+  ]);
+  if (cryptoSymbols.has(symbol)) return "CRYPTO";
+
+  // Default: null — the caller should resolve via the stocks table
+  // If not found there, it will be treated based on context
   return "NSE";
 }
 
@@ -234,11 +240,11 @@ function buildLlmPrompt(
   specializations: readonly string[]
 ): string {
   return `You are a financial tip parser. Extract structured tip data from the following social media post.
-The post is from an Indian financial influencer and may contain Hindi/English mixed text.
+The post may be from any global market (US, India, Europe, Asia, crypto) and may contain mixed-language text.
 
 Extract the following fields:
-- stock_name: Full stock name or symbol (e.g., "RELIANCE", "TCS", "NIFTY")
-- exchange: NSE, BSE, or INDEX
+- stock_name: Full stock name or symbol (e.g., "AAPL", "RELIANCE", "BTC", "NIFTY")
+- exchange: NYSE, NASDAQ, NSE, BSE, LSE, CRYPTO, INDEX, or other exchange code
 - direction: BUY or SELL
 - entry_price: Entry price or CMP (current market price)
 - target_1: Primary target price
@@ -415,11 +421,16 @@ function validateConviction(raw: string | null): ParsedConviction {
 }
 
 function validateExchange(raw: string | null): ParsedExchange | null {
-  const valid: ParsedExchange[] = ["NSE", "BSE", "INDEX"];
+  const valid: ParsedExchange[] = [
+    "NYSE", "NASDAQ", "TSX",
+    "LSE", "XETRA", "EURONEXT",
+    "NSE", "BSE", "TSE", "HKEX", "ASX", "KRX", "SGX",
+    "MCX", "CRYPTO", "INDEX",
+  ];
   if (raw && valid.includes(raw as ParsedExchange)) {
     return raw as ParsedExchange;
   }
-  return "NSE"; // Default to NSE for Indian stocks
+  return null; // Unknown exchange — will be resolved via DB lookup
 }
 
 // ──── Combined two-stage extraction ────
