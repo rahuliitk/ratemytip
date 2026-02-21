@@ -9,7 +9,9 @@ import type { ScoreSnapshotData } from "./score";
 
 type CreatorTier = "UNRATED" | "BRONZE" | "SILVER" | "GOLD" | "PLATINUM" | "DIAMOND";
 
-type Platform = "TWITTER" | "YOUTUBE" | "TELEGRAM" | "WEBSITE";
+type Platform = "TWITTER" | "YOUTUBE" | "TELEGRAM" | "WEBSITE" | "FINNHUB" | "STOCKTWITS" | "YAHOO_FINANCE";
+
+type CreatorType = "INDIVIDUAL" | "BROKERAGE" | "RESEARCH_FIRM" | "NEWS_OUTLET";
 
 // ──── Platform sub-type ────
 
@@ -88,6 +90,7 @@ interface LeaderboardEntry {
 export type {
   CreatorTier,
   Platform,
+  CreatorType,
   CreatorPlatformInfo,
   CreatorSummary,
   CreatorStats,

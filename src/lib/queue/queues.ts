@@ -106,3 +106,36 @@ export const scrapeMoneycontrolQueue = new Queue("scrape-moneycontrol", {
     removeOnFail: { age: 604800 },
   },
 });
+
+/** Queue for Finnhub scraping jobs — global analyst upgrade/downgrade data */
+export const scrapeFinnhubQueue = new Queue("scrape-finnhub", {
+  connection,
+  defaultJobOptions: {
+    attempts: 3,
+    backoff: { type: "exponential", delay: 10000 },
+    removeOnComplete: { age: 86400 },
+    removeOnFail: { age: 604800 },
+  },
+});
+
+/** Queue for Yahoo Finance analyst scraping — global analyst consensus data */
+export const scrapeYahooAnalystQueue = new Queue("scrape-yahoo-analyst", {
+  connection,
+  defaultJobOptions: {
+    attempts: 3,
+    backoff: { type: "exponential", delay: 10000 },
+    removeOnComplete: { age: 86400 },
+    removeOnFail: { age: 604800 },
+  },
+});
+
+/** Queue for StockTwits scraping — community posts for NLP parsing */
+export const scrapeStocktwitsQueue = new Queue("scrape-stocktwits", {
+  connection,
+  defaultJobOptions: {
+    attempts: 3,
+    backoff: { type: "exponential", delay: 5000 },
+    removeOnComplete: { age: 86400 },
+    removeOnFail: { age: 604800 },
+  },
+});

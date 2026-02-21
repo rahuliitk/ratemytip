@@ -24,6 +24,9 @@ import {
   checkExpirationsQueue,
   dailySnapshotQueue,
   scrapeMoneycontrolQueue,
+  scrapeFinnhubQueue,
+  scrapeYahooAnalystQueue,
+  scrapeStocktwitsQueue,
 } from "../src/lib/queue/queues";
 import { createTwitterScrapeWorker, createYoutubeScrapeWorker } from "../src/lib/queue/workers/scrape-worker";
 import { createParseTipWorker } from "../src/lib/queue/workers/parse-worker";
@@ -34,6 +37,9 @@ import {
   createDailySnapshotWorker,
 } from "../src/lib/queue/workers/tip-status-worker";
 import { createMoneyControlScrapeWorker } from "../src/lib/queue/workers/scrape-moneycontrol-worker";
+import { createFinnhubScrapeWorker } from "../src/lib/queue/workers/scrape-finnhub-worker";
+import { createYahooAnalystScrapeWorker } from "../src/lib/queue/workers/scrape-yahoo-analyst-worker";
+import { createStockTwitsScrapeWorker } from "../src/lib/queue/workers/scrape-stocktwits-worker";
 
 // ──── Worker instances ────
 
@@ -52,6 +58,18 @@ function registerWorkers(): void {
   // MoneyControl scraping worker
   workers.push(createMoneyControlScrapeWorker());
   console.log("[Workers] Registered: scrape-moneycontrol (concurrency: 1)");
+
+  // Finnhub scraping worker
+  workers.push(createFinnhubScrapeWorker());
+  console.log("[Workers] Registered: scrape-finnhub (concurrency: 1)");
+
+  // Yahoo Finance analyst scraping worker
+  workers.push(createYahooAnalystScrapeWorker());
+  console.log("[Workers] Registered: scrape-yahoo-analyst (concurrency: 1)");
+
+  // StockTwits scraping worker
+  workers.push(createStockTwitsScrapeWorker());
+  console.log("[Workers] Registered: scrape-stocktwits (concurrency: 1)");
 
   // NLP parsing worker
   workers.push(createParseTipWorker());
@@ -156,6 +174,47 @@ async function setupCronSchedules(): Promise<void> {
     }
   );
   console.log("[Workers] Cron: scrape-moneycontrol — daily at 8 AM IST");
+
+  // Finnhub scraping: twice daily at 6 AM and 6 PM UTC
+  await scrapeFinnhubQueue.upsertJobScheduler(
+    "cron-scrape-finnhub-morning",
+    { pattern: "0 6 * * *" },
+    {
+      name: "scheduled-finnhub-scrape-morning",
+      data: { type: "full-scrape", triggeredAt: new Date().toISOString() },
+    }
+  );
+  await scrapeFinnhubQueue.upsertJobScheduler(
+    "cron-scrape-finnhub-evening",
+    { pattern: "0 18 * * *" },
+    {
+      name: "scheduled-finnhub-scrape-evening",
+      data: { type: "full-scrape", triggeredAt: new Date().toISOString() },
+    }
+  );
+  console.log("[Workers] Cron: scrape-finnhub — 6 AM & 6 PM UTC");
+
+  // Yahoo Finance analyst scraping: daily at midnight UTC
+  await scrapeYahooAnalystQueue.upsertJobScheduler(
+    "cron-scrape-yahoo-analyst",
+    { pattern: "0 0 * * *" },
+    {
+      name: "scheduled-yahoo-analyst-scrape",
+      data: { type: "full-scrape", triggeredAt: new Date().toISOString() },
+    }
+  );
+  console.log("[Workers] Cron: scrape-yahoo-analyst — daily at midnight UTC");
+
+  // StockTwits scraping: every 4 hours during US market hours (14:30-21:00 UTC, Mon-Fri)
+  await scrapeStocktwitsQueue.upsertJobScheduler(
+    "cron-scrape-stocktwits",
+    { pattern: "30 14,18 * * 1-5" },
+    {
+      name: "scheduled-stocktwits-scrape",
+      data: { type: "full-scrape", triggeredAt: new Date().toISOString() },
+    }
+  );
+  console.log("[Workers] Cron: scrape-stocktwits — 2:30 PM & 6:30 PM UTC Mon-Fri");
 
   // Expiration checks: every hour
   await checkExpirationsQueue.upsertJobScheduler(
