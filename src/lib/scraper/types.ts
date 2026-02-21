@@ -32,8 +32,42 @@ export interface MoneyControlPostMetadata {
   readonly reportDate?: string;
 }
 
+/** Metadata specific to a Finnhub analyst upgrade/downgrade */
+export interface FinnhubUpgradeMetadata {
+  readonly company: string;
+  readonly action: string;
+  readonly fromGrade: string;
+  readonly toGrade: string;
+  readonly gradeTime: number;
+}
+
+/** Metadata specific to a StockTwits post */
+export interface StockTwitsPostMetadata {
+  readonly messageId: number;
+  readonly sentiment: "Bullish" | "Bearish" | null;
+  readonly userId: number;
+  readonly username: string;
+  readonly followers: number;
+  readonly likes: number;
+}
+
+/** Metadata specific to a Yahoo Finance analyst upgrade/downgrade */
+export interface YahooAnalystMetadata {
+  readonly firm: string;
+  readonly action: string;
+  readonly fromGrade: string;
+  readonly toGrade: string;
+  readonly epochGradeDate: number;
+}
+
 /** Union of platform-specific metadata */
-export type PlatformMetadata = TwitterPostMetadata | YouTubePostMetadata | MoneyControlPostMetadata;
+export type PlatformMetadata =
+  | TwitterPostMetadata
+  | YouTubePostMetadata
+  | MoneyControlPostMetadata
+  | FinnhubUpgradeMetadata
+  | StockTwitsPostMetadata
+  | YahooAnalystMetadata;
 
 /** A single scraped post from any platform, before NLP parsing */
 export interface ScrapedPost {

@@ -141,6 +141,29 @@ export const MONEYCONTROL = {
   SCRAPE_DELAY_MS: 3000,
 } as const;
 
+// ──── Finnhub ────
+export const FINNHUB = {
+  BASE_URL: "https://finnhub.io/api/v1",
+  DEFAULT_STOP_LOSS_PCT: 0.08,
+  DEFAULT_TIMEFRAME: "LONG_TERM" as const,
+  SYMBOLS_PER_BATCH: 30,
+  CONFIDENCE: 0.90,
+} as const;
+
+// ──── StockTwits ────
+export const STOCKTWITS = {
+  BASE_URL: "https://api.stocktwits.com/api/2",
+  MIN_FOLLOWERS_FOR_TRACKING: 1000,
+} as const;
+
+// ──── Yahoo Finance Analyst ────
+export const YAHOO_ANALYST = {
+  CONFIDENCE: 0.88,
+  DEFAULT_STOP_LOSS_PCT: 0.08,
+  DEFAULT_TIMEFRAME: "LONG_TERM" as const,
+  SYMBOLS_PER_BATCH: 10,
+} as const;
+
 // ──── Market Hours (per exchange, UTC) ────
 export const EXCHANGE_MARKET_HOURS: Record<string, { openUTC: { hour: number; minute: number }; closeUTC: { hour: number; minute: number }; timezone: string; weekdays: boolean }> = {
   // Americas

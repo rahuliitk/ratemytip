@@ -53,6 +53,7 @@ model Creator {
   isClaimed       Boolean     @default(false) @map("is_claimed")
   isActive        Boolean     @default(true) @map("is_active")
   tier            CreatorTier @default(UNRATED)
+  creatorType     CreatorType @default(INDIVIDUAL) @map("creator_type")
 
   specializations String[] @default([])
 
@@ -77,8 +78,16 @@ model Creator {
   @@index([tier])
   @@index([totalTips])
   @@index([isActive])
+  @@index([creatorType])
   @@index([createdAt])
   @@map("creators")
+}
+
+enum CreatorType {
+  INDIVIDUAL
+  BROKERAGE
+  RESEARCH_FIRM
+  NEWS_OUTLET
 }
 
 enum CreatorTier {
@@ -122,6 +131,9 @@ enum Platform {
   YOUTUBE
   TELEGRAM
   WEBSITE
+  FINNHUB
+  STOCKTWITS
+  YAHOO_FINANCE
 }
 
 // ════════════════════════════════════════
@@ -172,8 +184,9 @@ model Stock {
   updatedAt   DateTime   @updatedAt @map("updated_at")
 
   // Relations
-  tips         Tip[]
-  priceHistory StockPrice[]
+  tips           Tip[]
+  priceHistory   StockPrice[]
+  consensusData  AnalystConsensus[]
 
   @@index([symbol])
   @@index([exchange])
@@ -232,6 +245,37 @@ model StockPrice {
   @@unique([stockId, date])
   @@index([stockId, date(sort: Desc)])
   @@map("stock_prices")
+}
+
+// ════════════════════════════════════════
+// ANALYST CONSENSUS (Aggregate analyst sentiment per stock)
+// ════════════════════════════════════════
+
+model AnalystConsensus {
+  id               String    @id @default(cuid())
+  stockId          String    @map("stock_id")
+  source           String    // "FINNHUB" | "YAHOO_FINANCE"
+  strongBuy        Int       @default(0) @map("strong_buy")
+  buy              Int       @default(0)
+  hold             Int       @default(0)
+  sell             Int       @default(0)
+  strongSell       Int       @default(0) @map("strong_sell")
+  targetHigh       Float?    @map("target_high")
+  targetLow        Float?    @map("target_low")
+  targetMean       Float?    @map("target_mean")
+  targetMedian     Float?    @map("target_median")
+  numberOfAnalysts Int?      @map("number_of_analysts")
+  period           DateTime? @db.Date
+  fetchedAt        DateTime  @default(now()) @map("fetched_at")
+  rawData          Json?     @map("raw_data")
+
+  // Relations
+  stock Stock @relation(fields: [stockId], references: [id], onDelete: Cascade)
+
+  @@unique([stockId, source, period])
+  @@index([stockId, source])
+  @@index([fetchedAt(sort: Desc)])
+  @@map("analyst_consensus")
 }
 
 // ════════════════════════════════════════
