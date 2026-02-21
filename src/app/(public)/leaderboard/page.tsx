@@ -12,7 +12,7 @@ export const revalidate = 300; // 5 minutes
 export const metadata: Metadata = {
   title: "Leaderboard — Top Stock Tip Creators Ranked",
   description:
-    "See the top-ranked stock tip creators in India. Ranked by RMT Score — a composite of accuracy, risk-adjusted returns, consistency, and volume. Updated daily.",
+    "See the top-ranked stock and crypto tip creators worldwide. Ranked by RMT Score — a composite of accuracy, risk-adjusted returns, consistency, and volume. Updated daily.",
   openGraph: {
     title: "Stock Tip Leaderboard | RateMyTip",
     description:

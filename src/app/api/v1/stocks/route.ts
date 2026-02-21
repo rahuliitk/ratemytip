@@ -7,7 +7,7 @@ import type { Prisma } from "@prisma/client";
 
 const stocksQuerySchema = paginationSchema.extend({
   search: z.string().max(200).optional(),
-  exchange: z.enum(["NSE", "BSE", "MCX", "CRYPTO", "INDEX"]).optional(),
+  exchange: z.enum(["NYSE", "NASDAQ", "TSX", "LSE", "XETRA", "EURONEXT", "NSE", "BSE", "TSE", "HKEX", "ASX", "KRX", "SGX", "MCX", "CRYPTO", "INDEX"]).optional(),
   sector: z.string().max(100).optional(),
   marketCap: z.enum(["LARGE", "MID", "SMALL", "MICRO"]).optional(),
 });

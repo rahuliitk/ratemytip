@@ -13,6 +13,9 @@ export {
   checkExpirationsQueue,
   dailySnapshotQueue,
   scrapeMoneycontrolQueue,
+  scrapeFinnhubQueue,
+  scrapeYahooAnalystQueue,
+  scrapeStocktwitsQueue,
 } from "./queues";
 
 import {
@@ -21,6 +24,9 @@ import {
   parseTipQueue,
   calculateScoresQueue,
   scrapeMoneycontrolQueue,
+  scrapeFinnhubQueue,
+  scrapeYahooAnalystQueue,
+  scrapeStocktwitsQueue,
 } from "./queues";
 
 /**
@@ -117,5 +123,38 @@ export async function enqueueScrapeMoneycontrol(
     "scrape-moneycontrol",
     { type, triggeredAt: new Date().toISOString() },
     { jobId: `moneycontrol-${type}-${Date.now()}` }
+  );
+}
+
+/**
+ * Enqueue a Finnhub scraping job for global analyst data.
+ */
+export async function enqueueScrapeFinnhub(): Promise<void> {
+  await scrapeFinnhubQueue.add(
+    "scrape-finnhub",
+    { type: "full-scrape", triggeredAt: new Date().toISOString() },
+    { jobId: `finnhub-${Date.now()}` }
+  );
+}
+
+/**
+ * Enqueue a Yahoo Finance analyst scraping job.
+ */
+export async function enqueueScrapeYahooAnalyst(): Promise<void> {
+  await scrapeYahooAnalystQueue.add(
+    "scrape-yahoo-analyst",
+    { type: "full-scrape", triggeredAt: new Date().toISOString() },
+    { jobId: `yahoo-analyst-${Date.now()}` }
+  );
+}
+
+/**
+ * Enqueue a StockTwits scraping job.
+ */
+export async function enqueueScrapeStocktwits(): Promise<void> {
+  await scrapeStocktwitsQueue.add(
+    "scrape-stocktwits",
+    { type: "full-scrape", triggeredAt: new Date().toISOString() },
+    { jobId: `stocktwits-${Date.now()}` }
   );
 }

@@ -81,13 +81,13 @@ export const TIMEFRAME_EXPIRY_DAYS: Record<string, number> = {
 
 // ──── Asset Classes ────
 export const ASSET_CLASS = {
-  EQUITY_NSE: "EQUITY_NSE",
-  EQUITY_BSE: "EQUITY_BSE",
+  EQUITY: "EQUITY",
   INDEX: "INDEX",
   FUTURES: "FUTURES",
   OPTIONS: "OPTIONS",
   CRYPTO: "CRYPTO",
   COMMODITY: "COMMODITY",
+  FOREX: "FOREX",
 } as const;
 
 // ──── Creator Tiers ────
@@ -141,13 +141,57 @@ export const MONEYCONTROL = {
   SCRAPE_DELAY_MS: 3000,
 } as const;
 
-// ──── Market Hours (IST) ────
+// ──── Finnhub ────
+export const FINNHUB = {
+  BASE_URL: "https://finnhub.io/api/v1",
+  DEFAULT_STOP_LOSS_PCT: 0.08,
+  DEFAULT_TIMEFRAME: "LONG_TERM" as const,
+  SYMBOLS_PER_BATCH: 30,
+  CONFIDENCE: 0.90,
+} as const;
+
+// ──── StockTwits ────
+export const STOCKTWITS = {
+  BASE_URL: "https://api.stocktwits.com/api/2",
+  MIN_FOLLOWERS_FOR_TRACKING: 1000,
+} as const;
+
+// ──── Yahoo Finance Analyst ────
+export const YAHOO_ANALYST = {
+  CONFIDENCE: 0.88,
+  DEFAULT_STOP_LOSS_PCT: 0.08,
+  DEFAULT_TIMEFRAME: "LONG_TERM" as const,
+  SYMBOLS_PER_BATCH: 10,
+} as const;
+
+// ──── Market Hours (per exchange, UTC) ────
+export const EXCHANGE_MARKET_HOURS: Record<string, { openUTC: { hour: number; minute: number }; closeUTC: { hour: number; minute: number }; timezone: string; weekdays: boolean }> = {
+  // Americas
+  NYSE:     { openUTC: { hour: 14, minute: 30 }, closeUTC: { hour: 21, minute: 0 },  timezone: "America/New_York", weekdays: true },
+  NASDAQ:   { openUTC: { hour: 14, minute: 30 }, closeUTC: { hour: 21, minute: 0 },  timezone: "America/New_York", weekdays: true },
+  TSX:      { openUTC: { hour: 14, minute: 30 }, closeUTC: { hour: 21, minute: 0 },  timezone: "America/Toronto",  weekdays: true },
+  // Europe
+  LSE:      { openUTC: { hour: 8,  minute: 0 },  closeUTC: { hour: 16, minute: 30 }, timezone: "Europe/London",    weekdays: true },
+  XETRA:    { openUTC: { hour: 8,  minute: 0 },  closeUTC: { hour: 16, minute: 30 }, timezone: "Europe/Berlin",    weekdays: true },
+  EURONEXT: { openUTC: { hour: 8,  minute: 0 },  closeUTC: { hour: 16, minute: 30 }, timezone: "Europe/Paris",     weekdays: true },
+  // Asia-Pacific
+  NSE:      { openUTC: { hour: 3,  minute: 45 }, closeUTC: { hour: 10, minute: 0 },  timezone: "Asia/Kolkata",     weekdays: true },
+  BSE:      { openUTC: { hour: 3,  minute: 45 }, closeUTC: { hour: 10, minute: 0 },  timezone: "Asia/Kolkata",     weekdays: true },
+  TSE:      { openUTC: { hour: 0,  minute: 0 },  closeUTC: { hour: 6,  minute: 0 },  timezone: "Asia/Tokyo",       weekdays: true },
+  HKEX:     { openUTC: { hour: 1,  minute: 30 }, closeUTC: { hour: 8,  minute: 0 },  timezone: "Asia/Hong_Kong",   weekdays: true },
+  ASX:      { openUTC: { hour: 0,  minute: 0 },  closeUTC: { hour: 6,  minute: 0 },  timezone: "Australia/Sydney", weekdays: true },
+  KRX:      { openUTC: { hour: 0,  minute: 0 },  closeUTC: { hour: 6,  minute: 30 }, timezone: "Asia/Seoul",       weekdays: true },
+  SGX:      { openUTC: { hour: 1,  minute: 0 },  closeUTC: { hour: 9,  minute: 0 },  timezone: "Asia/Singapore",   weekdays: true },
+  // Other
+  MCX:      { openUTC: { hour: 3,  minute: 45 }, closeUTC: { hour: 18, minute: 0 },  timezone: "Asia/Kolkata",     weekdays: true },
+  // Crypto trades 24/7
+  CRYPTO:   { openUTC: { hour: 0,  minute: 0 },  closeUTC: { hour: 23, minute: 59 }, timezone: "UTC",              weekdays: false },
+  INDEX:    { openUTC: { hour: 0,  minute: 0 },  closeUTC: { hour: 23, minute: 59 }, timezone: "UTC",              weekdays: true },
+};
+
+// Legacy compat — default market hours used when exchange is unknown
 export const MARKET_HOURS = {
   NSE_OPEN: { hour: 9, minute: 15 },
   NSE_CLOSE: { hour: 15, minute: 30 },
   TIMEZONE: "Asia/Kolkata",
-  PRICE_CHECK_TIMES_IST: [
-    { hour: 10, minute: 0 },
-    { hour: 14, minute: 0 },
-  ],
 } as const;

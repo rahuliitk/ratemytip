@@ -2,12 +2,12 @@
 //
 // BullMQ worker that fetches current market prices and checks active tips
 // against their targets and stop-losses using the PriceMonitor service.
-// Runs every 5 minutes during market hours (Mon-Fri, 9:15 AM - 3:30 PM IST).
+// Runs periodically; skips checking when no global markets are open.
 
 import { Worker, type Job } from "bullmq";
 
 import { PriceMonitor } from "@/lib/market-data/price-monitor";
-import { MARKET_HOURS } from "@/lib/constants";
+import { EXCHANGE_MARKET_HOURS } from "@/lib/constants";
 import { calculateScoresQueue, dailySnapshotQueue } from "@/lib/queue/queues";
 
 // ──── Job payload type ────
@@ -29,31 +29,30 @@ function getConnection(): { host: string; port: number; password?: string } {
 }
 
 /**
- * Check if the Indian stock market is currently open.
- * Market hours: 9:15 AM - 3:30 PM IST, Monday through Friday.
+ * Check if any global market is currently open.
+ * Returns true if at least one exchange (including crypto which is 24/7)
+ * is currently in trading hours.
  */
-function isMarketOpen(): boolean {
-  // Get current time in IST
+function isAnyMarketOpen(): boolean {
   const now = new Date();
-  const istOffset = 5.5 * 60; // IST is UTC+5:30 in minutes
   const utcMinutes = now.getUTCHours() * 60 + now.getUTCMinutes();
-  const istMinutes = utcMinutes + istOffset;
+  const dayOfWeek = now.getUTCDay(); // 0=Sun, 6=Sat
 
-  // Get IST day of week (0 = Sunday, 6 = Saturday)
-  const istDate = new Date(now.getTime() + istOffset * 60 * 1000);
-  const dayOfWeek = istDate.getUTCDay();
+  for (const [, hours] of Object.entries(EXCHANGE_MARKET_HOURS)) {
+    // Skip weekday-only exchanges on weekends
+    if (hours.weekdays && (dayOfWeek === 0 || dayOfWeek === 6)) {
+      continue;
+    }
 
-  // Skip weekends
-  if (dayOfWeek === 0 || dayOfWeek === 6) {
-    return false;
+    const openMinutes = hours.openUTC.hour * 60 + hours.openUTC.minute;
+    const closeMinutes = hours.closeUTC.hour * 60 + hours.closeUTC.minute;
+
+    if (utcMinutes >= openMinutes && utcMinutes <= closeMinutes) {
+      return true;
+    }
   }
 
-  const openMinutes =
-    MARKET_HOURS.NSE_OPEN.hour * 60 + MARKET_HOURS.NSE_OPEN.minute;
-  const closeMinutes =
-    MARKET_HOURS.NSE_CLOSE.hour * 60 + MARKET_HOURS.NSE_CLOSE.minute;
-
-  return istMinutes >= openMinutes && istMinutes <= closeMinutes;
+  return false;
 }
 
 // ──── Main job processor ────
@@ -67,7 +66,7 @@ async function processUpdatePricesJob(
 
   // Check if market is open — if not, skip the price check
   // but still process (the PriceMonitor handles empty results gracefully)
-  const marketOpen = isMarketOpen();
+  const marketOpen = isAnyMarketOpen();
 
   if (!marketOpen) {
     console.log("[PriceWorker] Market is closed, skipping price check");

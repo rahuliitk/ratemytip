@@ -123,3 +123,27 @@ export function createMoneyControlRateLimiter(): RateLimiter {
     windowMs: 10_000,
   });
 }
+
+/** Finnhub API free tier: 60 calls per minute */
+export function createFinnhubRateLimiter(): RateLimiter {
+  return new RateLimiter({
+    maxRequests: 60,
+    windowMs: 60_000,
+  });
+}
+
+/** Yahoo Finance analyst endpoint: 2 requests per second (unofficial, be polite) */
+export function createYahooAnalystRateLimiter(): RateLimiter {
+  return new RateLimiter({
+    maxRequests: 2,
+    windowMs: 1000,
+  });
+}
+
+/** StockTwits API: 200 requests per hour (no auth) */
+export function createStockTwitsRateLimiter(): RateLimiter {
+  return new RateLimiter({
+    maxRequests: 200,
+    windowMs: 3_600_000,
+  });
+}

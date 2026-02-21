@@ -253,7 +253,7 @@ async function processMoneyControlScrapeJob(
             creatorId,
             stockId: stock.id,
             direction: parsedTip.direction,
-            assetClass: "EQUITY_NSE",
+            assetClass: "EQUITY",
             entryPrice: parsedTip.entryPrice,
             target1: parsedTip.target1,
             target2: null,

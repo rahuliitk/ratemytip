@@ -17,6 +17,7 @@ export type {
 export type {
   CreatorTier,
   Platform,
+  CreatorType,
   CreatorPlatformInfo,
   CreatorSummary,
   CreatorStats,
@@ -61,3 +62,12 @@ export type {
   StockConsensus,
   StockDetail,
 } from "./stock";
+
+export type {
+  AnalystConsensusData,
+  FinnhubRecommendationTrend,
+  FinnhubPriceTarget,
+  FinnhubUpgradeDowngrade,
+  YahooRecommendationTrend,
+  YahooUpgradeDowngrade,
+} from "./consensus";
