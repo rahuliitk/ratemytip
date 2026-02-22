@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { requireAdmin, isAuthError } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { paginationSchema } from "@/lib/validators/query";
 import { buildPaginationMeta, getPrismaSkipTake } from "@/lib/utils/pagination";
@@ -12,16 +12,8 @@ const moderationQuerySchema = paginationSchema.extend({
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    const session = await auth();
-    if (!session?.user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Unauthorized" },
-        },
-        { status: 401 }
-      );
-    }
+    const authResult = await requireAdmin();
+    if (isAuthError(authResult)) return authResult;
 
     const searchParams = Object.fromEntries(request.nextUrl.searchParams);
     const parsed = moderationQuerySchema.safeParse(searchParams);

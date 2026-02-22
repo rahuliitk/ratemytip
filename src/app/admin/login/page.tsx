@@ -18,7 +18,7 @@ export default function AdminLoginPage(): React.ReactElement {
     setIsLoading(true);
 
     try {
-      const result = await signIn("credentials", {
+      const result = await signIn("admin-login", {
         email,
         password,
         redirect: false,

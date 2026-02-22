@@ -62,6 +62,11 @@ model Creator {
   completedTips Int @default(0) @map("completed_tips")
   followerCount Int @default(0) @map("follower_count")
 
+  // V2: Community engagement stats
+  internalFollows    Int    @default(0) @map("internal_follows")
+  avgCommunityRating Float? @map("avg_community_rating")
+  reviewCount        Int    @default(0) @map("review_count")
+
   firstTipAt DateTime? @map("first_tip_at")
   lastTipAt  DateTime? @map("last_tip_at")
   createdAt  DateTime  @default(now()) @map("created_at")
@@ -73,6 +78,11 @@ model Creator {
   currentScore      CreatorScore?      @relation("CurrentScore")
   scoreSnapshots    ScoreSnapshot[]
   moderationActions ModerationAction[]
+
+  // V2 Relations
+  claimedBy         User?              @relation("ClaimedBy")
+  follows           Follow[]
+  reviews           CreatorReview[]
 
   @@index([slug])
   @@index([tier])
@@ -328,6 +338,15 @@ model Tip {
   reviewNote      String?      @map("review_note")
   parseConfidence Float?       @map("parse_confidence")
 
+  // V2: Engagement stats (denormalized, updated by background jobs)
+  avgRating    Float?    @default(0) @map("avg_rating")
+  ratingCount  Int       @default(0) @map("rating_count")
+  commentCount Int       @default(0) @map("comment_count")
+  viewCount    Int       @default(0) @map("view_count")
+  saveCount    Int       @default(0) @map("save_count")
+  feedScore    Float?    @map("feed_score")
+  source       TipSource @default(SCRAPED)
+
   // Timestamps
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -339,6 +358,12 @@ model Tip {
   amendments    TipAmendment[]
   reviewActions ReviewAction[]
 
+  // V2 Relations
+  ratings     TipRating[]
+  comments    Comment[]
+  savedBy     SavedTip[]
+  explanation TipExplanation?
+
   @@index([creatorId, status])
   @@index([creatorId, tipTimestamp(sort: Desc)])
   @@index([stockId, tipTimestamp(sort: Desc)])
@@ -346,6 +371,7 @@ model Tip {
   @@index([reviewStatus])
   @@index([expiresAt])
   @@index([tipTimestamp(sort: Desc)])
+  @@index([feedScore(sort: Desc)])
   @@map("tips")
 }
 
@@ -577,4 +603,266 @@ enum ModerationType {
   FLAGGED
   UNFLAGGED
   NOTE_ADDED
+}
+
+// ════════════════════════════════════════
+// V2 ENUMS
+// ════════════════════════════════════════
+
+enum UserRole {
+  CONSUMER
+  CREATOR
+}
+
+enum VoteType {
+  UPVOTE
+  DOWNVOTE
+}
+
+enum ReportReason {
+  SPAM
+  HARASSMENT
+  MISLEADING
+  OTHER
+}
+
+enum ReportStatus {
+  PENDING_REPORT
+  REVIEWED
+  ACTIONED
+  DISMISSED
+}
+
+enum TipSource {
+  SCRAPED
+  DIRECT
+  MANUAL
+}
+
+// ════════════════════════════════════════
+// USERS (Public user accounts — consumers + creators)
+// ════════════════════════════════════════
+
+model User {
+  id               String    @id @default(cuid())
+  email            String    @unique
+  emailVerified    DateTime? @map("email_verified")
+  passwordHash     String?   @map("password_hash")
+  displayName      String    @map("display_name")
+  username         String    @unique
+  avatarUrl        String?   @map("avatar_url")
+  role             UserRole  @default(CONSUMER)
+  isActive         Boolean   @default(true) @map("is_active")
+  isBanned         Boolean   @default(false) @map("is_banned")
+  banReason        String?   @map("ban_reason")
+  claimedCreatorId String?   @unique @map("claimed_creator_id")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  claimedCreator Creator?       @relation("ClaimedBy", fields: [claimedCreatorId], references: [id])
+  oauthAccounts  OAuthAccount[]
+  tipRatings     TipRating[]
+  comments       Comment[]
+  commentVotes   CommentVote[]
+  savedTips      SavedTip[]
+  follows        Follow[]
+  creatorReviews CreatorReview[]
+
+  @@index([username])
+  @@index([email])
+  @@map("users")
+}
+
+// ════════════════════════════════════════
+// OAUTH ACCOUNTS (Google, Twitter login)
+// ════════════════════════════════════════
+
+model OAuthAccount {
+  id                String    @id @default(cuid())
+  userId            String    @map("user_id")
+  provider          String
+  providerAccountId String    @map("provider_account_id")
+  accessToken       String?   @map("access_token")
+  refreshToken      String?   @map("refresh_token")
+  expiresAt         DateTime? @map("expires_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("oauth_accounts")
+}
+
+// ════════════════════════════════════════
+// TIP RATINGS (1-5 star ratings on tips)
+// ════════════════════════════════════════
+
+model TipRating {
+  id        String   @id @default(cuid())
+  tipId     String   @map("tip_id")
+  userId    String   @map("user_id")
+  rating    Int      // 1-5
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  tip  Tip  @relation(fields: [tipId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tipId, userId])
+  @@index([tipId])
+  @@map("tip_ratings")
+}
+
+// ════════════════════════════════════════
+// COMMENTS (Threaded comments on tips)
+// ════════════════════════════════════════
+
+model Comment {
+  id        String   @id @default(cuid())
+  tipId     String   @map("tip_id")
+  userId    String   @map("user_id")
+  parentId  String?  @map("parent_id")
+  content   String   // max 1000 chars enforced at app level
+  isPinned  Boolean  @default(false) @map("is_pinned")
+  isDeleted Boolean  @default(false) @map("is_deleted")
+  isHidden  Boolean  @default(false) @map("is_hidden")
+  upvotes   Int      @default(0)
+  downvotes Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  tip     Tip            @relation(fields: [tipId], references: [id], onDelete: Cascade)
+  user    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent  Comment?       @relation("CommentReplies", fields: [parentId], references: [id])
+  replies Comment[]      @relation("CommentReplies")
+  votes   CommentVote[]
+  reports CommentReport[]
+
+  @@index([tipId, createdAt(sort: Desc)])
+  @@index([tipId, upvotes(sort: Desc)])
+  @@index([parentId])
+  @@map("comments")
+}
+
+// ════════════════════════════════════════
+// COMMENT VOTES (Upvote/downvote on comments)
+// ════════════════════════════════════════
+
+model CommentVote {
+  id        String   @id @default(cuid())
+  commentId String   @map("comment_id")
+  userId    String   @map("user_id")
+  voteType  VoteType @map("vote_type")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, userId])
+  @@map("comment_votes")
+}
+
+// ════════════════════════════════════════
+// COMMENT REPORTS (Report abuse on comments)
+// ════════════════════════════════════════
+
+model CommentReport {
+  id         String       @id @default(cuid())
+  commentId  String       @map("comment_id")
+  reporterId String       @map("reporter_id")
+  reason     ReportReason
+  details    String?
+  status     ReportStatus @default(PENDING_REPORT)
+  createdAt  DateTime     @default(now()) @map("created_at")
+
+  // Relations
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@map("comment_reports")
+}
+
+// ════════════════════════════════════════
+// SAVED TIPS (Bookmarks)
+// ════════════════════════════════════════
+
+model SavedTip {
+  id        String   @id @default(cuid())
+  tipId     String   @map("tip_id")
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  tip  Tip  @relation(fields: [tipId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tipId, userId])
+  @@map("saved_tips")
+}
+
+// ════════════════════════════════════════
+// FOLLOWS (User follows Creator)
+// ════════════════════════════════════════
+
+model Follow {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  creatorId String   @map("creator_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  creator Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, creatorId])
+  @@index([creatorId])
+  @@map("follows")
+}
+
+// ════════════════════════════════════════
+// CREATOR REVIEWS (User reviews on creator profiles)
+// ════════════════════════════════════════
+
+model CreatorReview {
+  id        String   @id @default(cuid())
+  creatorId String   @map("creator_id")
+  userId    String   @map("user_id")
+  rating    Int      // 1-5
+  content   String?  // max 2000 chars enforced at app level
+  isHidden  Boolean  @default(false) @map("is_hidden")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  creator Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([creatorId, userId])
+  @@index([creatorId, createdAt(sort: Desc)])
+  @@map("creator_reviews")
+}
+
+// ════════════════════════════════════════
+// TIP EXPLANATIONS (Creator-written analysis)
+// ════════════════════════════════════════
+
+model TipExplanation {
+  id        String   @id @default(cuid())
+  tipId     String   @unique @map("tip_id")
+  creatorId String   @map("creator_id")
+  content   String   // Markdown content
+  imageUrls String[] @default([]) @map("image_urls")
+  version   Int      @default(1)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  tip Tip @relation(fields: [tipId], references: [id], onDelete: Cascade)
+
+  @@map("tip_explanations")
 }

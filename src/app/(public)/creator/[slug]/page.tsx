@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { CreatorHeader } from "@/components/creator/creator-header";
 import { CreatorStats } from "@/components/creator/creator-stats";
+import { CreatorScoreChart } from "@/components/creator/creator-score-chart";
+import { CreatorAccuracyChart } from "@/components/creator/creator-accuracy-chart";
+import { CreatorScoreBreakdown } from "@/components/creator/creator-score-breakdown";
 import { CreatorTipFeed } from "@/components/creator/creator-tip-feed";
 import type { CreatorDetail, TipSummary } from "@/types";
 
@@ -170,16 +173,39 @@ export default async function CreatorPage({
         <CreatorStats stats={creator.stats} score={creator.score} />
       </div>
 
-      {/* Score History Chart Placeholder */}
+      {/* Score History Chart */}
       {creator.scoreHistory.length > 0 && (
         <div className="mt-8 rounded-lg border border-gray-200 bg-surface p-6">
           <h2 className="text-lg font-bold text-primary">Score History</h2>
-          <p className="mt-2 text-sm text-muted">
-            RMT Score trend over the last {creator.scoreHistory.length} days.
-            Chart visualization powered by Recharts.
+          <p className="mt-1 text-sm text-muted">
+            RMT Score trend over the last {creator.scoreHistory.length} days
           </p>
-          <div className="mt-4 flex h-48 items-center justify-center rounded bg-bg text-sm text-muted">
-            Score history chart will render here (Recharts)
+          <div className="mt-4">
+            <CreatorScoreChart snapshots={creator.scoreHistory} />
+          </div>
+        </div>
+      )}
+
+      {/* Score Breakdown + Accuracy by Timeframe */}
+      {creator.score && (
+        <div className="mt-8 grid gap-6 lg:grid-cols-2">
+          <div className="rounded-lg border border-gray-200 bg-surface p-6">
+            <h2 className="text-lg font-bold text-primary">Score Breakdown</h2>
+            <p className="mt-1 text-sm text-muted">
+              Component scores that make up the RMT Score
+            </p>
+            <div className="mt-4">
+              <CreatorScoreBreakdown score={creator.score} />
+            </div>
+          </div>
+          <div className="rounded-lg border border-gray-200 bg-surface p-6">
+            <h2 className="text-lg font-bold text-primary">Accuracy by Timeframe</h2>
+            <p className="mt-1 text-sm text-muted">
+              Performance breakdown by trading style
+            </p>
+            <div className="mt-4">
+              <CreatorAccuracyChart score={creator.score} />
+            </div>
           </div>
         </div>
       )}

@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { Target, Users, TrendingUp, BarChart3 } from "lucide-react";
+import { AnalyticsCharts } from "@/components/admin/analytics-charts";
 
 export const dynamic = "force-dynamic";
 
@@ -50,8 +51,50 @@ async function getAnalytics() {
   }
 }
 
+async function getChartData() {
+  try {
+    // Daily tips for the last 30 days
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const tips = await db.tip.findMany({
+      where: { createdAt: { gte: thirtyDaysAgo }, status: { not: "REJECTED" } },
+      select: { createdAt: true },
+      orderBy: { createdAt: "asc" },
+    });
+
+    const dailyMap = new Map<string, number>();
+    for (const tip of tips) {
+      const day = tip.createdAt.toISOString().slice(0, 10);
+      dailyMap.set(day, (dailyMap.get(day) ?? 0) + 1);
+    }
+    const dailyTips = Array.from(dailyMap.entries()).map(([date, count]) => ({
+      date: new Date(date).toLocaleDateString("en-IN", { day: "numeric", month: "short" }),
+      count,
+    }));
+
+    // Score distribution
+    const scores = await db.creatorScore.findMany({ select: { rmtScore: true } });
+    const ranges = ["0-20", "20-40", "40-60", "60-80", "80-100"];
+    const distribution = ranges.map((range) => {
+      const [min, max] = range.split("-").map(Number);
+      return {
+        range,
+        count: scores.filter((s) => s.rmtScore >= min! && s.rmtScore < max!).length,
+      };
+    });
+
+    return { dailyTips, scoreDistribution: distribution };
+  } catch {
+    return { dailyTips: [], scoreDistribution: [] };
+  }
+}
+
 export default async function AdminAnalyticsPage(): Promise<React.ReactElement> {
-  const analytics = await getAnalytics();
+  const [analytics, chartData] = await Promise.all([
+    getAnalytics(),
+    getChartData(),
+  ]);
 
   const cards = [
     {
@@ -121,24 +164,11 @@ export default async function AdminAnalyticsPage(): Promise<React.ReactElement> 
         <p className="text-xs text-muted">across all rated creators</p>
       </div>
 
-      {/* Chart placeholders */}
-      <div className="mt-8 grid gap-6 lg:grid-cols-2">
-        <div className="rounded-lg border border-gray-200 bg-surface p-6">
-          <h2 className="text-sm font-semibold text-primary">
-            Tips Over Time
-          </h2>
-          <div className="mt-4 flex h-48 items-center justify-center rounded bg-bg text-sm text-muted">
-            Chart: Daily tips count (Recharts)
-          </div>
-        </div>
-        <div className="rounded-lg border border-gray-200 bg-surface p-6">
-          <h2 className="text-sm font-semibold text-primary">
-            Score Distribution
-          </h2>
-          <div className="mt-4 flex h-48 items-center justify-center rounded bg-bg text-sm text-muted">
-            Chart: RMT Score histogram (Recharts)
-          </div>
-        </div>
+      <div className="mt-8">
+        <AnalyticsCharts
+          dailyTips={chartData.dailyTips}
+          scoreDistribution={chartData.scoreDistribution}
+        />
       </div>
     </div>
   );

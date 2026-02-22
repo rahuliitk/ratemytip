@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { requireAdmin, isAuthError } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { paginationSchema } from "@/lib/validators/query";
 import { triggerScrapeSchema } from "@/lib/validators/admin";
@@ -14,16 +14,8 @@ const scraperQuerySchema = paginationSchema.extend({
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    const session = await auth();
-    if (!session?.user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Unauthorized" },
-        },
-        { status: 401 }
-      );
-    }
+    const authResult = await requireAdmin();
+    if (isAuthError(authResult)) return authResult;
 
     const searchParams = Object.fromEntries(request.nextUrl.searchParams);
     const parsed = scraperQuerySchema.safeParse(searchParams);
@@ -101,16 +93,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const session = await auth();
-    if (!session?.user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Unauthorized" },
-        },
-        { status: 401 }
-      );
-    }
+    const authResult = await requireAdmin();
+    if (isAuthError(authResult)) return authResult;
+    const { adminId } = authResult;
 
     const body: unknown = await request.json();
     const parsed = triggerScrapeSchema.safeParse(body);
@@ -175,7 +160,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         status: "QUEUED",
         creatorPlatformId,
         metadata: {
-          triggeredBy: (session.user as { adminId?: string }).adminId,
+          triggeredBy: adminId,
           triggerType: "manual",
         },
       },

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { requireAdmin, isAuthError } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { reviewTipSchema } from "@/lib/validators/admin";
 import { calculateTipContentHash } from "@/lib/utils/crypto";
@@ -13,27 +13,9 @@ export async function PATCH(
   context: RouteContext
 ): Promise<NextResponse> {
   try {
-    const session = await auth();
-    if (!session?.user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Unauthorized" },
-        },
-        { status: 401 }
-      );
-    }
-
-    const adminId = (session.user as { adminId?: string }).adminId;
-    if (!adminId) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "UNAUTHORIZED", message: "Unauthorized" },
-        },
-        { status: 401 }
-      );
-    }
+    const authResult = await requireAdmin();
+    if (isAuthError(authResult)) return authResult;
+    const { adminId } = authResult;
 
     const { id } = await context.params;
     const body: unknown = await request.json();
