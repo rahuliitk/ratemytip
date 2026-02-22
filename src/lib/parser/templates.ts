@@ -30,19 +30,19 @@
 export const STOCK_SYMBOL_PATTERN = /(?:\$([A-Z]{1,20})|\b([A-Z]{2,20})\b)/g;
 
 /** Matches price values with optional currency symbol ($, €, £, ¥, ₹), comma grouping, and decimals */
-export const PRICE_PATTERN = /[$€£¥₹]?\s*(\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?|\d{1,6}(?:\.\d{1,2})?)/g;
+export const PRICE_PATTERN = /[$€£¥₹]?\s*(\d{1,3}(?:,\d{3})+(?:\.\d{1,2})?|\d{1,6}(?:\.\d{1,2})?)/g;
 
 /** Matches target prices preceded by common target keywords or emoji */
 export const TARGET_PATTERN =
-  /(?:target|tgt|tp|🎯)\s*(?:\d\s*)?[:\-=]?\s*[$€£¥₹]?\s*(\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?|\d{1,6}(?:\.\d{1,2})?)/gi;
+  /(?:target|tgt|tp|🎯)\s*(?:\d\s*[:\-=])?\s*[:\-=]?\s*[$€£¥₹]?\s*(\d{1,3}(?:,\d{3})+(?:\.\d{1,2})?|\d{1,6}(?:\.\d{1,2})?)/gi;
 
 /** Matches stop-loss prices preceded by common SL keywords or emoji */
 export const STOP_LOSS_PATTERN =
-  /(?:stop\s*loss|stoploss|sl|⛔)\s*[:\-=]?\s*[$€£¥₹]?\s*(\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?|\d{1,6}(?:\.\d{1,2})?)/gi;
+  /(?:stop\s*loss|stoploss|sl|⛔)\s*[:\-=]?\s*[$€£¥₹]?\s*(\d{1,3}(?:,\d{3})+(?:\.\d{1,2})?|\d{1,6}(?:\.\d{1,2})?)/gi;
 
 /** Matches entry prices preceded by entry/buy/cmp keywords */
 export const ENTRY_PATTERN =
-  /(?:entry|buy\s*(?:above|below|near|around|at|@)?|sell\s*(?:below|above|near|around|at|@)?|cmp)\s*[:\-=]?\s*[$€£¥₹]?\s*(\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?|\d{1,6}(?:\.\d{1,2})?)/gi;
+  /(?:entry|buy\s*(?:above|below|near|around|at|@)?|sell\s*(?:below|above|near|around|at|@)?|cmp)\s*[:\-=]?\s*[$€£¥₹]?\s*(\d{1,3}(?:,\d{3})+(?:\.\d{1,2})?|\d{1,6}(?:\.\d{1,2})?)/gi;
 
 /** Matches entry price ranges like "185-187" and returns both ends */
 export const ENTRY_RANGE_PATTERN =
