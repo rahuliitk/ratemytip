@@ -41,9 +41,15 @@ function extractAllMatches(pattern: RegExp, text: string): string[] {
   let match: RegExpExecArray | null;
 
   while ((match = regex.exec(text)) !== null) {
-    const captured = match[1];
-    if (captured !== undefined) {
-      matches.push(captured);
+    // Find the first non-undefined capture group (supports patterns with
+    // multiple alternative groups, e.g. STOCK_SYMBOL_PATTERN where cashtags
+    // land in group 1 and bare symbols in group 2).
+    for (let i = 1; i < match.length; i++) {
+      const group = match[i];
+      if (group !== undefined) {
+        matches.push(group);
+        break;
+      }
     }
   }
 
