@@ -4,8 +4,11 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { StockHeader } from "@/components/stock/stock-header";
 import { StockConsensus } from "@/components/stock/stock-consensus";
-import { TipCard } from "@/components/tip/tip-card";
+import { StockPriceChart } from "@/components/stock/stock-price-chart";
+import { StockTipFeed } from "@/components/stock/stock-tip-feed";
 import { ScoreBadge } from "@/components/shared/score-badge";
+import { ShareButton } from "@/components/shared/share-button";
+import { subDays } from "date-fns";
 
 export const revalidate = 300; // 5 minutes
 
@@ -57,7 +60,29 @@ async function getStockData(symbol: string) {
       .sort((a, b) => b.hits / b.total - a.hits / a.total)
       .slice(0, 5);
 
-    return { stock, bullish, bearish, topCreators };
+    // Fetch price history for chart
+    const ninetyDaysAgo = subDays(new Date(), 90);
+    const priceHistory = await db.stockPrice.findMany({
+      where: {
+        stockId: stock.id,
+        date: { gte: ninetyDaysAgo },
+      },
+      orderBy: { date: "desc" },
+    });
+
+    const priceData = priceHistory.map((p) => ({
+      id: p.id,
+      stockId: p.stockId,
+      date: p.date.toISOString(),
+      open: p.open,
+      high: p.high,
+      low: p.low,
+      close: p.close,
+      volume: p.volume !== null ? Number(p.volume) : null,
+      source: p.source,
+    }));
+
+    return { stock, bullish, bearish, topCreators, priceData };
   } catch {
     return null;
   }
@@ -94,7 +119,7 @@ export default async function StockPage({
 
   if (!data) notFound();
 
-  const { stock, bullish, bearish, topCreators } = data;
+  const { stock, bullish, bearish, topCreators, priceData } = data;
 
   const tipSummaries = stock.tips.map((tip) => ({
     id: tip.id,
@@ -120,7 +145,9 @@ export default async function StockPage({
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <StockHeader
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <StockHeader
         symbol={stock.symbol}
         name={stock.name}
         exchange={stock.exchange}
@@ -128,24 +155,25 @@ export default async function StockPage({
         marketCap={stock.marketCap}
         lastPrice={stock.lastPrice}
       />
+        </div>
+        <ShareButton title={`${stock.symbol} Stock Tips | RateMyTip`} />
+      </div>
+
+      {/* Price Chart */}
+      {priceData.length > 0 && (
+        <div className="mt-6 rounded-lg border border-gray-200 bg-surface p-6">
+          <h2 className="text-lg font-bold text-primary">Price History</h2>
+          <p className="mt-1 text-sm text-muted">Last 90 days</p>
+          <div className="mt-4">
+            <StockPriceChart priceHistory={priceData} symbol={stock.symbol} />
+          </div>
+        </div>
+      )}
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
         {/* Main content */}
         <div className="lg:col-span-2">
-          <h2 className="text-lg font-bold text-primary">
-            Recent Tips ({stock.tips.length})
-          </h2>
-          <div className="mt-4 space-y-3">
-            {tipSummaries.length > 0 ? (
-              tipSummaries.map((tip) => (
-                <TipCard key={tip.id} tip={tip} showCreator />
-              ))
-            ) : (
-              <p className="py-8 text-center text-sm text-muted">
-                No tips tracked for this stock yet.
-              </p>
-            )}
-          </div>
+          <StockTipFeed initialTips={tipSummaries} stockSymbol={stock.symbol} />
         </div>
 
         {/* Sidebar */}

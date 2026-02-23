@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { TipStatusBadge } from "@/components/tip/tip-status-badge";
 import { formatPrice } from "@/lib/utils/format";
 import { Check, X, ChevronDown, ChevronRight, Loader2 } from "lucide-react";
@@ -25,6 +25,7 @@ export default function ReviewQueuePage(): React.ReactElement {
   const [tips, setTips] = useState<ReviewTip[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
@@ -66,6 +67,52 @@ export default function ReviewQueuePage(): React.ReactElement {
     }
   }
 
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      // Don't fire shortcuts when typing in inputs
+      const target = e.target as HTMLElement;
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return;
+      if (tips.length === 0 || actionLoading) return;
+
+      const currentTip = tips[selectedIndex];
+      if (!currentTip) return;
+
+      switch (e.key.toLowerCase()) {
+        case "a":
+          e.preventDefault();
+          handleAction(currentTip.id, "approve");
+          break;
+        case "r":
+          e.preventDefault();
+          handleAction(currentTip.id, "reject");
+          break;
+        case "n":
+          e.preventDefault();
+          setSelectedIndex((prev) => Math.min(prev + 1, tips.length - 1));
+          setExpandedId(tips[Math.min(selectedIndex + 1, tips.length - 1)]?.id ?? null);
+          break;
+        case "p":
+          e.preventDefault();
+          setSelectedIndex((prev) => Math.max(prev - 1, 0));
+          setExpandedId(tips[Math.max(selectedIndex - 1, 0)]?.id ?? null);
+          break;
+      }
+    },
+    [tips, selectedIndex, actionLoading]
+  );
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
+
+  // Keep selectedIndex in bounds when tips are removed
+  useEffect(() => {
+    if (selectedIndex >= tips.length && tips.length > 0) {
+      setSelectedIndex(tips.length - 1);
+    }
+  }, [tips.length, selectedIndex]);
+
   return (
     <div>
       <div className="flex items-center justify-between">
@@ -74,6 +121,12 @@ export default function ReviewQueuePage(): React.ReactElement {
           <p className="mt-1 text-sm text-muted">
             {tips.length} tips pending review
           </p>
+        </div>
+        <div className="flex items-center gap-3 text-xs text-muted">
+          <span className="rounded border border-gray-300 px-1.5 py-0.5 font-mono">A</span> Approve
+          <span className="rounded border border-gray-300 px-1.5 py-0.5 font-mono">R</span> Reject
+          <span className="rounded border border-gray-300 px-1.5 py-0.5 font-mono">N</span> Next
+          <span className="rounded border border-gray-300 px-1.5 py-0.5 font-mono">P</span> Prev
         </div>
       </div>
 
@@ -89,12 +142,13 @@ export default function ReviewQueuePage(): React.ReactElement {
         </div>
       ) : (
         <div className="mt-6 space-y-3">
-          {tips.map((tip) => {
+          {tips.map((tip, index) => {
             const isExpanded = expandedId === tip.id;
+            const isSelected = selectedIndex === index;
             return (
               <div
                 key={tip.id}
-                className="rounded-lg border border-gray-200 bg-surface"
+                className={`rounded-lg border bg-surface ${isSelected ? "border-accent ring-1 ring-accent/30" : "border-gray-200"}`}
               >
                 {/* Summary row */}
                 <div className="flex items-center justify-between px-4 py-3">

@@ -17,14 +17,37 @@ export async function GET(
 ): Promise<ImageResponse> {
   const { slug } = await params;
 
-  // Note: In edge runtime, we can't use Prisma directly.
-  // Fetch from API instead, or use a simplified approach.
-  // For now, generate a generic OG image with the slug.
-
-  const score = 75; // placeholder
-  const name = slug
+  // Fetch real creator data from our API
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL ?? new URL(request.url).origin;
+  let name = slug
     .replace(/-/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
+  let score = 0;
+  let accuracy = "N/A";
+  let totalTips = 0;
+  let tier = "UNRATED";
+
+  try {
+    const res = await fetch(`${baseUrl}/api/v1/creators/${slug}`, {
+      next: { revalidate: 600 },
+    });
+    if (res.ok) {
+      const json = await res.json();
+      if (json.success && json.data) {
+        const data = json.data;
+        name = data.displayName ?? name;
+        score = data.score?.rmtScore ?? 0;
+        accuracy = data.score
+          ? `${(data.score.accuracyRate * 100).toFixed(1)}%`
+          : "N/A";
+        totalTips = data.stats?.totalTips ?? 0;
+        tier = data.tier ?? "UNRATED";
+      }
+    }
+  } catch {
+    // Fall back to slug-based display
+  }
 
   return new ImageResponse(
     (
@@ -73,7 +96,7 @@ export async function GET(
             }}
           >
             <div style={{ fontSize: 48, fontWeight: 700, color: "white" }}>
-              {score}
+              {score > 0 ? Math.round(score) : "—"}
             </div>
             <div style={{ fontSize: 16, color: "white", opacity: 0.9 }}>
               RMT Score
@@ -86,7 +109,30 @@ export async function GET(
               {name}
             </div>
             <div style={{ fontSize: 20, color: "#718096" }}>
-              Verified Track Record
+              {tier !== "UNRATED" ? `${tier} Tier` : "Verified Track Record"}
+            </div>
+            <div
+              style={{
+                display: "flex",
+                gap: "24px",
+                marginTop: "12px",
+                fontSize: 18,
+              }}
+            >
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <div style={{ color: "#718096", fontSize: 14 }}>Accuracy</div>
+                <div style={{ fontWeight: 700, color: "#1A202C" }}>
+                  {accuracy}
+                </div>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <div style={{ color: "#718096", fontSize: 14 }}>
+                  Total Tips
+                </div>
+                <div style={{ fontWeight: 700, color: "#1A202C" }}>
+                  {totalTips}
+                </div>
+              </div>
             </div>
           </div>
         </div>

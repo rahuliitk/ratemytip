@@ -3,8 +3,11 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { TipStatusBadge } from "@/components/tip/tip-status-badge";
+import { TipPriceChart } from "@/components/tip/tip-price-chart";
 import { ScoreBadge } from "@/components/shared/score-badge";
+import { ShareButton } from "@/components/shared/share-button";
 import { formatPrice, formatPercent } from "@/lib/utils/format";
+import { subDays } from "date-fns";
 
 export const revalidate = 600; // 10 minutes
 
@@ -24,7 +27,30 @@ async function getTip(id: string) {
     });
 
     if (!tip || tip.status === "REJECTED") return null;
-    return tip;
+
+    // Fetch price history for the stock (last 90 days)
+    const ninetyDaysAgo = subDays(new Date(), 90);
+    const priceHistory = await db.stockPrice.findMany({
+      where: {
+        stockId: tip.stockId,
+        date: { gte: ninetyDaysAgo },
+      },
+      orderBy: { date: "desc" },
+    });
+
+    const priceData = priceHistory.map((p) => ({
+      id: p.id,
+      stockId: p.stockId,
+      date: p.date.toISOString(),
+      open: p.open,
+      high: p.high,
+      low: p.low,
+      close: p.close,
+      volume: p.volume !== null ? Number(p.volume) : null,
+      source: p.source,
+    }));
+
+    return { ...tip, priceData };
   } catch {
     return null;
   }
@@ -62,6 +88,9 @@ export default async function TipPage({
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mb-4 flex justify-end">
+        <ShareButton title={`${tip.direction} ${tip.stock.symbol} by ${tip.creator.displayName} | RateMyTip`} />
+      </div>
       <div className="rounded-lg border border-gray-200 bg-surface p-6">
         {/* Tip header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -138,6 +167,24 @@ export default async function TipPage({
             </p>
           </div>
         </div>
+
+        {/* Price chart with entry/target/SL lines */}
+        {tip.priceData.length > 0 && (
+          <div className="mt-6">
+            <p className="text-xs font-medium text-muted">Price Chart</p>
+            <div className="mt-2">
+              <TipPriceChart
+                priceHistory={tip.priceData}
+                entryPrice={tip.entryPrice}
+                target1={tip.target1}
+                target2={tip.target2}
+                target3={tip.target3}
+                stopLoss={tip.stopLoss}
+                symbol={tip.stock.symbol}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Details grid */}
         <div className="mt-6 grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">

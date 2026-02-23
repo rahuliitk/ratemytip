@@ -4,6 +4,9 @@ import {
   Users,
   Target,
   TrendingUp,
+  Bot,
+  CheckCircle2,
+  BarChart3,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -30,8 +33,82 @@ async function getDashboardStats() {
   }
 }
 
+async function getRecentActivity() {
+  try {
+    const [recentJobs, recentReviews, recentSnapshots] = await Promise.all([
+      db.scrapeJob.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 5,
+        select: {
+          id: true,
+          platform: true,
+          jobType: true,
+          status: true,
+          postsFound: true,
+          tipsExtracted: true,
+          createdAt: true,
+        },
+      }),
+      db.reviewAction.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 5,
+        include: {
+          admin: { select: { name: true } },
+          tip: {
+            select: {
+              stock: { select: { symbol: true } },
+              direction: true,
+            },
+          },
+        },
+      }),
+      db.scoreSnapshot.findMany({
+        orderBy: { date: "desc" },
+        take: 5,
+        distinct: ["creatorId"],
+        include: {
+          creator: { select: { displayName: true, slug: true } },
+        },
+      }),
+    ]);
+
+    return { recentJobs, recentReviews, recentSnapshots };
+  } catch {
+    return { recentJobs: [], recentReviews: [], recentSnapshots: [] };
+  }
+}
+
+function formatTimeAgo(date: Date): string {
+  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
+
+function jobStatusColor(status: string): string {
+  switch (status) {
+    case "COMPLETED":
+      return "text-success";
+    case "RUNNING":
+      return "text-accent";
+    case "FAILED":
+      return "text-danger";
+    case "QUEUED":
+      return "text-warning";
+    default:
+      return "text-muted";
+  }
+}
+
 export default async function AdminDashboardPage(): Promise<React.ReactElement> {
-  const stats = await getDashboardStats();
+  const [stats, activity] = await Promise.all([
+    getDashboardStats(),
+    getRecentActivity(),
+  ]);
 
   const cards = [
     {
@@ -97,17 +174,123 @@ export default async function AdminDashboardPage(): Promise<React.ReactElement> 
         })}
       </div>
 
-      {/* Placeholder for recent activity */}
-      <div className="mt-8 rounded-lg border border-gray-200 bg-surface p-6">
-        <h2 className="text-lg font-semibold text-primary">
-          Recent Activity
-        </h2>
-        <p className="mt-2 text-sm text-muted">
-          Recent scraping jobs, reviews, and score calculations will appear
-          here.
-        </p>
-        <div className="mt-4 flex h-48 items-center justify-center rounded bg-bg text-sm text-muted">
-          Activity feed coming soon
+      {/* Activity Feed */}
+      <div className="mt-8 grid gap-6 lg:grid-cols-3">
+        {/* Recent Scrape Jobs */}
+        <div className="rounded-lg border border-gray-200 bg-surface p-5">
+          <div className="flex items-center gap-2">
+            <Bot className="h-4 w-4 text-accent" />
+            <h2 className="text-sm font-semibold text-primary">
+              Recent Scrape Jobs
+            </h2>
+          </div>
+          <div className="mt-4 space-y-3">
+            {activity.recentJobs.length > 0 ? (
+              activity.recentJobs.map((job) => (
+                <div
+                  key={job.id}
+                  className="flex items-center justify-between text-xs"
+                >
+                  <div>
+                    <span className="font-medium text-text">
+                      {job.platform}
+                    </span>
+                    <span className="ml-1 text-muted">
+                      {job.jobType.replace(/_/g, " ").toLowerCase()}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`font-medium ${jobStatusColor(job.status)}`}>
+                      {job.status}
+                    </span>
+                    <span className="text-muted">
+                      {formatTimeAgo(job.createdAt)}
+                    </span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-xs text-muted">No scrape jobs yet.</p>
+            )}
+          </div>
+        </div>
+
+        {/* Recent Reviews */}
+        <div className="rounded-lg border border-gray-200 bg-surface p-5">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4 text-success" />
+            <h2 className="text-sm font-semibold text-primary">
+              Recent Reviews
+            </h2>
+          </div>
+          <div className="mt-4 space-y-3">
+            {activity.recentReviews.length > 0 ? (
+              activity.recentReviews.map((review) => (
+                <div
+                  key={review.id}
+                  className="flex items-center justify-between text-xs"
+                >
+                  <div>
+                    <span
+                      className={`font-medium ${review.action === "APPROVED" ? "text-success" : review.action === "REJECTED" ? "text-danger" : "text-text"}`}
+                    >
+                      {review.action}
+                    </span>
+                    <span className="ml-1 text-muted">
+                      {review.tip.direction} {review.tip.stock.symbol}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted">by {review.admin.name}</span>
+                    <span className="text-muted">
+                      {formatTimeAgo(review.createdAt)}
+                    </span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-xs text-muted">No reviews yet.</p>
+            )}
+          </div>
+        </div>
+
+        {/* Recent Score Updates */}
+        <div className="rounded-lg border border-gray-200 bg-surface p-5">
+          <div className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4 text-warning" />
+            <h2 className="text-sm font-semibold text-primary">
+              Recent Score Updates
+            </h2>
+          </div>
+          <div className="mt-4 space-y-3">
+            {activity.recentSnapshots.length > 0 ? (
+              activity.recentSnapshots.map((snap) => (
+                <div
+                  key={snap.id}
+                  className="flex items-center justify-between text-xs"
+                >
+                  <div>
+                    <span className="font-medium text-text">
+                      {snap.creator.displayName}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium tabular-nums text-accent">
+                      {snap.rmtScore.toFixed(1)}
+                    </span>
+                    <span className="text-muted">
+                      {new Date(snap.date).toLocaleDateString("en-IN", {
+                        day: "numeric",
+                        month: "short",
+                      })}
+                    </span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-xs text-muted">No score updates yet.</p>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -7,6 +7,7 @@ import { CreatorScoreChart } from "@/components/creator/creator-score-chart";
 import { CreatorAccuracyChart } from "@/components/creator/creator-accuracy-chart";
 import { CreatorScoreBreakdown } from "@/components/creator/creator-score-breakdown";
 import { CreatorTipFeed } from "@/components/creator/creator-tip-feed";
+import { ShareButton } from "@/components/shared/share-button";
 import type { CreatorDetail, TipSummary } from "@/types";
 
 export const revalidate = 600; // 10 minutes
@@ -167,7 +168,14 @@ export default async function CreatorPage({
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <CreatorHeader creator={creator} />
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <CreatorHeader creator={creator} />
+        </div>
+        <ShareButton
+          title={`${creator.displayName} — ${creator.score ? `RMT Score: ${creator.score.rmtScore.toFixed(1)}/100` : "Unrated"} | RateMyTip`}
+        />
+      </div>
 
       <div className="mt-8">
         <CreatorStats stats={creator.stats} score={creator.score} />

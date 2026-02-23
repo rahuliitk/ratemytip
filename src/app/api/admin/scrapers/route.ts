@@ -6,6 +6,7 @@ import { triggerScrapeSchema } from "@/lib/validators/admin";
 import { buildPaginationMeta, getPrismaSkipTake } from "@/lib/utils/pagination";
 import { z } from "zod";
 import type { Prisma } from "@prisma/client";
+import { scrapeTwitterQueue, scrapeYoutubeQueue } from "@/lib/queue/queues";
 
 const scraperQuerySchema = paginationSchema.extend({
   platform: z.enum(["TWITTER", "YOUTUBE", "WEBSITE"]).optional(),
@@ -166,8 +167,28 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       },
     });
 
-    // In a full implementation, this would enqueue a BullMQ job.
-    // For now, we just create the database record.
+    // Enqueue a BullMQ job for the appropriate platform queue
+    try {
+      const queueMap: Record<string, typeof scrapeTwitterQueue | typeof scrapeYoutubeQueue> = {
+        TWITTER: scrapeTwitterQueue,
+        YOUTUBE: scrapeYoutubeQueue,
+      };
+      const queue = queueMap[platform];
+      if (queue) {
+        await queue.add(
+          `${jobType}-${job.id}`,
+          {
+            jobId: job.id,
+            platform,
+            jobType,
+            creatorPlatformId,
+          },
+          { jobId: job.id }
+        );
+      }
+    } catch {
+      // Redis/queue unavailable — DB record is the source of truth
+    }
 
     return NextResponse.json(
       {

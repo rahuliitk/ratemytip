@@ -11,24 +11,51 @@ function getScoreColor(score: number): string {
   return "#9B2C2C";
 }
 
-interface LeaderboardEntry {
+interface LeaderboardRow {
   readonly rank: number;
   readonly name: string;
   readonly score: number;
   readonly accuracy: string;
 }
 
-export async function GET(): Promise<ImageResponse> {
-  // Note: In edge runtime, we can't use Prisma directly.
-  // In production, fetch from an internal API endpoint or use fetch().
-  // For now, use placeholder data.
-  const topCreators: readonly LeaderboardEntry[] = [
-    { rank: 1, name: "Top Creator 1", score: 92, accuracy: "84.2%" },
-    { rank: 2, name: "Top Creator 2", score: 87, accuracy: "79.5%" },
-    { rank: 3, name: "Top Creator 3", score: 81, accuracy: "76.1%" },
-    { rank: 4, name: "Top Creator 4", score: 78, accuracy: "72.8%" },
-    { rank: 5, name: "Top Creator 5", score: 74, accuracy: "70.3%" },
-  ];
+export async function GET(request: Request): Promise<ImageResponse> {
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL ?? new URL(request.url).origin;
+
+  let topCreators: readonly LeaderboardRow[] = [];
+
+  try {
+    const res = await fetch(
+      `${baseUrl}/api/v1/leaderboard?pageSize=5&page=1`,
+      { next: { revalidate: 300 } }
+    );
+    if (res.ok) {
+      const json = await res.json();
+      if (json.success && json.data) {
+        topCreators = json.data.map(
+          (entry: {
+            rank: number;
+            creator: { displayName: string };
+            score: { rmtScore: number; accuracyRate: number };
+          }) => ({
+            rank: entry.rank,
+            name: entry.creator.displayName,
+            score: Math.round(entry.score.rmtScore),
+            accuracy: `${(entry.score.accuracyRate * 100).toFixed(1)}%`,
+          })
+        );
+      }
+    }
+  } catch {
+    // Fall back to empty
+  }
+
+  // Fallback if API returned no data
+  if (topCreators.length === 0) {
+    topCreators = [
+      { rank: 1, name: "No data yet", score: 0, accuracy: "—" },
+    ];
+  }
 
   return new ImageResponse(
     (
@@ -134,7 +161,7 @@ export async function GET(): Promise<ImageResponse> {
                   color: getScoreColor(creator.score),
                 }}
               >
-                {creator.score}
+                {creator.score > 0 ? creator.score : "—"}
               </div>
               <div
                 style={{

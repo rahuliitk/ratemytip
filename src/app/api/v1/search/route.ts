@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { searchQuerySchema } from "@/lib/validators/query";
+import { cached } from "@/lib/cache";
+import { CACHE_TTL } from "@/lib/constants";
+import { rateLimitSearch } from "@/lib/rate-limit";
+import { createHash } from "crypto";
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
+    const rateLimited = await rateLimitSearch(request);
+    if (rateLimited) return rateLimited;
+
     const searchParams = Object.fromEntries(request.nextUrl.searchParams);
     const parsed = searchQuerySchema.safeParse(searchParams);
 
@@ -23,7 +30,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     const { q, type, limit } = parsed.data;
     const searchTerm = q.trim();
+    const queryHash = createHash("md5").update(`${searchTerm}:${type}:${limit}`).digest("hex");
+    const cacheKey = `search:${queryHash}`;
 
+    const data = await cached(cacheKey, CACHE_TTL.SEARCH_RESULTS, async () => {
     const includeCreators = type === "all" || type === "creator";
     const includeStocks = type === "all" || type === "stock";
     const includeTips = type === "all" || type === "tip";
@@ -112,7 +122,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       tipsPromise,
     ]);
 
-    const data = {
+    return {
       creators,
       stocks: stocks.map((stock) => ({
         ...stock,
@@ -140,6 +150,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         sourceUrl: tip.sourceUrl,
       })),
     };
+    }); // end cached()
 
     return NextResponse.json({ success: true, data });
   } catch (error) {

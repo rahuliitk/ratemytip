@@ -5,6 +5,7 @@ import { PAGINATION, SCORING } from "@/lib/constants";
 import { LeaderboardTable } from "@/components/leaderboard/leaderboard-table";
 import { LeaderboardFilters } from "@/components/leaderboard/leaderboard-filters";
 import { CategoryTabs } from "@/components/leaderboard/category-tabs";
+import { ShareButton } from "@/components/shared/share-button";
 import type { LeaderboardEntry } from "@/types";
 
 export const revalidate = 300; // 5 minutes
@@ -110,10 +111,15 @@ export default async function LeaderboardPage({
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <h1 className="text-3xl font-bold text-primary">Leaderboard</h1>
-      <p className="mt-2 text-sm text-muted">
-        Top stock tip creators ranked by verified performance
-      </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-primary">Leaderboard</h1>
+          <p className="mt-2 text-sm text-muted">
+            Top stock tip creators ranked by verified performance
+          </p>
+        </div>
+        <ShareButton title="Top Stock Tip Creators Leaderboard | RateMyTip" />
+      </div>
 
       <div className="mt-6">
         <CategoryTabs />

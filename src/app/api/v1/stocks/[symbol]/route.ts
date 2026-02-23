@@ -1,35 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { subDays } from "date-fns";
-import { TARGET_HIT_STATUSES, COMPLETED_TIP_STATUSES } from "@/lib/constants";
+import { TARGET_HIT_STATUSES, COMPLETED_TIP_STATUSES, CACHE_TTL } from "@/lib/constants";
+import { cached } from "@/lib/cache";
+import { rateLimit } from "@/lib/rate-limit";
 
 interface RouteContext {
   params: Promise<{ symbol: string }>;
 }
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
   try {
-    const { symbol } = await context.params;
+    const rateLimited = await rateLimit(request);
+    if (rateLimited) return rateLimited;
 
+    const { symbol } = await context.params;
+    const cacheKey = `stock:${symbol.toUpperCase()}`;
+
+    const data = await cached(cacheKey, CACHE_TTL.STOCK_PAGE, async () => {
     const stock = await db.stock.findUnique({
       where: { symbol: symbol.toUpperCase() },
     });
 
-    if (!stock) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "STOCK_NOT_FOUND",
-            message: `Stock not found: ${symbol}`,
-          },
-        },
-        { status: 404 }
-      );
-    }
+    if (!stock) return null;
 
     // Count tips for this stock (only approved)
     const approvedReviewStatuses = ["AUTO_APPROVED", "MANUALLY_APPROVED"] as const;
@@ -135,7 +131,7 @@ export async function GET(
       orderBy: { date: "asc" },
     });
 
-    const data = {
+    return {
       id: stock.id,
       symbol: stock.symbol,
       exchange: stock.exchange,
@@ -191,6 +187,20 @@ export async function GET(
         source: p.source,
       })),
     };
+    }); // end cached()
+
+    if (!data) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "STOCK_NOT_FOUND",
+            message: `Stock not found: ${symbol}`,
+          },
+        },
+        { status: 404 }
+      );
+    }
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
