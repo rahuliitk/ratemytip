@@ -9,7 +9,10 @@
 
 import { Worker, type Job } from "bullmq";
 
+import { createLogger } from "@/lib/logger";
 import { db } from "@/lib/db";
+
+const log = createLogger("worker/tip-status");
 import { TIP_STATUS } from "@/lib/constants";
 
 // ──── Job payload types ────
@@ -39,9 +42,7 @@ function getConnection(): { host: string; port: number; password?: string } {
 async function processCheckExpirations(
   job: Job<CheckExpirationsJobData>
 ): Promise<{ expiredCount: number }> {
-  console.log(
-    `[TipStatusWorker] Checking for expired tips (triggered: ${job.data.triggeredAt})`
-  );
+  log.info({ triggeredAt: job.data.triggeredAt }, "Checking for expired tips");
 
   const now = new Date();
 
@@ -70,13 +71,11 @@ async function processCheckExpirations(
   });
 
   if (expiredTips.length === 0) {
-    console.log("[TipStatusWorker] No expired tips found");
+    log.info("No expired tips found");
     return { expiredCount: 0 };
   }
 
-  console.log(
-    `[TipStatusWorker] Found ${expiredTips.length} expired tips to process`
-  );
+  log.info({ count: expiredTips.length }, "Found expired tips to process");
 
   let expiredCount = 0;
 
@@ -111,15 +110,9 @@ async function processCheckExpirations(
 
       expiredCount++;
 
-      console.log(
-        `[TipStatusWorker] Expired tip ${tip.id}: ${tip.stock.symbol} ` +
-          `(return: ${returnPct.toFixed(2)}%)`
-      );
+      log.info({ tipId: tip.id, symbol: tip.stock.symbol, returnPct }, "Expired tip processed");
     } catch (error) {
-      console.error(
-        `[TipStatusWorker] Failed to expire tip ${tip.id}:`,
-        error instanceof Error ? error.message : String(error)
-      );
+      log.error({ err: error instanceof Error ? error : new Error(String(error)), tipId: tip.id }, "Failed to expire tip");
     }
   }
 
@@ -157,16 +150,11 @@ async function processCheckExpirations(
         },
       });
     } catch (error) {
-      console.error(
-        `[TipStatusWorker] Failed to update creator ${creatorId} counts:`,
-        error instanceof Error ? error.message : String(error)
-      );
+      log.error({ err: error instanceof Error ? error : new Error(String(error)), creatorId }, "Failed to update creator counts");
     }
   }
 
-  console.log(
-    `[TipStatusWorker] Processed ${expiredCount} expired tips across ${affectedCreatorIds.length} creators`
-  );
+  log.info({ expiredCount, affectedCreators: affectedCreatorIds.length }, "Processed expired tips");
 
   return { expiredCount };
 }
@@ -176,9 +164,7 @@ async function processCheckExpirations(
 async function processDailySnapshot(
   job: Job<DailySnapshotJobData>
 ): Promise<{ snapshotsCreated: number }> {
-  console.log(
-    `[TipStatusWorker:Snapshot] Creating daily snapshots (triggered: ${job.data.triggeredAt})`
-  );
+  log.info({ triggeredAt: job.data.triggeredAt }, "Creating daily snapshots");
 
   const today = new Date();
   // Normalize to date-only (strip time component)
@@ -225,16 +211,11 @@ async function processDailySnapshot(
 
       snapshotsCreated++;
     } catch (error) {
-      console.error(
-        `[TipStatusWorker:Snapshot] Failed to create snapshot for creator ${score.creatorId}:`,
-        error instanceof Error ? error.message : String(error)
-      );
+      log.error({ err: error instanceof Error ? error : new Error(String(error)), creatorId: score.creatorId }, "Failed to create snapshot for creator");
     }
   }
 
-  console.log(
-    `[TipStatusWorker:Snapshot] Created ${snapshotsCreated} daily snapshots`
-  );
+  log.info({ snapshotsCreated }, "Created daily snapshots");
 
   return { snapshotsCreated };
 }
@@ -256,14 +237,11 @@ export function createCheckExpirationsWorker(): Worker {
   );
 
   worker.on("completed", (job) => {
-    console.log(`[TipStatusWorker] Job ${job.id} completed`);
+    log.info({ jobId: job.id }, "Expiration check job completed");
   });
 
   worker.on("failed", (job, error) => {
-    console.error(
-      `[TipStatusWorker] Job ${job?.id} failed:`,
-      error.message
-    );
+    log.error({ err: error, jobId: job?.id }, "Expiration check job failed");
   });
 
   return worker;
@@ -284,14 +262,11 @@ export function createDailySnapshotWorker(): Worker {
   );
 
   worker.on("completed", (job) => {
-    console.log(`[TipStatusWorker:Snapshot] Job ${job.id} completed`);
+    log.info({ jobId: job.id }, "Daily snapshot job completed");
   });
 
   worker.on("failed", (job, error) => {
-    console.error(
-      `[TipStatusWorker:Snapshot] Job ${job?.id} failed:`,
-      error.message
-    );
+    log.error({ err: error, jobId: job?.id }, "Daily snapshot job failed");
   });
 
   return worker;

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
+import { auth } from "@/lib/auth";
 import { CreatorHeader } from "@/components/creator/creator-header";
 import { CreatorStats } from "@/components/creator/creator-stats";
 import { CreatorScoreChart } from "@/components/creator/creator-score-chart";
@@ -8,6 +9,8 @@ import { CreatorAccuracyChart } from "@/components/creator/creator-accuracy-char
 import { CreatorScoreBreakdown } from "@/components/creator/creator-score-breakdown";
 import { CreatorTipFeed } from "@/components/creator/creator-tip-feed";
 import { ShareButton } from "@/components/shared/share-button";
+import { FollowButton } from "@/components/creator/follow-button";
+import { ReviewSection } from "@/components/creator/review-section";
 import type { CreatorDetail, TipSummary } from "@/types";
 
 export const revalidate = 600; // 10 minutes
@@ -166,15 +169,28 @@ export default async function CreatorPage({
 
   if (!creator) notFound();
 
+  // Check if current user follows this creator
+  const session = await auth();
+  let isFollowing = false;
+  if (session?.user?.userId) {
+    const follow = await db.follow.findUnique({
+      where: { userId_creatorId: { userId: session.user.userId, creatorId: creator.id } },
+    });
+    isFollowing = !!follow;
+  }
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <CreatorHeader creator={creator} />
         </div>
-        <ShareButton
-          title={`${creator.displayName} — ${creator.score ? `RMT Score: ${creator.score.rmtScore.toFixed(1)}/100` : "Unrated"} | RateMyTip`}
-        />
+        <div className="flex items-center gap-2">
+          <FollowButton creatorId={creator.id} initialFollowing={isFollowing} />
+          <ShareButton
+            title={`${creator.displayName} — ${creator.score ? `RMT Score: ${creator.score.rmtScore.toFixed(1)}/100` : "Unrated"} | RateMyTip`}
+          />
+        </div>
       </div>
 
       <div className="mt-8">
@@ -223,6 +239,11 @@ export default async function CreatorPage({
           initialTips={creator.recentTips}
           creatorSlug={creator.slug}
         />
+      </div>
+
+      {/* Creator Reviews */}
+      <div className="mt-8">
+        <ReviewSection creatorId={creator.id} />
       </div>
 
       {/* JSON-LD Structured Data */}

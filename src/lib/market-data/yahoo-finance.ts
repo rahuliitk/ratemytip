@@ -4,6 +4,7 @@
 // Primary data source for current and historical stock prices.
 // Handles rate limiting and exchange suffix mapping for global markets.
 
+import { createLogger } from "@/lib/logger";
 import type {
   CurrentPrice,
   HistoricalPriceParams,
@@ -11,6 +12,8 @@ import type {
   YahooChartResponse,
   YahooQuoteResponse,
 } from "./types";
+
+const log = createLogger("market-data/yahoo");
 
 const YAHOO_QUOTE_URL = "https://query1.finance.yahoo.com/v7/finance/quote";
 const YAHOO_CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart";
@@ -84,26 +87,22 @@ export class YahooFinanceService {
       });
 
       if (!response.ok) {
-        console.error(
-          `[YahooFinance] Chart request failed: ${response.status} for ${yahooSymbol}`
-        );
+        log.error({ status: response.status, symbol: yahooSymbol }, "Yahoo Finance chart request failed");
         return null;
       }
 
       const data = (await response.json()) as YahooChartResponse;
 
       if (data.chart.error) {
-        console.warn(
-          `[YahooFinance] Chart API error for ${yahooSymbol}:`,
-          data.chart.error.description
+        log.warn(
+          { symbol: yahooSymbol, apiError: data.chart.error.description },
+          "Yahoo Finance chart API error"
         );
         return null;
       }
 
       if (!data.chart.result || data.chart.result.length === 0) {
-        console.warn(
-          `[YahooFinance] No chart data returned for ${yahooSymbol}`
-        );
+        log.warn({ symbol: yahooSymbol }, "Yahoo Finance no chart data returned");
         return null;
       }
 
@@ -130,9 +129,9 @@ export class YahooFinanceService {
         timestamp: new Date(meta.regularMarketTime * 1000),
       };
     } catch (error) {
-      console.error(
-        `[YahooFinance] Error fetching quote for ${yahooSymbol}:`,
-        error instanceof Error ? error.message : String(error)
+      log.error(
+        { err: error instanceof Error ? error : new Error(String(error)), symbol: yahooSymbol },
+        "Yahoo Finance error fetching quote"
       );
       return null;
     }
@@ -171,26 +170,22 @@ export class YahooFinanceService {
       });
 
       if (!response.ok) {
-        console.error(
-          `[YahooFinance] Chart request failed: ${response.status} for ${yahooSymbol}`
-        );
+        log.error({ status: response.status, symbol: yahooSymbol }, "Yahoo Finance historical chart request failed");
         return [];
       }
 
       const data = (await response.json()) as YahooChartResponse;
 
       if (data.chart.error) {
-        console.error(
-          `[YahooFinance] Chart API error for ${yahooSymbol}:`,
-          data.chart.error.description
+        log.error(
+          { symbol: yahooSymbol, apiError: data.chart.error.description },
+          "Yahoo Finance historical chart API error"
         );
         return [];
       }
 
       if (!data.chart.result || data.chart.result.length === 0) {
-        console.warn(
-          `[YahooFinance] No chart data returned for ${yahooSymbol}`
-        );
+        log.warn({ symbol: yahooSymbol }, "Yahoo Finance no historical chart data returned");
         return [];
       }
 
@@ -201,9 +196,9 @@ export class YahooFinanceService {
 
       return this.parseChartResponse(params.symbol, result);
     } catch (error) {
-      console.error(
-        `[YahooFinance] Error fetching historical prices for ${yahooSymbol}:`,
-        error instanceof Error ? error.message : String(error)
+      log.error(
+        { err: error instanceof Error ? error : new Error(String(error)), symbol: yahooSymbol },
+        "Yahoo Finance error fetching historical prices"
       );
       return [];
     }

@@ -4,7 +4,10 @@
 // Backup data source for BSE-listed stocks.
 // BSE has a more accessible API compared to NSE.
 
+import { createLogger } from "@/lib/logger";
 import type { CurrentPrice, PriceData } from "./types";
+
+const log = createLogger("market-data/bse");
 
 const BSE_API_URL = "https://api.bseindia.com/BseIndiaAPI/api";
 
@@ -46,7 +49,7 @@ export class BseService {
       });
 
       if (!response.ok) {
-        console.error(`[BSE] Quote request failed: ${response.status} for ${scripCode}`);
+        log.error({ status: response.status, scripCode }, "BSE quote request failed");
         return null;
       }
 
@@ -71,9 +74,9 @@ export class BseService {
         timestamp: new Date(header.UpdTime),
       };
     } catch (error) {
-      console.error(
-        `[BSE] Error fetching quote for ${scripCode}:`,
-        error instanceof Error ? error.message : String(error)
+      log.error(
+        { err: error instanceof Error ? error : new Error(String(error)), scripCode },
+        "BSE error fetching quote"
       );
       return null;
     }
@@ -124,7 +127,7 @@ export class BseService {
       });
 
       if (!response.ok) {
-        console.error(`[BSE] Historical request failed: ${response.status} for ${scripCode}`);
+        log.error({ status: response.status, scripCode }, "BSE historical request failed");
         return [];
       }
 
@@ -146,9 +149,9 @@ export class BseService {
         )
         .sort((a, b) => a.date.getTime() - b.date.getTime());
     } catch (error) {
-      console.error(
-        `[BSE] Error fetching historical for ${scripCode}:`,
-        error instanceof Error ? error.message : String(error)
+      log.error(
+        { err: error instanceof Error ? error : new Error(String(error)), scripCode },
+        "BSE error fetching historical prices"
       );
       return [];
     }

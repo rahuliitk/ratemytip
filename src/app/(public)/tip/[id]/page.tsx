@@ -2,10 +2,14 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
+import { auth } from "@/lib/auth";
 import { TipStatusBadge } from "@/components/tip/tip-status-badge";
 import { TipPriceChart } from "@/components/tip/tip-price-chart";
 import { ScoreBadge } from "@/components/shared/score-badge";
 import { ShareButton } from "@/components/shared/share-button";
+import { StarRating } from "@/components/tip/star-rating";
+import { BookmarkButton } from "@/components/tip/bookmark-button";
+import { CommentSection } from "@/components/tip/comment-section";
 import { formatPrice, formatPercent } from "@/lib/utils/format";
 import { subDays } from "date-fns";
 
@@ -86,10 +90,24 @@ export default async function TipPage({
 
   const isBuy = tip.direction === "BUY";
 
+  // Check if current user saved this tip
+  const session = await auth();
+  let isSaved = false;
+  if (session?.user?.userId) {
+    const saved = await db.savedTip.findUnique({
+      where: { tipId_userId: { tipId: tip.id, userId: session.user.userId } },
+    });
+    isSaved = !!saved;
+  }
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-4 flex justify-end">
-        <ShareButton title={`${tip.direction} ${tip.stock.symbol} by ${tip.creator.displayName} | RateMyTip`} />
+      <div className="mb-4 flex items-center justify-between">
+        <StarRating tipId={tip.id} avgRating={tip.avgRating} ratingCount={tip.ratingCount} />
+        <div className="flex items-center gap-1">
+          <BookmarkButton tipId={tip.id} initialSaved={isSaved} />
+          <ShareButton title={`${tip.direction} ${tip.stock.symbol} by ${tip.creator.displayName} | RateMyTip`} />
+        </div>
       </div>
       <div className="rounded-lg border border-gray-200 bg-surface p-6">
         {/* Tip header */}
@@ -307,6 +325,11 @@ export default async function TipPage({
             <ScoreBadge score={tip.creator.currentScore.rmtScore} />
           )}
         </Link>
+      </div>
+
+      {/* Comments */}
+      <div className="mt-6">
+        <CommentSection tipId={tip.id} />
       </div>
 
       {/* Amendment history */}

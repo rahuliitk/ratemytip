@@ -6,7 +6,10 @@
 
 import { Worker, type Job } from "bullmq";
 
+import { createLogger } from "@/lib/logger";
 import { db } from "@/lib/db";
+
+const log = createLogger("worker/scrape");
 import { TwitterScraper } from "@/lib/scraper/twitter";
 import { YouTubeScraper } from "@/lib/scraper/youtube";
 import {
@@ -50,7 +53,7 @@ async function processTwitterScrapeJob(
 ): Promise<{ postsStored: number; tipsParsed: number }> {
   // Handle full-scrape dispatch: fan out to individual creator jobs
   if (job.data.type === "full-scrape") {
-    console.log("[ScrapeWorker:Twitter] Full scrape triggered, dispatching individual jobs...");
+    log.info("Full Twitter scrape triggered, dispatching individual jobs");
     const platforms = await db.creatorPlatform.findMany({
       where: { platform: "TWITTER", isActive: true },
       select: { id: true },
@@ -65,20 +68,18 @@ async function processTwitterScrapeJob(
       );
     }
 
-    console.log(`[ScrapeWorker:Twitter] Dispatched ${platforms.length} individual scrape jobs`);
+    log.info({ count: platforms.length }, "Dispatched individual Twitter scrape jobs");
     return { postsStored: 0, tipsParsed: platforms.length };
   }
 
   const { creatorPlatformId, sinceId } = job.data;
 
   if (!creatorPlatformId) {
-    console.warn("[ScrapeWorker:Twitter] No creatorPlatformId provided, skipping");
+    log.warn("No creatorPlatformId provided for Twitter scrape, skipping");
     return { postsStored: 0, tipsParsed: 0 };
   }
 
-  console.log(
-    `[ScrapeWorker:Twitter] Processing job for platform ${creatorPlatformId}`
-  );
+  log.info({ creatorPlatformId }, "Processing Twitter scrape job");
 
   // Look up the creator platform record
   const platform = await db.creatorPlatform.findUnique({
@@ -87,9 +88,7 @@ async function processTwitterScrapeJob(
   });
 
   if (!platform || !platform.isActive) {
-    console.warn(
-      `[ScrapeWorker:Twitter] Platform ${creatorPlatformId} not found or inactive`
-    );
+    log.warn({ creatorPlatformId }, "Twitter platform not found or inactive");
     return { postsStored: 0, tipsParsed: 0 };
   }
 
@@ -108,9 +107,7 @@ async function processTwitterScrapeJob(
     effectiveSinceId
   );
 
-  console.log(
-    `[ScrapeWorker:Twitter] Found ${posts.length} new posts for ${platform.platformHandle}`
-  );
+  log.info({ postsFound: posts.length, handle: platform.platformHandle }, "Found new Twitter posts");
 
   let postsStored = 0;
   let tipsParsed = 0;
@@ -152,10 +149,7 @@ async function processTwitterScrapeJob(
         tipsParsed++;
       }
     } catch (error) {
-      console.error(
-        `[ScrapeWorker:Twitter] Failed to store post ${post.platformPostId}:`,
-        error instanceof Error ? error.message : String(error)
-      );
+      log.error({ err: error instanceof Error ? error : new Error(String(error)), platformPostId: post.platformPostId }, "Failed to store Twitter post");
     }
   }
 
@@ -179,9 +173,7 @@ async function processTwitterScrapeJob(
     },
   });
 
-  console.log(
-    `[ScrapeWorker:Twitter] Completed: ${postsStored} stored, ${tipsParsed} enqueued for parsing`
-  );
+  log.info({ postsStored, tipsParsed }, "Twitter scrape completed");
 
   return { postsStored, tipsParsed };
 }
@@ -193,7 +185,7 @@ async function processYoutubeScrapeJob(
 ): Promise<{ postsStored: number; tipsParsed: number }> {
   // Handle full-scrape dispatch: fan out to individual creator jobs
   if (job.data.type === "full-scrape") {
-    console.log("[ScrapeWorker:YouTube] Full scrape triggered, dispatching individual jobs...");
+    log.info("Full YouTube scrape triggered, dispatching individual jobs");
     const platforms = await db.creatorPlatform.findMany({
       where: { platform: "YOUTUBE", isActive: true },
       select: { id: true },
@@ -208,20 +200,18 @@ async function processYoutubeScrapeJob(
       );
     }
 
-    console.log(`[ScrapeWorker:YouTube] Dispatched ${platforms.length} individual scrape jobs`);
+    log.info({ count: platforms.length }, "Dispatched individual YouTube scrape jobs");
     return { postsStored: 0, tipsParsed: platforms.length };
   }
 
   const { creatorPlatformId, publishedAfter } = job.data;
 
   if (!creatorPlatformId) {
-    console.warn("[ScrapeWorker:YouTube] No creatorPlatformId provided, skipping");
+    log.warn("No creatorPlatformId provided for YouTube scrape, skipping");
     return { postsStored: 0, tipsParsed: 0 };
   }
 
-  console.log(
-    `[ScrapeWorker:YouTube] Processing job for platform ${creatorPlatformId}`
-  );
+  log.info({ creatorPlatformId }, "Processing YouTube scrape job");
 
   const platform = await db.creatorPlatform.findUnique({
     where: { id: creatorPlatformId },
@@ -229,9 +219,7 @@ async function processYoutubeScrapeJob(
   });
 
   if (!platform || !platform.isActive) {
-    console.warn(
-      `[ScrapeWorker:YouTube] Platform ${creatorPlatformId} not found or inactive`
-    );
+    log.warn({ creatorPlatformId }, "YouTube platform not found or inactive");
     return { postsStored: 0, tipsParsed: 0 };
   }
 
@@ -249,9 +237,7 @@ async function processYoutubeScrapeJob(
     afterDate
   );
 
-  console.log(
-    `[ScrapeWorker:YouTube] Found ${posts.length} new posts for ${platform.platformHandle}`
-  );
+  log.info({ postsFound: posts.length, handle: platform.platformHandle }, "Found new YouTube posts");
 
   let postsStored = 0;
   let tipsParsed = 0;
@@ -291,10 +277,7 @@ async function processYoutubeScrapeJob(
         tipsParsed++;
       }
     } catch (error) {
-      console.error(
-        `[ScrapeWorker:YouTube] Failed to store post ${post.platformPostId}:`,
-        error instanceof Error ? error.message : String(error)
-      );
+      log.error({ err: error instanceof Error ? error : new Error(String(error)), platformPostId: post.platformPostId }, "Failed to store YouTube post");
     }
   }
 
@@ -316,9 +299,7 @@ async function processYoutubeScrapeJob(
     },
   });
 
-  console.log(
-    `[ScrapeWorker:YouTube] Completed: ${postsStored} stored, ${tipsParsed} enqueued for parsing`
-  );
+  log.info({ postsStored, tipsParsed }, "YouTube scrape completed");
 
   return { postsStored, tipsParsed };
 }
@@ -340,14 +321,11 @@ export function createTwitterScrapeWorker(): Worker {
   );
 
   worker.on("completed", (job) => {
-    console.log(`[ScrapeWorker:Twitter] Job ${job.id} completed`);
+    log.info({ jobId: job.id }, "Twitter scrape job completed");
   });
 
   worker.on("failed", (job, error) => {
-    console.error(
-      `[ScrapeWorker:Twitter] Job ${job?.id} failed:`,
-      error.message
-    );
+    log.error({ err: error, jobId: job?.id }, "Twitter scrape job failed");
   });
 
   return worker;
@@ -368,14 +346,11 @@ export function createYoutubeScrapeWorker(): Worker {
   );
 
   worker.on("completed", (job) => {
-    console.log(`[ScrapeWorker:YouTube] Job ${job.id} completed`);
+    log.info({ jobId: job.id }, "YouTube scrape job completed");
   });
 
   worker.on("failed", (job, error) => {
-    console.error(
-      `[ScrapeWorker:YouTube] Job ${job?.id} failed:`,
-      error.message
-    );
+    log.error({ err: error, jobId: job?.id }, "YouTube scrape job failed");
   });
 
   return worker;

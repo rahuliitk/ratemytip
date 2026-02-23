@@ -8,7 +8,10 @@
 
 import { Worker, type Job } from "bullmq";
 
+import { createLogger } from "@/lib/logger";
 import { db } from "@/lib/db";
+
+const log = createLogger("worker/finnhub");
 import { FinnhubScraper } from "@/lib/scraper/finnhub";
 import {
   parseFinnhubUpgradeDowngrade,
@@ -132,18 +135,16 @@ async function processFinnhubScrapeJob(
   tipsCreated: number;
   errors: number;
 }> {
-  console.log(
-    `[FinnhubWorker] Starting scrape job (triggered: ${job.data.triggeredAt})`
-  );
+  log.info({ triggeredAt: job.data.triggeredAt }, "Starting Finnhub scrape job");
 
   if (process.env.ENABLE_FINNHUB_SCRAPER !== "true") {
-    console.log("[FinnhubWorker] Finnhub scraper is disabled via feature flag");
+    log.info("Finnhub scraper is disabled via feature flag");
     return { consensusStored: 0, tipsCreated: 0, errors: 0 };
   }
 
   const apiKey = process.env.FINNHUB_API_KEY;
   if (!apiKey) {
-    console.error("[FinnhubWorker] FINNHUB_API_KEY not set");
+    log.error("FINNHUB_API_KEY not set");
     return { consensusStored: 0, tipsCreated: 0, errors: 0 };
   }
 
@@ -165,9 +166,7 @@ async function processFinnhubScrapeJob(
       select: { id: true, symbol: true, lastPrice: true },
     });
 
-    console.log(
-      `[FinnhubWorker] Processing ${stocks.length} US stocks in batches of ${FINNHUB.SYMBOLS_PER_BATCH}`
-    );
+    log.info({ stockCount: stocks.length, batchSize: FINNHUB.SYMBOLS_PER_BATCH }, "Processing US stocks in batches");
 
     // Create ScrapeJob record
     const scrapeJob = await db.scrapeJob.create({
@@ -185,9 +184,7 @@ async function processFinnhubScrapeJob(
       const batch = stocks.slice(i, i + FINNHUB.SYMBOLS_PER_BATCH);
       const symbols = batch.map((s) => s.symbol);
 
-      console.log(
-        `[FinnhubWorker] Processing batch ${Math.floor(i / FINNHUB.SYMBOLS_PER_BATCH) + 1}: ${symbols.join(", ")}`
-      );
+      log.info({ batch: Math.floor(i / FINNHUB.SYMBOLS_PER_BATCH) + 1, symbols }, "Processing Finnhub batch");
 
       const results = await scraper.processSymbolBatch(symbols);
 
@@ -381,18 +378,12 @@ async function processFinnhubScrapeJob(
                 continue;
               }
               errors++;
-              console.error(
-                `[FinnhubWorker] Error processing upgrade for ${stock.symbol}:`,
-                error instanceof Error ? error.message : String(error)
-              );
+              log.error({ err: error instanceof Error ? error : new Error(String(error)), symbol: stock.symbol }, "Error processing Finnhub upgrade");
             }
           }
         } catch (error) {
           errors++;
-          console.error(
-            `[FinnhubWorker] Error processing stock ${stock.symbol}:`,
-            error instanceof Error ? error.message : String(error)
-          );
+          log.error({ err: error instanceof Error ? error : new Error(String(error)), symbol: stock.symbol }, "Error processing Finnhub stock");
         }
       }
 
@@ -414,14 +405,9 @@ async function processFinnhubScrapeJob(
       },
     });
 
-    console.log(
-      `[FinnhubWorker] Scrape complete: ${consensusStored} consensus stored, ${tipsCreated} tips created, ${errors} errors`
-    );
+    log.info({ consensusStored, tipsCreated, errors }, "Finnhub scrape complete");
   } catch (error) {
-    console.error(
-      "[FinnhubWorker] Fatal scrape error:",
-      error instanceof Error ? error.message : String(error)
-    );
+    log.error({ err: error instanceof Error ? error : new Error(String(error)) }, "Fatal Finnhub scrape error");
     throw error;
   }
 
@@ -442,14 +428,11 @@ export function createFinnhubScrapeWorker(): Worker {
   );
 
   worker.on("completed", (job) => {
-    console.log(`[FinnhubWorker] Job ${job.id} completed`);
+    log.info({ jobId: job.id }, "Finnhub scrape job completed");
   });
 
   worker.on("failed", (job, error) => {
-    console.error(
-      `[FinnhubWorker] Job ${job?.id} failed:`,
-      error.message
-    );
+    log.error({ err: error, jobId: job?.id }, "Finnhub scrape job failed");
   });
 
   return worker;

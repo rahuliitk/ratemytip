@@ -4,7 +4,10 @@
 // Backup data source for Indian equities when Yahoo Finance is unavailable.
 // NSE's unofficial API requires cookie-based session management.
 
+import { createLogger } from "@/lib/logger";
 import type { CurrentPrice, PriceData } from "./types";
+
+const log = createLogger("market-data/nse");
 
 const NSE_BASE_URL = "https://www.nseindia.com";
 const NSE_API_URL = "https://www.nseindia.com/api";
@@ -49,9 +52,9 @@ export class NseService {
         this.cookieExpiry = now + 4 * 60 * 1000; // 4 minutes
       }
     } catch (error) {
-      console.error(
-        "[NSE] Failed to refresh cookie:",
-        error instanceof Error ? error.message : String(error)
+      log.error(
+        { err: error instanceof Error ? error : new Error(String(error)) },
+        "NSE failed to refresh cookie"
       );
     }
   }
@@ -64,7 +67,7 @@ export class NseService {
     await this.waitForRateLimit();
 
     if (!this.cookie) {
-      console.warn("[NSE] No session cookie available");
+      log.warn("NSE no session cookie available");
       return null;
     }
 
@@ -84,15 +87,15 @@ export class NseService {
           this.cookie = null;
           this.cookieExpiry = 0;
         }
-        console.error(`[NSE] API request failed: ${response.status} ${endpoint}`);
+        log.error({ status: response.status, endpoint }, "NSE API request failed");
         return null;
       }
 
       return (await response.json()) as T;
     } catch (error) {
-      console.error(
-        `[NSE] Error fetching ${endpoint}:`,
-        error instanceof Error ? error.message : String(error)
+      log.error(
+        { err: error instanceof Error ? error : new Error(String(error)), endpoint },
+        "NSE fetch error"
       );
       return null;
     }

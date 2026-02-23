@@ -6,7 +6,10 @@
 
 import { Worker, type Job } from "bullmq";
 
+import { createLogger } from "@/lib/logger";
 import { db } from "@/lib/db";
+
+const log = createLogger("worker/yahoo-analyst");
 import { YahooAnalystScraper } from "@/lib/scraper/yahoo-analyst";
 import {
   parseYahooUpgradeDowngrade,
@@ -124,14 +127,10 @@ async function processYahooAnalystScrapeJob(
   tipsCreated: number;
   errors: number;
 }> {
-  console.log(
-    `[YahooAnalystWorker] Starting scrape job (triggered: ${job.data.triggeredAt})`
-  );
+  log.info({ triggeredAt: job.data.triggeredAt }, "Starting Yahoo Analyst scrape job");
 
   if (process.env.ENABLE_YAHOO_ANALYST_SCRAPER !== "true") {
-    console.log(
-      "[YahooAnalystWorker] Yahoo Analyst scraper is disabled via feature flag"
-    );
+    log.info("Yahoo Analyst scraper is disabled via feature flag");
     return { consensusStored: 0, tipsCreated: 0, errors: 0 };
   }
 
@@ -149,9 +148,7 @@ async function processYahooAnalystScrapeJob(
       select: { id: true, symbol: true, exchange: true, lastPrice: true },
     });
 
-    console.log(
-      `[YahooAnalystWorker] Processing ${stocks.length} stocks`
-    );
+    log.info({ stockCount: stocks.length }, "Processing stocks for Yahoo Analyst data");
 
     const scrapeJob = await db.scrapeJob.create({
       data: {
@@ -351,18 +348,12 @@ async function processYahooAnalystScrapeJob(
                 continue;
               }
               errors++;
-              console.error(
-                `[YahooAnalystWorker] Error processing upgrade for ${stock.symbol}:`,
-                error instanceof Error ? error.message : String(error)
-              );
+              log.error({ err: error instanceof Error ? error : new Error(String(error)), symbol: stock.symbol }, "Error processing Yahoo Analyst upgrade");
             }
           }
         } catch (error) {
           errors++;
-          console.error(
-            `[YahooAnalystWorker] Error processing ${stock.symbol}:`,
-            error instanceof Error ? error.message : String(error)
-          );
+          log.error({ err: error instanceof Error ? error : new Error(String(error)), symbol: stock.symbol }, "Error processing Yahoo Analyst stock");
         }
       }
 
@@ -382,14 +373,9 @@ async function processYahooAnalystScrapeJob(
       },
     });
 
-    console.log(
-      `[YahooAnalystWorker] Scrape complete: ${consensusStored} consensus stored, ${tipsCreated} tips created, ${errors} errors`
-    );
+    log.info({ consensusStored, tipsCreated, errors }, "Yahoo Analyst scrape complete");
   } catch (error) {
-    console.error(
-      "[YahooAnalystWorker] Fatal scrape error:",
-      error instanceof Error ? error.message : String(error)
-    );
+    log.error({ err: error instanceof Error ? error : new Error(String(error)) }, "Fatal Yahoo Analyst scrape error");
     throw error;
   }
 
@@ -410,14 +396,11 @@ export function createYahooAnalystScrapeWorker(): Worker {
   );
 
   worker.on("completed", (job) => {
-    console.log(`[YahooAnalystWorker] Job ${job.id} completed`);
+    log.info({ jobId: job.id }, "Yahoo Analyst scrape job completed");
   });
 
   worker.on("failed", (job, error) => {
-    console.error(
-      `[YahooAnalystWorker] Job ${job?.id} failed:`,
-      error.message
-    );
+    log.error({ err: error, jobId: job?.id }, "Yahoo Analyst scrape job failed");
   });
 
   return worker;

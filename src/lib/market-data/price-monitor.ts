@@ -5,8 +5,11 @@
 // updates tip statuses in the database, and calculates returns
 // for resolved tips.
 
+import { createLogger } from "@/lib/logger";
 import { db } from "@/lib/db";
 import { TIP_STATUS } from "@/lib/constants";
+
+const log = createLogger("market-data/price-monitor");
 
 import { YahooFinanceService } from "./yahoo-finance";
 import type { CurrentPrice, TipStatusUpdate } from "./types";
@@ -94,12 +97,13 @@ export class PriceMonitor {
     });
 
     if (activeTips.length === 0) {
-      console.log("[PriceMonitor] No active tips to check");
+      log.info("No active tips to check");
       return [];
     }
 
-    console.log(
-      `[PriceMonitor] Checking ${activeTips.length} active tips across ${this.countUniqueStocks(activeTips)} stocks`
+    log.info(
+      { tipCount: activeTips.length, stockCount: this.countUniqueStocks(activeTips) },
+      "Checking active tips against current prices"
     );
 
     // Group tips by stock symbol to deduplicate price fetches
@@ -114,8 +118,9 @@ export class PriceMonitor {
     for (const tip of activeTips) {
       const currentPrice = priceMap.get(tip.stock.symbol);
       if (!currentPrice) {
-        console.warn(
-          `[PriceMonitor] No price available for ${tip.stock.symbol}, skipping tip ${tip.id}`
+        log.warn(
+          { symbol: tip.stock.symbol, tipId: tip.id },
+          "No price available, skipping tip"
         );
         continue;
       }
@@ -129,9 +134,7 @@ export class PriceMonitor {
     // Update the last price on each stock record
     await this.updateStockPrices(priceMap);
 
-    console.log(
-      `[PriceMonitor] Applied ${updates.length} status updates`
-    );
+    log.info({ updateCount: updates.length }, "Applied tip status updates");
     return updates;
   }
 
@@ -275,9 +278,9 @@ export class PriceMonitor {
       data: updateData,
     });
 
-    console.log(
-      `[PriceMonitor] Tip ${tip.id}: ${tip.status} -> ${newStatus} ` +
-        `(${tip.stock.symbol} @ ${closedPrice}, return: ${returnPct?.toFixed(2)}%)`
+    log.info(
+      { tipId: tip.id, oldStatus: tip.status, newStatus, symbol: tip.stock.symbol, closedPrice, returnPct },
+      "Tip resolved"
     );
 
     return {
@@ -316,9 +319,9 @@ export class PriceMonitor {
       data: updateData,
     });
 
-    console.log(
-      `[PriceMonitor] Tip ${tip.id}: ${tip.status} -> ${newStatus} ` +
-        `(${tip.stock.symbol} @ ${price})`
+    log.info(
+      { tipId: tip.id, oldStatus: tip.status, newStatus, symbol: tip.stock.symbol, price },
+      "Tip status updated to intermediate target"
     );
 
     return {
@@ -429,9 +432,9 @@ export class PriceMonitor {
           },
         });
       } catch (error) {
-        console.error(
-          `[PriceMonitor] Failed to update price for ${symbol}:`,
-          error instanceof Error ? error.message : String(error)
+        log.error(
+          { err: error instanceof Error ? error : new Error(String(error)), symbol },
+          "Failed to update stock price"
         );
       }
     }
