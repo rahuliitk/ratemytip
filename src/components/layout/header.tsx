@@ -2,10 +2,23 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Menu, X, Search, BarChart3, Github } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
+import { Menu, X, Search, BarChart3, Github, User, LogOut, Settings, Bookmark, LayoutDashboard } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 export function Header(): React.ReactElement {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { data: session, status } = useSession();
+
+  const isUser = session?.user?.userType === "user";
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200 bg-surface">
@@ -19,7 +32,7 @@ export function Header(): React.ReactElement {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden items-center gap-8 md:flex">
+        <nav className="hidden items-center gap-6 md:flex">
           <Link
             href="/leaderboard"
             className="text-sm font-medium text-muted transition-colors hover:text-primary"
@@ -42,6 +55,64 @@ export function Header(): React.ReactElement {
           >
             <Github className="h-5 w-5" />
           </a>
+
+          {/* Auth section */}
+          {status === "loading" ? (
+            <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200" />
+          ) : isUser ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/10 text-sm font-bold text-accent transition-colors hover:bg-accent/20"
+                  aria-label="User menu"
+                >
+                  {session.user.name?.charAt(0).toUpperCase() ?? "U"}
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  <p className="text-sm font-medium">{session.user.name}</p>
+                  <p className="text-xs text-muted">@{session.user.username}</p>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard" className="cursor-pointer">
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    Dashboard
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/saved" className="cursor-pointer">
+                    <Bookmark className="mr-2 h-4 w-4" />
+                    Saved Tips
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/settings" className="cursor-pointer">
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="cursor-pointer text-danger"
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/login">Sign in</Link>
+              </Button>
+              <Button size="sm" asChild>
+                <Link href="/register">Sign up</Link>
+              </Button>
+            </div>
+          )}
         </nav>
 
         {/* Mobile menu button */}
@@ -87,6 +158,62 @@ export function Header(): React.ReactElement {
               <Github className="h-4 w-4" />
               GitHub
             </a>
+            {/* Mobile auth links */}
+            {isUser ? (
+              <>
+                <Link
+                  href="/dashboard"
+                  className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-bg hover:text-primary"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <LayoutDashboard className="h-4 w-4" />
+                  Dashboard
+                </Link>
+                <Link
+                  href="/saved"
+                  className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-bg hover:text-primary"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Bookmark className="h-4 w-4" />
+                  Saved Tips
+                </Link>
+                <Link
+                  href="/settings"
+                  className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-bg hover:text-primary"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Settings className="h-4 w-4" />
+                  Settings
+                </Link>
+                <button
+                  className="flex items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium text-danger hover:bg-bg"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    signOut({ callbackUrl: "/" });
+                  }}
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sign out
+                </button>
+              </>
+            ) : status !== "loading" ? (
+              <div className="flex gap-2 px-3 pt-2">
+                <Link
+                  href="/login"
+                  className="flex-1 rounded-md border border-gray-200 px-3 py-2 text-center text-sm font-medium text-muted hover:bg-bg"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Sign in
+                </Link>
+                <Link
+                  href="/register"
+                  className="flex-1 rounded-md bg-primary px-3 py-2 text-center text-sm font-medium text-white hover:bg-primary/90"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Sign up
+                </Link>
+              </div>
+            ) : null}
           </nav>
         </div>
       )}

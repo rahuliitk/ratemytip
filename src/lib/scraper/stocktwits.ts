@@ -8,8 +8,11 @@
 //
 // API: GET https://api.stocktwits.com/api/2/streams/symbol/{symbol}.json
 
+import { createLogger } from "@/lib/logger";
 import { RateLimiter } from "./rate-limiter";
 import { STOCKTWITS } from "@/lib/constants";
+
+const log = createLogger("scraper/stocktwits");
 
 // ──── StockTwits API response types ────
 
@@ -102,23 +105,22 @@ export class StockTwitsScraper {
       });
 
       if (response.status === 429) {
-        console.warn("[StockTwits] Rate limited — waiting 60s...");
+        log.warn({ symbol }, "StockTwits rate limited — waiting 60s");
         await new Promise((resolve) => setTimeout(resolve, 60_000));
         return [];
       }
 
       if (!response.ok) {
-        console.warn(
-          `[StockTwits] HTTP ${response.status} for ${symbol}`
-        );
+        log.warn({ status: response.status, symbol }, "StockTwits HTTP error");
         return [];
       }
 
       const data = (await response.json()) as StockTwitsStreamResponse;
 
       if (data.errors && data.errors.length > 0) {
-        console.warn(
-          `[StockTwits] API error for ${symbol}: ${data.errors[0]?.message}`
+        log.warn(
+          { symbol, apiError: data.errors[0]?.message },
+          "StockTwits API error"
         );
         return [];
       }
@@ -138,9 +140,9 @@ export class StockTwitsScraper {
         symbols: msg.symbols?.map((s) => s.symbol) ?? [],
       }));
     } catch (error) {
-      console.error(
-        `[StockTwits] Error fetching ${symbol}:`,
-        error instanceof Error ? error.message : String(error)
+      log.error(
+        { err: error instanceof Error ? error : new Error(String(error)), symbol },
+        "StockTwits fetch error"
       );
       return [];
     }

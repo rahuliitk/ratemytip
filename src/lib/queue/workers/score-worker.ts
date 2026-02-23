@@ -10,7 +10,10 @@
 
 import { Worker, type Job } from "bullmq";
 
+import { createLogger } from "@/lib/logger";
 import { db } from "@/lib/db";
+
+const log = createLogger("worker/score");
 import {
   SCORING,
   COMPLETED_TIP_STATUSES,
@@ -256,7 +259,7 @@ function calculateConfidenceInterval(
 // ──── Core: Recalculate score for a single creator ────
 
 async function recalculateCreatorScore(creatorId: string): Promise<void> {
-  console.log(`[ScoreWorker] Recalculating score for creator ${creatorId}`);
+  log.info({ creatorId }, "Recalculating score for creator");
 
   // Fetch all completed tips for this creator
   const rawTips = await db.tip.findMany({
@@ -317,9 +320,7 @@ async function recalculateCreatorScore(creatorId: string): Promise<void> {
         completedTips: totalScoredTips,
       },
     });
-    console.log(
-      `[ScoreWorker] Creator ${creatorId}: ${totalScoredTips} tips (below minimum), tier: ${tier}`
-    );
+    log.info({ creatorId, totalScoredTips, tier }, "Creator below minimum tip threshold");
     return;
   }
 
@@ -457,12 +458,16 @@ async function recalculateCreatorScore(creatorId: string): Promise<void> {
     },
   });
 
-  console.log(
-    `[ScoreWorker] Creator ${creatorId}: RMT Score = ${clampedRmtScore.toFixed(1)} ` +
-      `(accuracy: ${accuracyResult.accuracyScore.toFixed(1)}, risk: ${riskResult.riskAdjustedScore.toFixed(1)}, ` +
-      `consistency: ${consistencyResult.consistencyScore.toFixed(1)}, volume: ${volumeFactorScore.toFixed(1)}) ` +
-      `tier: ${tier}, tips: ${totalScoredTips}`
-  );
+  log.info({
+    creatorId,
+    rmtScore: clampedRmtScore,
+    accuracyScore: accuracyResult.accuracyScore,
+    riskAdjustedScore: riskResult.riskAdjustedScore,
+    consistencyScore: consistencyResult.consistencyScore,
+    volumeFactorScore,
+    tier,
+    totalScoredTips,
+  }, "Creator score recalculated");
 }
 
 // ──── Main job processor ────
@@ -479,7 +484,7 @@ async function processScoreJob(
   }
 
   // Full recalculation for all active creators
-  console.log("[ScoreWorker] Starting full score recalculation for all creators");
+  log.info("Starting full score recalculation for all creators");
 
   const creators = await db.creator.findMany({
     where: { isActive: true },
@@ -497,22 +502,15 @@ async function processScoreJob(
           await recalculateCreatorScore(creator.id);
           processed++;
         } catch (error) {
-          console.error(
-            `[ScoreWorker] Failed to recalculate score for creator ${creator.id}:`,
-            error instanceof Error ? error.message : String(error)
-          );
+          log.error({ err: error instanceof Error ? error : new Error(String(error)), creatorId: creator.id }, "Failed to recalculate score for creator");
         }
       })
     );
 
-    console.log(
-      `[ScoreWorker] Progress: ${processed}/${creators.length} creators processed`
-    );
+    log.info({ processed, total: creators.length }, "Score recalculation progress");
   }
 
-  console.log(
-    `[ScoreWorker] Full recalculation complete: ${processed}/${creators.length} creators`
-  );
+  log.info({ processed, total: creators.length }, "Full score recalculation complete");
 
   return { creatorsProcessed: processed };
 }
@@ -534,14 +532,11 @@ export function createScoreWorker(): Worker {
   );
 
   worker.on("completed", (job) => {
-    console.log(`[ScoreWorker] Job ${job.id} completed`);
+    log.info({ jobId: job.id }, "Score job completed");
   });
 
   worker.on("failed", (job, error) => {
-    console.error(
-      `[ScoreWorker] Job ${job?.id} failed:`,
-      error.message
-    );
+    log.error({ err: error, jobId: job?.id }, "Score job failed");
   });
 
   return worker;

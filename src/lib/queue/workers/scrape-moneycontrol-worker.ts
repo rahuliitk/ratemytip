@@ -8,7 +8,10 @@
 
 import { Worker, type Job } from "bullmq";
 
+import { createLogger } from "@/lib/logger";
 import { db } from "@/lib/db";
+
+const log = createLogger("worker/moneycontrol");
 import { MoneyControlScraper } from "@/lib/scraper/moneycontrol";
 import {
   parseMoneyControlRecommendation,
@@ -107,13 +110,11 @@ async function findOrCreateBrokerage(
 async function processMoneyControlScrapeJob(
   job: Job<ScrapeMoneyControlJobData>
 ): Promise<{ postsStored: number; tipsCreated: number; errors: number }> {
-  console.log(
-    `[MoneyControlWorker] Starting scrape job (triggered: ${job.data.triggeredAt})`
-  );
+  log.info({ triggeredAt: job.data.triggeredAt }, "Starting MoneyControl scrape job");
 
   // Check feature flag
   if (process.env.ENABLE_MONEYCONTROL_SCRAPER !== "true") {
-    console.log("[MoneyControlWorker] MoneyControl scraper is disabled via feature flag");
+    log.info("MoneyControl scraper is disabled via feature flag");
     return { postsStored: 0, tipsCreated: 0, errors: 0 };
   }
 
@@ -127,9 +128,7 @@ async function processMoneyControlScrapeJob(
   try {
     const { recommendations } = await scraper.scrapeStockIdeas();
 
-    console.log(
-      `[MoneyControlWorker] Found ${recommendations.length} recommendations to process`
-    );
+    log.info({ count: recommendations.length }, "Found MoneyControl recommendations to process");
 
     // Create ScrapeJob record
     const scrapeJob = await db.scrapeJob.create({
@@ -216,9 +215,7 @@ async function processMoneyControlScrapeJob(
         });
 
         if (!stock) {
-          console.warn(
-            `[MoneyControlWorker] Stock not found: ${rec.stockName} (normalized: ${parsedTip.stockSymbol})`
-          );
+          log.warn({ stockName: rec.stockName, normalizedSymbol: parsedTip.stockSymbol }, "Stock not found in database");
           continue;
         }
 
@@ -286,10 +283,7 @@ async function processMoneyControlScrapeJob(
         });
       } catch (error) {
         errors++;
-        console.error(
-          "[MoneyControlWorker] Error processing recommendation:",
-          error instanceof Error ? error.message : String(error)
-        );
+        log.error({ err: error instanceof Error ? error : new Error(String(error)) }, "Error processing MoneyControl recommendation");
       }
     }
 
@@ -304,14 +298,9 @@ async function processMoneyControlScrapeJob(
       },
     });
 
-    console.log(
-      `[MoneyControlWorker] Scrape complete: ${postsStored} posts stored, ${tipsCreated} tips created, ${errors} errors`
-    );
+    log.info({ postsStored, tipsCreated, errors }, "MoneyControl scrape complete");
   } catch (error) {
-    console.error(
-      "[MoneyControlWorker] Fatal scrape error:",
-      error instanceof Error ? error.message : String(error)
-    );
+    log.error({ err: error instanceof Error ? error : new Error(String(error)) }, "Fatal MoneyControl scrape error");
     throw error;
   }
 
@@ -334,14 +323,11 @@ export function createMoneyControlScrapeWorker(): Worker {
   );
 
   worker.on("completed", (job) => {
-    console.log(`[MoneyControlWorker] Job ${job.id} completed`);
+    log.info({ jobId: job.id }, "MoneyControl scrape job completed");
   });
 
   worker.on("failed", (job, error) => {
-    console.error(
-      `[MoneyControlWorker] Job ${job?.id} failed:`,
-      error.message
-    );
+    log.error({ err: error, jobId: job?.id }, "MoneyControl scrape job failed");
   });
 
   return worker;

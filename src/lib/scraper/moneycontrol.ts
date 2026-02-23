@@ -7,8 +7,11 @@
 // Uses cheerio for HTML parsing. Runs daily at 8 AM IST.
 
 import * as cheerio from "cheerio";
+import { createLogger } from "@/lib/logger";
 import { RateLimiter } from "./rate-limiter";
 import type { ScrapedPost } from "./types";
+
+const log = createLogger("scraper/moneycontrol");
 
 // ──── Types ────
 
@@ -57,7 +60,7 @@ export class MoneyControlScraper {
     recommendations: MoneyControlRecommendation[];
     posts: ScrapedPost[];
   }> {
-    console.log("[MoneyControl] Starting stock ideas scrape...");
+    log.info("Starting MoneyControl stock ideas scrape");
 
     const allRecommendations: MoneyControlRecommendation[] = [];
     const allPosts: ScrapedPost[] = [];
@@ -72,19 +75,19 @@ export class MoneyControlScraper {
       const html = await this.fetchWithRetry(url);
 
       if (!html) {
-        console.warn(`[MoneyControl] Empty response for page ${page}, stopping`);
+        log.warn({ page }, "MoneyControl empty response, stopping pagination");
         break;
       }
 
       const recs = this.parseStockIdeasHtml(html, url);
 
       if (recs.length === 0) {
-        console.log(`[MoneyControl] No recommendations found on page ${page}, stopping pagination`);
+        log.info({ page }, "No MoneyControl recommendations found, stopping pagination");
         break;
       }
 
       allRecommendations.push(...recs);
-      console.log(`[MoneyControl] Page ${page}: found ${recs.length} recommendations`);
+      log.info({ page, count: recs.length }, "MoneyControl page scraped");
 
       // Convert to ScrapedPost format
       for (const rec of recs) {
@@ -97,7 +100,7 @@ export class MoneyControlScraper {
       }
     }
 
-    console.log(`[MoneyControl] Scrape complete: ${allRecommendations.length} total recommendations`);
+    log.info({ totalRecommendations: allRecommendations.length }, "MoneyControl scrape complete");
 
     return { recommendations: allRecommendations, posts: allPosts };
   }
@@ -121,8 +124,10 @@ export class MoneyControlScraper {
     }
 
     if (rows.length === 0) {
-      console.warn("[MoneyControl] No data rows found. HTML structure may have changed.");
-      console.warn("[MoneyControl] Page title:", $("title").text().trim());
+      log.warn(
+        { pageTitle: $("title").text().trim() },
+        "MoneyControl no data rows found — HTML structure may have changed"
+      );
       return [];
     }
 
@@ -287,14 +292,15 @@ export class MoneyControlScraper {
         });
 
         if (!response.ok) {
-          console.warn(
-            `[MoneyControl] HTTP ${response.status} for ${url} (attempt ${attempt}/${maxRetries})`
+          log.warn(
+            { status: response.status, url, attempt, maxRetries },
+            "MoneyControl HTTP error"
           );
 
           if (response.status === 429) {
             // Rate limited — wait longer
             const waitMs = 10_000 * attempt;
-            console.log(`[MoneyControl] Rate limited, waiting ${waitMs}ms...`);
+            log.info({ waitMs }, "MoneyControl rate limited, backing off");
             await new Promise((resolve) => setTimeout(resolve, waitMs));
             continue;
           }
@@ -309,9 +315,9 @@ export class MoneyControlScraper {
 
         return await response.text();
       } catch (error) {
-        console.error(
-          `[MoneyControl] Fetch error (attempt ${attempt}/${maxRetries}):`,
-          error instanceof Error ? error.message : String(error)
+        log.error(
+          { err: error instanceof Error ? error : new Error(String(error)), url, attempt, maxRetries },
+          "MoneyControl fetch error"
         );
 
         if (attempt < maxRetries) {

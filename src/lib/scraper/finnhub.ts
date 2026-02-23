@@ -8,8 +8,11 @@
 // Rate limit: 60 calls/min (free tier). With 3 endpoints per symbol,
 // processes ~20 symbols/min.
 
+import { createLogger } from "@/lib/logger";
 import { FINNHUB } from "@/lib/constants";
 import { RateLimiter } from "./rate-limiter";
+
+const log = createLogger("scraper/finnhub");
 import type {
   FinnhubRecommendationTrend,
   FinnhubPriceTarget,
@@ -112,9 +115,9 @@ export class FinnhubScraper {
 
         results.set(symbol, { recommendations, priceTarget, upgrades });
       } catch (error) {
-        console.error(
-          `[Finnhub] Error processing ${symbol}:`,
-          error instanceof Error ? error.message : String(error)
+        log.error(
+          { err: error instanceof Error ? error : new Error(String(error)), symbol },
+          "Error processing Finnhub symbol batch entry"
         );
         results.set(symbol, {
           recommendations: [],
@@ -142,21 +145,21 @@ export class FinnhubScraper {
       });
 
       if (response.status === 429) {
-        console.warn("[Finnhub] Rate limited — waiting 60s...");
+        log.warn({ path }, "Finnhub rate limited — waiting 60s");
         await new Promise((resolve) => setTimeout(resolve, 60_000));
         return this.fetchEndpoint<T>(path);
       }
 
       if (!response.ok) {
-        console.warn(`[Finnhub] HTTP ${response.status} for ${path}`);
+        log.warn({ status: response.status, path }, "Finnhub HTTP error");
         return null;
       }
 
       return (await response.json()) as T;
     } catch (error) {
-      console.error(
-        `[Finnhub] Fetch error for ${path}:`,
-        error instanceof Error ? error.message : String(error)
+      log.error(
+        { err: error instanceof Error ? error : new Error(String(error)), path },
+        "Finnhub fetch error"
       );
       return null;
     }

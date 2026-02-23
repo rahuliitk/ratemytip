@@ -9,7 +9,10 @@
 import { Worker, type Job } from "bullmq";
 import { createHash } from "crypto";
 
+import { createLogger } from "@/lib/logger";
 import { db } from "@/lib/db";
+
+const log = createLogger("worker/parse");
 import { PARSER, TIMEFRAME_EXPIRY_DAYS } from "@/lib/constants";
 import {
   STOCK_SYMBOL_PATTERN,
@@ -170,7 +173,7 @@ async function parseTipJob(
 ): Promise<{ tipCreated: boolean; confidence: number }> {
   const { rawPostId, content, creatorId } = job.data;
 
-  console.log(`[ParseWorker] Processing raw post ${rawPostId}`);
+  log.info({ rawPostId }, "Processing raw post");
 
   // Stage 1: Rule-based extraction
   const extraction = extractFromContent(content);
@@ -187,9 +190,7 @@ async function parseTipJob(
 
   // Below low confidence threshold — not a tip, skip
   if (extraction.confidence < PARSER.LOW_CONFIDENCE_THRESHOLD) {
-    console.log(
-      `[ParseWorker] Post ${rawPostId} below confidence threshold (${extraction.confidence.toFixed(2)}), skipping`
-    );
+    log.info({ rawPostId, confidence: extraction.confidence }, "Post below confidence threshold, skipping");
     return { tipCreated: false, confidence: extraction.confidence };
   }
 
@@ -201,9 +202,7 @@ async function parseTipJob(
     extraction.targets.length === 0 ||
     extraction.stopLoss === null
   ) {
-    console.log(
-      `[ParseWorker] Post ${rawPostId} missing required fields, skipping`
-    );
+    log.info({ rawPostId }, "Post missing required fields, skipping");
     return { tipCreated: false, confidence: extraction.confidence };
   }
 
@@ -218,9 +217,7 @@ async function parseTipJob(
   });
 
   if (!stock) {
-    console.warn(
-      `[ParseWorker] Stock "${extraction.stockSymbol}" not found in database for post ${rawPostId}`
-    );
+    log.warn({ stockSymbol: extraction.stockSymbol, rawPostId }, "Stock not found in database");
     return { tipCreated: false, confidence: extraction.confidence };
   }
 
@@ -230,7 +227,7 @@ async function parseTipJob(
   });
 
   if (!rawPost) {
-    console.error(`[ParseWorker] Raw post ${rawPostId} not found`);
+    log.error({ rawPostId }, "Raw post not found");
     return { tipCreated: false, confidence: extraction.confidence };
   }
 
@@ -272,9 +269,7 @@ async function parseTipJob(
   });
 
   if (existingTip) {
-    console.log(
-      `[ParseWorker] Duplicate tip detected for post ${rawPostId}, skipping`
-    );
+    log.info({ rawPostId }, "Duplicate tip detected, skipping");
     return { tipCreated: false, confidence: extraction.confidence };
   }
 
@@ -309,10 +304,7 @@ async function parseTipJob(
       },
     });
 
-    console.log(
-      `[ParseWorker] Created tip for ${stock.symbol} from post ${rawPostId} ` +
-        `(confidence: ${extraction.confidence.toFixed(2)}, status: ${tipStatus})`
-    );
+    log.info({ stockSymbol: stock.symbol, rawPostId, confidence: extraction.confidence, status: tipStatus }, "Created tip from parsed post");
 
     // Update creator tip counts
     await db.creator.update({
@@ -326,10 +318,7 @@ async function parseTipJob(
 
     return { tipCreated: true, confidence: extraction.confidence };
   } catch (error) {
-    console.error(
-      `[ParseWorker] Failed to create tip for post ${rawPostId}:`,
-      error instanceof Error ? error.message : String(error)
-    );
+    log.error({ err: error instanceof Error ? error : new Error(String(error)), rawPostId }, "Failed to create tip");
     return { tipCreated: false, confidence: extraction.confidence };
   }
 }
@@ -351,14 +340,11 @@ export function createParseTipWorker(): Worker {
   );
 
   worker.on("completed", (job) => {
-    console.log(`[ParseWorker] Job ${job.id} completed`);
+    log.info({ jobId: job.id }, "Parse job completed");
   });
 
   worker.on("failed", (job, error) => {
-    console.error(
-      `[ParseWorker] Job ${job?.id} failed:`,
-      error.message
-    );
+    log.error({ err: error, jobId: job?.id }, "Parse job failed");
   });
 
   return worker;

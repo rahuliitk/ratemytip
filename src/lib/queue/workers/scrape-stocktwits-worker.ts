@@ -12,7 +12,10 @@
 
 import { Worker, type Job } from "bullmq";
 
+import { createLogger } from "@/lib/logger";
 import { db } from "@/lib/db";
+
+const log = createLogger("worker/stocktwits");
 import { StockTwitsScraper } from "@/lib/scraper/stocktwits";
 import { createStockTwitsRateLimiter } from "@/lib/scraper/rate-limiter";
 import { STOCKTWITS } from "@/lib/constants";
@@ -131,14 +134,10 @@ async function processStockTwitsScrapeJob(
   creatorsCreated: number;
   errors: number;
 }> {
-  console.log(
-    `[StockTwitsWorker] Starting scrape job (triggered: ${job.data.triggeredAt})`
-  );
+  log.info({ triggeredAt: job.data.triggeredAt }, "Starting StockTwits scrape job");
 
   if (process.env.ENABLE_STOCKTWITS_SCRAPER !== "true") {
-    console.log(
-      "[StockTwitsWorker] StockTwits scraper is disabled via feature flag"
-    );
+    log.info("StockTwits scraper is disabled via feature flag");
     return { postsStored: 0, parsedEnqueued: 0, creatorsCreated: 0, errors: 0 };
   }
 
@@ -161,9 +160,7 @@ async function processStockTwitsScrapeJob(
       select: { id: true, symbol: true },
     });
 
-    console.log(
-      `[StockTwitsWorker] Fetching messages for ${stocks.length} US stocks`
-    );
+    log.info({ stockCount: stocks.length }, "Fetching StockTwits messages for US stocks");
 
     const scrapeJob = await db.scrapeJob.create({
       data: {
@@ -246,17 +243,17 @@ async function processStockTwitsScrapeJob(
               continue;
             }
             errors++;
-            console.error(
-              `[StockTwitsWorker] Error processing message ${msg.messageId}:`,
-              error instanceof Error ? error.message : String(error)
+            log.error(
+              { err: error instanceof Error ? error : new Error(String(error)), messageId: msg.messageId },
+              "Error processing StockTwits message"
             );
           }
         }
       } catch (error) {
         errors++;
-        console.error(
-          `[StockTwitsWorker] Error fetching ${stock.symbol}:`,
-          error instanceof Error ? error.message : String(error)
+        log.error(
+          { err: error instanceof Error ? error : new Error(String(error)), symbol: stock.symbol },
+          "Error fetching StockTwits symbol stream"
         );
       }
 
@@ -279,13 +276,14 @@ async function processStockTwitsScrapeJob(
       },
     });
 
-    console.log(
-      `[StockTwitsWorker] Scrape complete: ${postsStored} posts, ${parsedEnqueued} enqueued for parsing, ${creatorsCreated} new creators, ${errors} errors`
+    log.info(
+      { postsStored, parsedEnqueued, creatorsCreated, errors },
+      "StockTwits scrape complete"
     );
   } catch (error) {
-    console.error(
-      "[StockTwitsWorker] Fatal scrape error:",
-      error instanceof Error ? error.message : String(error)
+    log.error(
+      { err: error instanceof Error ? error : new Error(String(error)) },
+      "Fatal StockTwits scrape error"
     );
     throw error;
   }
@@ -307,14 +305,11 @@ export function createStockTwitsScrapeWorker(): Worker {
   );
 
   worker.on("completed", (job) => {
-    console.log(`[StockTwitsWorker] Job ${job.id} completed`);
+    log.info({ jobId: job.id }, "StockTwits scrape job completed");
   });
 
   worker.on("failed", (job, error) => {
-    console.error(
-      `[StockTwitsWorker] Job ${job?.id} failed:`,
-      error.message
-    );
+    log.error({ err: error, jobId: job?.id }, "StockTwits scrape job failed");
   });
 
   return worker;

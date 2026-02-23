@@ -8,11 +8,14 @@
 //   GET https://query2.finance.yahoo.com/v10/finance/quoteSummary/{symbol}
 //       ?modules=recommendationTrend,upgradeDowngradeHistory,financialData
 
+import { createLogger } from "@/lib/logger";
 import { RateLimiter } from "./rate-limiter";
 import type {
   YahooRecommendationTrend,
   YahooUpgradeDowngrade,
 } from "@/types/consensus";
+
+const log = createLogger("scraper/yahoo-analyst");
 
 // ──── Yahoo Finance response types ────
 
@@ -134,15 +137,13 @@ export class YahooAnalystScraper {
       });
 
       if (response.status === 429) {
-        console.warn("[YahooAnalyst] Rate limited — waiting 30s...");
+        log.warn({ symbol: yahooSymbol }, "Yahoo Analyst rate limited — waiting 30s");
         await new Promise((resolve) => setTimeout(resolve, 30_000));
         return null;
       }
 
       if (!response.ok) {
-        console.warn(
-          `[YahooAnalyst] HTTP ${response.status} for ${yahooSymbol}`
-        );
+        log.warn({ status: response.status, symbol: yahooSymbol }, "Yahoo Analyst HTTP error");
         return null;
       }
 
@@ -165,9 +166,9 @@ export class YahooAnalystScraper {
           financialData?.numberOfAnalystOpinions?.raw ?? null,
       };
     } catch (error) {
-      console.error(
-        `[YahooAnalyst] Error fetching ${yahooSymbol}:`,
-        error instanceof Error ? error.message : String(error)
+      log.error(
+        { err: error instanceof Error ? error : new Error(String(error)), symbol: yahooSymbol },
+        "Yahoo Analyst fetch error"
       );
       return null;
     }

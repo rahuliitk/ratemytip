@@ -6,7 +6,10 @@
 
 import { Worker, type Job } from "bullmq";
 
+import { createLogger } from "@/lib/logger";
 import { PriceMonitor } from "@/lib/market-data/price-monitor";
+
+const log = createLogger("worker/price");
 import { EXCHANGE_MARKET_HOURS } from "@/lib/constants";
 import { calculateScoresQueue, dailySnapshotQueue } from "@/lib/queue/queues";
 
@@ -60,16 +63,14 @@ function isAnyMarketOpen(): boolean {
 async function processUpdatePricesJob(
   job: Job<UpdatePricesJobData>
 ): Promise<{ updatesApplied: number; marketOpen: boolean; scoresTriggered: boolean }> {
-  console.log(
-    `[PriceWorker] Processing price update job (triggered: ${job.data.triggeredAt})`
-  );
+  log.info({ triggeredAt: job.data.triggeredAt }, "Processing price update job");
 
   // Check if market is open — if not, skip the price check
   // but still process (the PriceMonitor handles empty results gracefully)
   const marketOpen = isAnyMarketOpen();
 
   if (!marketOpen) {
-    console.log("[PriceWorker] Market is closed, skipping price check");
+    log.info("Market is closed, skipping price check");
     return { updatesApplied: 0, marketOpen: false, scoresTriggered: false };
   }
 
@@ -78,12 +79,10 @@ async function processUpdatePricesJob(
   try {
     const updates = await monitor.checkActiveTips();
 
-    console.log(
-      `[PriceWorker] Price check complete: ${updates.length} tip status updates applied`
-    );
+    log.info({ updatesApplied: updates.length }, "Price check complete");
 
     // Chain: trigger full score recalculation after price check
-    console.log("[PriceWorker] Chaining full score recalculation...");
+    log.info("Chaining full score recalculation");
     await calculateScoresQueue.add(
       "recalculate-all",
       { type: "full", triggeredBy: "price-check" },
@@ -99,14 +98,11 @@ async function processUpdatePricesJob(
         delay: 300_000, // 5 minutes
       }
     );
-    console.log("[PriceWorker] Score recalculation and snapshot jobs enqueued");
+    log.info("Score recalculation and snapshot jobs enqueued");
 
     return { updatesApplied: updates.length, marketOpen: true, scoresTriggered: true };
   } catch (error) {
-    console.error(
-      "[PriceWorker] Price update failed:",
-      error instanceof Error ? error.message : String(error)
-    );
+    log.error({ err: error instanceof Error ? error : new Error(String(error)) }, "Price update failed");
     throw error;
   }
 }
@@ -128,14 +124,11 @@ export function createPriceWorker(): Worker {
   );
 
   worker.on("completed", (job) => {
-    console.log(`[PriceWorker] Job ${job.id} completed`);
+    log.info({ jobId: job.id }, "Price job completed");
   });
 
   worker.on("failed", (job, error) => {
-    console.error(
-      `[PriceWorker] Job ${job?.id} failed:`,
-      error.message
-    );
+    log.error({ err: error, jobId: job?.id }, "Price job failed");
   });
 
   return worker;
