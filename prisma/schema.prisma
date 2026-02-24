@@ -360,10 +360,11 @@ model Tip {
   reviewActions ReviewAction[]
 
   // V2 Relations
-  ratings     TipRating[]
-  comments    Comment[]
-  savedBy     SavedTip[]
-  explanation TipExplanation?
+  ratings          TipRating[]
+  comments         Comment[]
+  savedBy          SavedTip[]
+  explanation      TipExplanation?
+  portfolioEntries PortfolioEntry[]
 
   @@index([creatorId, status])
   @@index([creatorId, tipTimestamp(sort: Desc)])
@@ -645,21 +646,23 @@ enum TipSource {
 // ════════════════════════════════════════
 
 model User {
-  id                     String    @id @default(cuid())
-  email                  String    @unique
-  emailVerified          DateTime? @map("email_verified")
-  emailVerificationToken String?   @unique @map("email_verification_token")
-  passwordHash           String?   @map("password_hash")
-  displayName            String    @map("display_name")
-  username               String    @unique
-  avatarUrl              String?   @map("avatar_url")
-  role                   UserRole  @default(CONSUMER)
-  isActive               Boolean   @default(true) @map("is_active")
-  isBanned               Boolean   @default(false) @map("is_banned")
-  banReason              String?   @map("ban_reason")
-  claimedCreatorId       String?   @unique @map("claimed_creator_id")
-  createdAt              DateTime  @default(now()) @map("created_at")
-  updatedAt              DateTime  @updatedAt @map("updated_at")
+  id                     String           @id @default(cuid())
+  email                  String           @unique
+  emailVerified          DateTime?        @map("email_verified")
+  emailVerificationToken String?          @unique @map("email_verification_token")
+  passwordHash           String?          @map("password_hash")
+  displayName            String           @map("display_name")
+  username               String           @unique
+  avatarUrl              String?          @map("avatar_url")
+  role                   UserRole         @default(CONSUMER)
+  isActive               Boolean          @default(true) @map("is_active")
+  isBanned               Boolean          @default(false) @map("is_banned")
+  banReason              String?          @map("ban_reason")
+  claimedCreatorId       String?          @unique @map("claimed_creator_id")
+  subscriptionTier       SubscriptionTier @default(FREE) @map("subscription_tier")
+  stripeCustomerId       String?          @unique @map("stripe_customer_id")
+  createdAt              DateTime         @default(now()) @map("created_at")
+  updatedAt              DateTime         @updatedAt @map("updated_at")
 
   // Relations
   claimedCreator      Creator?           @relation("ClaimedBy", fields: [claimedCreatorId], references: [id])
@@ -673,9 +676,15 @@ model User {
   claimRequests       ClaimRequest[]
   notifications       Notification[]
   passwordResetTokens PasswordResetToken[]
+  subscriptions       Subscription[]
+  payments            Payment[]
+  portfolios          Portfolio[]
+  preferences         UserPreference?
+  recommendationLogs  RecommendationLog[]
 
   @@index([username])
   @@index([email])
+  @@index([subscriptionTier])
   @@map("users")
 }
 
@@ -935,6 +944,8 @@ enum NotificationType {
   CLAIM_APPROVED
   CLAIM_REJECTED
   COMMENT_REPLY
+  SUBSCRIPTION_EXPIRING
+  PORTFOLIO_ALERT
 }
 
 // ════════════════════════════════════════
@@ -954,4 +965,195 @@ model PasswordResetToken {
 
   @@index([userId])
   @@map("password_reset_tokens")
+}
+
+// ════════════════════════════════════════
+// V3 ENUMS
+// ════════════════════════════════════════
+
+enum SubscriptionTier {
+  FREE
+  PRO
+  PREMIUM
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  INCOMPLETE
+}
+
+enum PaymentStatus {
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+enum PortfolioEntryStatus {
+  OPEN
+  CLOSED
+}
+
+enum RiskTolerance {
+  LOW
+  MODERATE
+  HIGH
+}
+
+// ════════════════════════════════════════
+// SUBSCRIPTIONS (Stripe-managed billing)
+// ════════════════════════════════════════
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  userId               String             @map("user_id")
+  stripeSubscriptionId String             @unique @map("stripe_subscription_id")
+  stripePriceId        String             @map("stripe_price_id")
+  tier                 SubscriptionTier
+  status               SubscriptionStatus @default(ACTIVE)
+  currentPeriodStart   DateTime           @map("current_period_start")
+  currentPeriodEnd     DateTime           @map("current_period_end")
+  cancelAtPeriodEnd    Boolean            @default(false) @map("cancel_at_period_end")
+  canceledAt           DateTime?          @map("canceled_at")
+  createdAt            DateTime           @default(now()) @map("created_at")
+  updatedAt            DateTime           @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@map("subscriptions")
+}
+
+// ════════════════════════════════════════
+// PAYMENTS (Stripe payment history)
+// ════════════════════════════════════════
+
+model Payment {
+  id                     String        @id @default(cuid())
+  userId                 String        @map("user_id")
+  stripePaymentIntentId  String        @unique @map("stripe_payment_intent_id")
+  amount                 Int           // in smallest currency unit (cents/paise)
+  currency               String        @default("usd")
+  status                 PaymentStatus @default(SUCCEEDED)
+  description            String?
+  createdAt              DateTime      @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("payments")
+}
+
+// ════════════════════════════════════════
+// PORTFOLIOS (User-created tip portfolios)
+// ════════════════════════════════════════
+
+model Portfolio {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  name      String   @default("My Portfolio")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entries   PortfolioEntry[]
+  snapshots PortfolioSnapshot[]
+
+  @@index([userId])
+  @@map("portfolios")
+}
+
+// ════════════════════════════════════════
+// PORTFOLIO ENTRIES (Tracked positions from tips)
+// ════════════════════════════════════════
+
+model PortfolioEntry {
+  id             String               @id @default(cuid())
+  portfolioId    String               @map("portfolio_id")
+  tipId          String               @map("tip_id")
+  status         PortfolioEntryStatus @default(OPEN)
+  entryPrice     Float                @map("entry_price")
+  quantity       Float                @default(1)
+  closedPrice    Float?               @map("closed_price")
+  closedAt       DateTime?            @map("closed_at")
+  unrealizedPnl  Float?               @map("unrealized_pnl")
+  realizedPnl    Float?               @map("realized_pnl")
+  notes          String?
+  createdAt      DateTime             @default(now()) @map("created_at")
+  updatedAt      DateTime             @updatedAt @map("updated_at")
+
+  // Relations
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  tip       Tip       @relation(fields: [tipId], references: [id])
+
+  @@unique([portfolioId, tipId])
+  @@index([portfolioId, status])
+  @@map("portfolio_entries")
+}
+
+// ════════════════════════════════════════
+// PORTFOLIO SNAPSHOTS (Daily value history)
+// ════════════════════════════════════════
+
+model PortfolioSnapshot {
+  id          String   @id @default(cuid())
+  portfolioId String   @map("portfolio_id")
+  date        DateTime @db.Date
+  totalValue  Float    @map("total_value")
+  totalPnl    Float    @map("total_pnl")
+  openCount   Int      @map("open_count")
+
+  // Relations
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@unique([portfolioId, date])
+  @@index([portfolioId, date(sort: Desc)])
+  @@map("portfolio_snapshots")
+}
+
+// ════════════════════════════════════════
+// USER PREFERENCES (For AI recommendations)
+// ════════════════════════════════════════
+
+model UserPreference {
+  id                   String        @id @default(cuid())
+  userId               String        @unique @map("user_id")
+  preferredTimeframes  String[]      @default([]) @map("preferred_timeframes")
+  preferredAssetClasses String[]     @default([]) @map("preferred_asset_classes")
+  riskTolerance        RiskTolerance @default(MODERATE) @map("risk_tolerance")
+  minCreatorScore      Float?        @map("min_creator_score")
+  preferredSectors     String[]      @default([]) @map("preferred_sectors")
+  createdAt            DateTime      @default(now()) @map("created_at")
+  updatedAt            DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+}
+
+// ════════════════════════════════════════
+// RECOMMENDATION LOGS (Pre-computed recommendations)
+// ════════════════════════════════════════
+
+model RecommendationLog {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  type        String   // "TIP" or "CREATOR"
+  referenceId String   @map("reference_id") // tip ID or creator ID
+  score       Float    // recommendation score
+  reason      String?  // human-readable explanation
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+  @@index([createdAt(sort: Desc)])
+  @@map("recommendation_logs")
 }

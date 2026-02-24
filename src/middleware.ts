@@ -32,7 +32,9 @@ export default auth((req) => {
     pathname.startsWith("/saved") ||
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/notifications") ||
-    pathname.startsWith("/feed");
+    pathname.startsWith("/feed") ||
+    pathname.startsWith("/portfolio") ||
+    pathname.startsWith("/discover");
 
   if (isUserProtectedRoute && !req.auth) {
     const loginUrl = new URL("/login", req.url);
@@ -70,6 +72,8 @@ export const config = {
     "/dashboard/:path*",
     "/notifications/:path*",
     "/feed/:path*",
+    "/portfolio/:path*",
+    "/discover/:path*",
     "/creator-dashboard/:path*",
   ],
 };

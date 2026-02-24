@@ -115,6 +115,9 @@ export const CACHE_TTL = {
   SEARCH_RESULTS: 60,
   MARKET_PRICE: 30,
   CREATOR_SCORE: 3600,
+  PORTFOLIO: 60,
+  RECOMMENDATIONS: 3600,
+  SUBSCRIPTION: 300,
 } as const;
 
 // ──── Scraper ────
@@ -204,6 +207,62 @@ export const NOTIFICATION = {
   POLLING_INTERVAL_MS: 30_000, // 30 seconds
   PASSWORD_RESET_EXPIRY_HOURS: 1,
   EMAIL_VERIFICATION_EXPIRY_HOURS: 24,
+} as const;
+
+// ──── Subscription Tiers ────
+export const SUBSCRIPTION_TIERS = {
+  FREE: "FREE",
+  PRO: "PRO",
+  PREMIUM: "PREMIUM",
+} as const;
+
+export const SUBSCRIPTION_FEATURES = {
+  FREE: {
+    maxPortfolioEntries: 5,
+    canViewRecommendations: false,
+    canExportData: false,
+    canAccessAdvancedAnalytics: false,
+    canAccessPrioritySupport: false,
+  },
+  PRO: {
+    maxPortfolioEntries: 50,
+    canViewRecommendations: true,
+    canExportData: true,
+    canAccessAdvancedAnalytics: true,
+    canAccessPrioritySupport: false,
+  },
+  PREMIUM: {
+    maxPortfolioEntries: 500,
+    canViewRecommendations: true,
+    canExportData: true,
+    canAccessAdvancedAnalytics: true,
+    canAccessPrioritySupport: true,
+  },
+} as const;
+
+// ──── Portfolio ────
+export const PORTFOLIO = {
+  SNAPSHOT_RETENTION_DAYS: 365,
+  DEFAULT_NAME: "My Portfolio",
+} as const;
+
+// ──── Recommendations ────
+export const RECOMMENDATION = {
+  TIP_WEIGHTS: {
+    CREATOR_SCORE: 0.30,
+    PREFERENCE_MATCH: 0.30,
+    RECENCY: 0.20,
+    ENGAGEMENT: 0.20,
+  },
+  CREATOR_WEIGHTS: {
+    RMT_SCORE: 0.40,
+    SPECIALIZATION_MATCH: 0.30,
+    ACTIVITY_RECENCY: 0.15,
+    COMMUNITY_REVIEW: 0.15,
+  },
+  MAX_TIPS: 20,
+  MAX_CREATORS: 10,
+  RECENCY_HALFLIFE_DAYS: 7,
 } as const;
 
 // Legacy compat — default market hours used when exchange is unknown

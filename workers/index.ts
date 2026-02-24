@@ -28,6 +28,8 @@ import {
   scrapeYahooAnalystQueue,
   scrapeStocktwitsQueue,
   scrapeTelegramQueue,
+  portfolioQueue,
+  recommendationQueue,
 } from "../src/lib/queue/queues";
 import { createTwitterScrapeWorker, createYoutubeScrapeWorker } from "../src/lib/queue/workers/scrape-worker";
 import { createParseTipWorker } from "../src/lib/queue/workers/parse-worker";
@@ -43,6 +45,8 @@ import { createYahooAnalystScrapeWorker } from "../src/lib/queue/workers/scrape-
 import { createStockTwitsScrapeWorker } from "../src/lib/queue/workers/scrape-stocktwits-worker";
 import { createTelegramScrapeWorker } from "../src/lib/queue/workers/scrape-telegram-worker";
 import { createNotificationWorker } from "../src/lib/queue/workers/notification-worker";
+import { createPortfolioWorker } from "../src/lib/queue/workers/portfolio-worker";
+import { createRecommendationWorker } from "../src/lib/queue/workers/recommendation-worker";
 
 // ──── Worker instances ────
 
@@ -105,6 +109,14 @@ function registerWorkers(): void {
   // Notification worker
   workers.push(createNotificationWorker());
   console.log("[Workers] Registered: notifications (concurrency: 5)");
+
+  // Portfolio worker
+  workers.push(createPortfolioWorker());
+  console.log("[Workers] Registered: portfolio (concurrency: 5)");
+
+  // Recommendation worker
+  workers.push(createRecommendationWorker());
+  console.log("[Workers] Registered: recommendations (concurrency: 3)");
 
   console.log(`[Workers] All ${workers.length} workers registered`);
 }
@@ -261,6 +273,39 @@ async function setupCronSchedules(): Promise<void> {
     await dailySnapshotQueue.removeJobScheduler("cron-daily-snapshot");
   } catch { /* ignore */ }
   console.log("[Workers] Cron: daily-snapshot — chained after score calculation");
+
+  // Portfolio recalculation: chains after price updates (same times)
+  await portfolioQueue.upsertJobScheduler(
+    "cron-portfolio-recalculate",
+    { pattern: "35 4,8 * * 1-5" }, // 5 min after price updates
+    {
+      name: "scheduled-portfolio-recalculate",
+      data: { type: "recalculate-all", triggeredAt: new Date().toISOString() },
+    }
+  );
+  console.log("[Workers] Cron: portfolio recalculate — after price updates Mon-Fri");
+
+  // Portfolio snapshots: daily at 4:30 PM IST = 11:00 UTC
+  await portfolioQueue.upsertJobScheduler(
+    "cron-portfolio-snapshot",
+    { pattern: "0 11 * * 1-5" },
+    {
+      name: "scheduled-portfolio-snapshot",
+      data: { type: "snapshot", triggeredAt: new Date().toISOString() },
+    }
+  );
+  console.log("[Workers] Cron: portfolio snapshot — daily at 4:30 PM IST");
+
+  // Recommendation pre-computation: daily after score calculation
+  await recommendationQueue.upsertJobScheduler(
+    "cron-compute-recommendations",
+    { pattern: "0 12 * * *" }, // noon UTC
+    {
+      name: "scheduled-recommendation-compute",
+      data: { triggeredAt: new Date().toISOString() },
+    }
+  );
+  console.log("[Workers] Cron: recommendations — daily at noon UTC");
 
   console.log("[Workers] All cron schedules configured");
 }
