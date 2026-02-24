@@ -32,8 +32,38 @@ const DATE_RANGE_OPTIONS = [
   { value: "month", label: "This Month" },
 ] as const;
 
-const selectClass =
-  "rounded-md border border-gray-300 bg-surface px-3 py-1.5 text-sm text-text focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent";
+const activePillClass =
+  "whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-medium bg-white text-primary shadow-sm ring-1 ring-gray-200/50";
+const inactivePillClass =
+  "whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-medium text-muted hover:text-text";
+
+interface PillGroupProps {
+  readonly label: string;
+  readonly paramKey: string;
+  readonly options: ReadonlyArray<{ readonly value: string; readonly label: string }>;
+  readonly currentValue: string;
+  readonly onSelect: (key: string, value: string) => void;
+}
+
+function PillGroup({ label, paramKey, options, currentValue, onSelect }: PillGroupProps): React.ReactElement {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className="text-[11px] font-medium uppercase tracking-wider text-muted">{label}</span>
+      <div className="inline-flex rounded-xl bg-gray-50 p-0.5 gap-0.5">
+        {options.map((opt) => (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => onSelect(paramKey, opt.value)}
+            className={currentValue === opt.value ? activePillClass : inactivePillClass}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function TipBrowseFilters(): React.ReactElement {
   const router = useRouter();
@@ -59,46 +89,38 @@ export function TipBrowseFilters(): React.ReactElement {
   );
 
   return (
-    <div className="flex flex-wrap items-center gap-3">
-      <select
-        value={currentStatus}
-        onChange={(e) => updateParam("status", e.target.value)}
-        className={selectClass}
-      >
-        {STATUS_OPTIONS.map((opt) => (
-          <option key={opt.value} value={opt.value}>{opt.label}</option>
-        ))}
-      </select>
+    <div className="flex flex-wrap items-start gap-4">
+      <PillGroup
+        label="Status"
+        paramKey="status"
+        options={STATUS_OPTIONS}
+        currentValue={currentStatus}
+        onSelect={updateParam}
+      />
 
-      <select
-        value={currentTimeframe}
-        onChange={(e) => updateParam("timeframe", e.target.value)}
-        className={selectClass}
-      >
-        {TIMEFRAME_OPTIONS.map((opt) => (
-          <option key={opt.value} value={opt.value}>{opt.label}</option>
-        ))}
-      </select>
+      <PillGroup
+        label="Timeframe"
+        paramKey="timeframe"
+        options={TIMEFRAME_OPTIONS}
+        currentValue={currentTimeframe}
+        onSelect={updateParam}
+      />
 
-      <select
-        value={currentDirection}
-        onChange={(e) => updateParam("direction", e.target.value)}
-        className={selectClass}
-      >
-        {DIRECTION_OPTIONS.map((opt) => (
-          <option key={opt.value} value={opt.value}>{opt.label}</option>
-        ))}
-      </select>
+      <PillGroup
+        label="Direction"
+        paramKey="direction"
+        options={DIRECTION_OPTIONS}
+        currentValue={currentDirection}
+        onSelect={updateParam}
+      />
 
-      <select
-        value={currentDateRange}
-        onChange={(e) => updateParam("dateRange", e.target.value)}
-        className={selectClass}
-      >
-        {DATE_RANGE_OPTIONS.map((opt) => (
-          <option key={opt.value} value={opt.value}>{opt.label}</option>
-        ))}
-      </select>
+      <PillGroup
+        label="Date Range"
+        paramKey="dateRange"
+        options={DATE_RANGE_OPTIONS}
+        currentValue={currentDateRange}
+        onSelect={updateParam}
+      />
     </div>
   );
 }

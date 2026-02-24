@@ -45,7 +45,7 @@ export default async function AnalyticsPage(): Promise<React.ReactElement> {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-primary">Analytics</h1>
+        <h1 className="text-2xl font-bold text-gradient-primary">Analytics</h1>
         <p className="text-sm text-muted">Your performance breakdown and trends</p>
       </div>
 
@@ -58,7 +58,7 @@ export default async function AnalyticsPage(): Promise<React.ReactElement> {
             { label: "Consistency", value: score.consistencyScore.toFixed(1), color: "text-primary" },
             { label: "Volume Factor", value: score.volumeFactorScore.toFixed(1), color: "text-muted" },
           ].map((item) => (
-            <div key={item.label} className="rounded-lg border border-gray-200 bg-surface p-4">
+            <div key={item.label} className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-4">
               <p className="text-xs text-muted">{item.label}</p>
               <p className={`mt-1 text-2xl font-bold tabular-nums ${item.color}`}>
                 {item.value}
@@ -69,8 +69,8 @@ export default async function AnalyticsPage(): Promise<React.ReactElement> {
       )}
 
       {/* Score History Chart */}
-      <div className="rounded-lg border border-gray-200 bg-surface p-6">
-        <h2 className="text-lg font-bold text-primary">Score Trend</h2>
+      <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-6">
+        <h2 className="text-lg font-bold text-gradient-primary">Score Trend</h2>
         <div className="mt-4">
           <PerformanceChart
             data={scoreHistory.map((s) => ({
@@ -84,8 +84,8 @@ export default async function AnalyticsPage(): Promise<React.ReactElement> {
 
       {/* Accuracy by Timeframe */}
       {score && (
-        <div className="rounded-lg border border-gray-200 bg-surface p-6">
-          <h2 className="text-lg font-bold text-primary">Accuracy by Timeframe</h2>
+        <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-6">
+          <h2 className="text-lg font-bold text-gradient-primary">Accuracy by Timeframe</h2>
           <div className="mt-4 space-y-3">
             {[
               { label: "Intraday", value: score.intradayAccuracy },
@@ -114,8 +114,8 @@ export default async function AnalyticsPage(): Promise<React.ReactElement> {
 
       {/* Tips Distribution */}
       <div className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-lg border border-gray-200 bg-surface p-6">
-          <h2 className="text-lg font-bold text-primary">Tips by Timeframe</h2>
+        <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-6">
+          <h2 className="text-lg font-bold text-gradient-primary">Tips by Timeframe</h2>
           <div className="mt-4 space-y-2">
             {tipsByTimeframe.map((t) => (
               <div key={t.timeframe} className="flex items-center justify-between rounded-md bg-bg px-3 py-2 text-sm">
@@ -129,8 +129,8 @@ export default async function AnalyticsPage(): Promise<React.ReactElement> {
           </div>
         </div>
 
-        <div className="rounded-lg border border-gray-200 bg-surface p-6">
-          <h2 className="text-lg font-bold text-primary">Tips by Status</h2>
+        <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-6">
+          <h2 className="text-lg font-bold text-gradient-primary">Tips by Status</h2>
           <div className="mt-4 space-y-2">
             {tipsByStatus.map((t) => (
               <div key={t.status} className="flex items-center justify-between rounded-md bg-bg px-3 py-2 text-sm">

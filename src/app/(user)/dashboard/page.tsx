@@ -16,7 +16,7 @@ export default function DashboardPage(): React.ReactElement {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-      <h1 className="text-2xl font-bold text-primary">
+      <h1 className="text-2xl font-bold text-gradient-primary">
         Welcome back, {session?.user?.name ?? "User"}
       </h1>
       <p className="mt-1 text-sm text-muted">
@@ -25,7 +25,7 @@ export default function DashboardPage(): React.ReactElement {
 
       {/* Quick stats */}
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <div className="rounded-lg border border-gray-200 bg-surface p-4">
+        <div className="rounded-2xl bg-white p-4 shadow-[0_1px_2px_0_rgba(26,54,93,0.04)]">
           <div className="flex items-center gap-2 text-muted">
             <Users className="h-4 w-4" />
             <span className="text-xs">Following</span>
@@ -34,7 +34,7 @@ export default function DashboardPage(): React.ReactElement {
             {profile?.data?.followingCount ?? 0}
           </p>
         </div>
-        <div className="rounded-lg border border-gray-200 bg-surface p-4">
+        <div className="rounded-2xl bg-white p-4 shadow-[0_1px_2px_0_rgba(26,54,93,0.04)]">
           <div className="flex items-center gap-2 text-muted">
             <Bookmark className="h-4 w-4" />
             <span className="text-xs">Saved Tips</span>
@@ -43,7 +43,7 @@ export default function DashboardPage(): React.ReactElement {
             {profile?.data?.savedCount ?? 0}
           </p>
         </div>
-        <div className="rounded-lg border border-gray-200 bg-surface p-4">
+        <div className="rounded-2xl bg-white p-4 shadow-[0_1px_2px_0_rgba(26,54,93,0.04)]">
           <div className="flex items-center gap-2 text-muted">
             <Star className="h-4 w-4" />
             <span className="text-xs">Ratings Given</span>
@@ -52,7 +52,7 @@ export default function DashboardPage(): React.ReactElement {
             {profile?.data?.ratingsCount ?? 0}
           </p>
         </div>
-        <div className="rounded-lg border border-gray-200 bg-surface p-4">
+        <div className="rounded-2xl bg-white p-4 shadow-[0_1px_2px_0_rgba(26,54,93,0.04)]">
           <div className="flex items-center gap-2 text-muted">
             <MessageSquare className="h-4 w-4" />
             <span className="text-xs">Comments</span>
@@ -82,7 +82,7 @@ export default function DashboardPage(): React.ReactElement {
       {/* Followed creators */}
       <div className="mt-8">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-primary">Followed Creators</h2>
+          <h2 className="text-lg font-bold text-gradient-primary">Followed Creators</h2>
           <Link
             href="/dashboard"
             className="text-sm text-accent hover:underline"
@@ -105,7 +105,7 @@ export default function DashboardPage(): React.ReactElement {
                 <Link
                   key={item.creator.id}
                   href={`/creator/${item.creator.slug}`}
-                  className="flex items-center justify-between rounded-lg border border-gray-200 bg-surface p-3 transition-colors hover:bg-bg"
+                  className="flex items-center justify-between rounded-2xl bg-white p-3 shadow-[0_1px_2px_0_rgba(26,54,93,0.04)] card-hover"
                 >
                   <div>
                     <p className="text-sm font-medium text-text">
@@ -121,7 +121,7 @@ export default function DashboardPage(): React.ReactElement {
             )}
           </div>
         ) : (
-          <div className="mt-4 rounded-lg border border-dashed border-gray-300 p-6 text-center">
+          <div className="mt-4 rounded-2xl border border-dashed border-gray-200 p-6 text-center">
             <p className="text-sm text-muted">
               You&apos;re not following any creators yet.
             </p>

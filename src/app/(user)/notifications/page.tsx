@@ -61,7 +61,7 @@ export default function NotificationsPage(): React.ReactElement {
   return (
     <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-primary">Notifications</h1>
+        <h1 className="text-2xl font-bold text-gradient-primary">Notifications</h1>
         {unreadCount > 0 && (
           <Button variant="outline" size="sm" onClick={markAllRead}>
             Mark all read
@@ -72,7 +72,7 @@ export default function NotificationsPage(): React.ReactElement {
       {!data ? (
         <div className="mt-6 space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-20 animate-pulse rounded-lg bg-bg" />
+            <div key={i} className="h-20 rounded-2xl shimmer" />
           ))}
         </div>
       ) : notifications.length === 0 ? (
@@ -93,11 +93,11 @@ export default function NotificationsPage(): React.ReactElement {
                 onClick={() => {
                   if (!n.isRead) markRead([n.id]);
                 }}
-                className={`block rounded-lg border p-4 transition-colors hover:bg-bg ${
+                className={`block rounded-2xl p-4 transition-all duration-200 ${
                   n.isRead
-                    ? "border-gray-200 bg-surface"
-                    : "border-accent/20 bg-blue-50/30"
-                }`}
+                    ? "bg-white shadow-[0_1px_2px_0_rgba(26,54,93,0.04)]"
+                    : "bg-[#2B6CB0]/5 shadow-[0_1px_3px_0_rgba(43,108,176,0.1)]"
+                } hover:shadow-[0_4px_6px_-1px_rgba(26,54,93,0.08)]`}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">

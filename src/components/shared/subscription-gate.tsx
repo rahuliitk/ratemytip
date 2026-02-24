@@ -35,12 +35,12 @@ export function SubscriptionGate({ minTier, feature, children }: SubscriptionGat
   }
 
   return (
-    <Card className="border-dashed border-gray-300 bg-gray-50">
+    <Card className="border-dashed border-[#2B6CB0]/20 bg-[#2B6CB0]/5">
       <CardContent className="flex flex-col items-center py-12 text-center">
         <div className="mb-4 rounded-full bg-accent/10 p-3">
           <Lock className="h-6 w-6 text-accent" />
         </div>
-        <h3 className="mb-2 text-lg font-semibold text-primary">
+        <h3 className="mb-2 text-lg font-bold text-gradient-primary">
           {feature ? `${feature} requires ${minTier}` : `Upgrade to ${minTier}`}
         </h3>
         <p className="mb-6 max-w-md text-sm text-muted">

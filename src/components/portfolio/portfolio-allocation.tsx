@@ -29,7 +29,7 @@ const SECTOR_COLORS = [
 export function PortfolioAllocation({ sectors }: PortfolioAllocationProps): React.ReactElement {
   if (sectors.length === 0) {
     return (
-      <div className="flex h-48 items-center justify-center rounded-lg border border-gray-200 bg-white text-sm text-[#718096]">
+      <div className="flex h-48 items-center justify-center rounded-2xl bg-white shadow-[0_1px_2px_0_rgba(26,54,93,0.04)] text-sm text-[#718096]">
         No allocation data available.
       </div>
     );
@@ -40,7 +40,7 @@ export function PortfolioAllocation({ sectors }: PortfolioAllocationProps): Reac
   const sorted = [...sectors].sort((a, b) => b.value - a.value);
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4">
+    <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-4">
       <h3 className="mb-4 text-sm font-semibold text-[#1A202C]">Sector Allocation</h3>
       <div className="space-y-3">
         {sorted.map((sector, index) => {
@@ -68,7 +68,7 @@ export function PortfolioAllocation({ sectors }: PortfolioAllocationProps): Reac
                   </span>
                 </div>
               </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-[#F7FAFC]">
                 <div
                   className={cn("h-full rounded-full transition-all", colorClass)}
                   style={{ width: `${pct}%` }}

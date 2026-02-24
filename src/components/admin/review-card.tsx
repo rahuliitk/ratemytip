@@ -36,7 +36,7 @@ export function ReviewCard({
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-surface">
+    <div className="rounded-2xl bg-white shadow-[0_1px_2px_0_rgba(26,54,93,0.04)]">
       {/* Summary row */}
       <div className="flex items-center justify-between px-4 py-3">
         <button

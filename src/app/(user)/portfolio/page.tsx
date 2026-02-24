@@ -67,11 +67,11 @@ export default function PortfolioPage(): React.ReactElement {
     return (
       <div className="mx-auto max-w-6xl px-4 py-12">
         <div className="animate-pulse space-y-6">
-          <div className="h-8 w-48 rounded bg-gray-200" />
+          <div className="h-8 w-48 rounded-2xl shimmer" />
           <div className="grid grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map((i) => <div key={i} className="h-24 rounded bg-gray-200" />)}
+            {[1, 2, 3, 4].map((i) => <div key={i} className="h-24 rounded-2xl shimmer" />)}
           </div>
-          <div className="h-64 rounded bg-gray-200" />
+          <div className="h-64 rounded-2xl shimmer" />
         </div>
       </div>
     );
@@ -83,7 +83,7 @@ export default function PortfolioPage(): React.ReactElement {
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-primary">Portfolio</h1>
+          <h1 className="text-2xl font-bold text-gradient-primary">Portfolio</h1>
           <p className="text-sm text-muted">Track your positions and P&L across saved tips</p>
         </div>
         <Button variant="outline" size="sm" asChild>
@@ -97,7 +97,7 @@ export default function PortfolioPage(): React.ReactElement {
       {!hasEntries ? (
         <div className="flex flex-col items-center py-20 text-center">
           <Briefcase className="mb-4 h-12 w-12 text-gray-300" />
-          <h2 className="mb-2 text-lg font-semibold text-primary">No positions yet</h2>
+          <h2 className="mb-2 text-lg font-bold text-[#1A365D]">No positions yet</h2>
           <p className="mb-6 max-w-md text-sm text-muted">
             Add tips to your portfolio to track their performance. Use the &quot;Add to Portfolio&quot; button on any tip card.
           </p>
@@ -112,7 +112,7 @@ export default function PortfolioPage(): React.ReactElement {
           {history.length > 0 && <PortfolioPnlChart data={history} />}
 
           <div>
-            <h2 className="mb-3 text-lg font-semibold text-primary">Positions</h2>
+            <h2 className="mb-3 text-lg font-bold text-gradient-primary">Positions</h2>
             <PortfolioPositions entries={data!.entries} />
           </div>
 

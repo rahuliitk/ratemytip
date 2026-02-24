@@ -109,7 +109,7 @@ export default function CommentReportsPage(): React.ReactElement {
     <div>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-primary">Comment Reports</h1>
+          <h1 className="text-2xl font-bold text-gradient-primary">Comment Reports</h1>
           <p className="mt-1 text-sm text-muted">
             {total} total &middot; {pendingCount} pending review
           </p>
@@ -139,7 +139,7 @@ export default function CommentReportsPage(): React.ReactElement {
           <Loader2 className="h-6 w-6 animate-spin text-muted" />
         </div>
       ) : reports.length === 0 ? (
-        <div className="mt-8 rounded-lg border border-gray-200 bg-surface py-16 text-center">
+        <div className="mt-8 rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] py-16 text-center">
           <p className="text-sm text-muted">No reports found.</p>
         </div>
       ) : (
@@ -149,7 +149,7 @@ export default function CommentReportsPage(): React.ReactElement {
             return (
               <div
                 key={report.id}
-                className="rounded-lg border border-gray-200 bg-surface"
+                className="rounded-2xl bg-white shadow-[0_1px_2px_0_rgba(26,54,93,0.04)]"
               >
                 {/* Summary row */}
                 <div className="flex items-center justify-between px-4 py-3">
@@ -258,7 +258,7 @@ export default function CommentReportsPage(): React.ReactElement {
                           type="button"
                           onClick={() => handleAction(report.id, "HIDE_COMMENT")}
                           disabled={actionLoading === report.id}
-                          className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-3 py-1.5 text-xs font-medium text-text hover:bg-bg disabled:opacity-50"
+                          className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-3 py-1.5 text-xs font-medium text-text hover:bg-[#2B6CB0]/5 disabled:opacity-50"
                         >
                           <EyeOff className="h-3 w-3" />
                           Hide Comment

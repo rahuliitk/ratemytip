@@ -24,40 +24,42 @@ export function Header(): React.ReactElement {
   const subTier = (session?.user as Record<string, unknown> | undefined)?.subscriptionTier as string | undefined;
 
   return (
-    <header className="sticky top-0 z-50 border-b border-gray-200 bg-surface">
+    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-white/20 shadow-sm">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <BarChart3 className="h-7 w-7 text-accent" />
-          <span className="text-xl font-bold text-primary">
+        <Link href="/" className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#1A365D] to-[#2B6CB0] shadow-sm">
+            <BarChart3 className="h-4.5 w-4.5 text-white" />
+          </div>
+          <span className="text-xl font-bold text-gradient-primary">
             RateMyTip
           </span>
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden items-center gap-6 md:flex">
+        <nav className="hidden items-center gap-1 md:flex">
           <Link
             href="/leaderboard"
-            className="text-sm font-medium text-muted transition-colors hover:text-primary"
+            className="rounded-lg px-3 py-2 text-sm font-medium text-muted transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:text-primary"
           >
             Leaderboard
           </Link>
           <Link
             href="/tips"
-            className="text-sm font-medium text-muted transition-colors hover:text-primary"
+            className="rounded-lg px-3 py-2 text-sm font-medium text-muted transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:text-primary"
           >
             Tips
           </Link>
           <Link
             href="/search"
-            className="flex items-center gap-1.5 text-sm font-medium text-muted transition-colors hover:text-primary"
+            className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-muted transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:text-primary"
           >
             <Search className="h-4 w-4" />
             Search
           </Link>
           <Link
             href="/pricing"
-            className="text-sm font-medium text-muted transition-colors hover:text-primary"
+            className="rounded-lg px-3 py-2 text-sm font-medium text-muted transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:text-primary"
           >
             Pricing
           </Link>
@@ -65,7 +67,7 @@ export function Header(): React.ReactElement {
             href="https://github.com/rahuliitk/ratemytip"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-muted transition-colors hover:text-primary"
+            className="rounded-lg px-2 py-2 text-muted transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:text-primary"
             aria-label="GitHub repository"
           >
             <Github className="h-5 w-5" />
@@ -75,18 +77,18 @@ export function Header(): React.ReactElement {
           {status === "loading" ? (
             <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200" />
           ) : isUser ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 ml-2">
             <NotificationBell />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/10 text-sm font-bold text-accent transition-colors hover:bg-accent/20"
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/10 text-sm font-bold text-accent ring-2 ring-[#2B6CB0]/20 transition-all duration-200 hover:bg-accent/20 hover:ring-[#2B6CB0]/40"
                   aria-label="User menu"
                 >
                   {session.user.name?.charAt(0).toUpperCase() ?? "U"}
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuContent align="end" className="w-56 rounded-xl shadow-lg border-gray-100">
                 <DropdownMenuLabel>
                   <div className="flex items-center gap-2">
                     <div>
@@ -94,10 +96,10 @@ export function Header(): React.ReactElement {
                       <p className="text-xs text-muted">@{session.user.username}</p>
                     </div>
                     {subTier === "PRO" && (
-                      <span className="rounded bg-accent/10 px-1.5 py-0.5 text-[10px] font-bold text-accent">PRO</span>
+                      <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-bold text-accent">PRO</span>
                     )}
                     {subTier === "PREMIUM" && (
-                      <span className="rounded bg-yellow-100 px-1.5 py-0.5 text-[10px] font-bold text-yellow-700">PREMIUM</span>
+                      <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-[10px] font-bold text-yellow-700">PREMIUM</span>
                     )}
                   </div>
                 </DropdownMenuLabel>
@@ -158,11 +160,11 @@ export function Header(): React.ReactElement {
             </DropdownMenu>
             </div>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 ml-2">
               <Button variant="ghost" size="sm" asChild>
                 <Link href="/login">Sign in</Link>
               </Button>
-              <Button size="sm" asChild>
+              <Button variant="glow" size="sm" asChild>
                 <Link href="/register">Sign up</Link>
               </Button>
             </div>
@@ -172,7 +174,7 @@ export function Header(): React.ReactElement {
         {/* Mobile menu button */}
         <button
           type="button"
-          className="inline-flex items-center justify-center rounded-md p-2 text-muted hover:text-primary md:hidden"
+          className="inline-flex items-center justify-center rounded-lg p-2 text-muted transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:text-primary md:hidden"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
         >
@@ -185,33 +187,37 @@ export function Header(): React.ReactElement {
       </div>
 
       {/* Mobile Navigation */}
-      {mobileMenuOpen && (
-        <div className="border-t border-gray-200 bg-surface md:hidden">
+      <div
+        className={`overflow-hidden transition-all duration-300 ease-in-out md:hidden ${
+          mobileMenuOpen ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
+        }`}
+      >
+        <div className="bg-white/95 backdrop-blur-lg border-t border-gray-100">
           <nav className="flex flex-col gap-1 px-4 py-3">
             <Link
               href="/leaderboard"
-              className="rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-bg hover:text-primary"
+              className="rounded-lg px-3 py-2.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:text-primary"
               onClick={() => setMobileMenuOpen(false)}
             >
               Leaderboard
             </Link>
             <Link
               href="/tips"
-              className="rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-bg hover:text-primary"
+              className="rounded-lg px-3 py-2.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:text-primary"
               onClick={() => setMobileMenuOpen(false)}
             >
               Tips
             </Link>
             <Link
               href="/search"
-              className="rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-bg hover:text-primary"
+              className="rounded-lg px-3 py-2.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:text-primary"
               onClick={() => setMobileMenuOpen(false)}
             >
               Search
             </Link>
             <Link
               href="/pricing"
-              className="rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-bg hover:text-primary"
+              className="rounded-lg px-3 py-2.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:text-primary"
               onClick={() => setMobileMenuOpen(false)}
             >
               Pricing
@@ -220,7 +226,7 @@ export function Header(): React.ReactElement {
               href="https://github.com/rahuliitk/ratemytip"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-bg hover:text-primary"
+              className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:text-primary"
               onClick={() => setMobileMenuOpen(false)}
             >
               <Github className="h-4 w-4" />
@@ -231,7 +237,7 @@ export function Header(): React.ReactElement {
               <>
                 <Link
                   href="/dashboard"
-                  className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-bg hover:text-primary"
+                  className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:text-primary"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <LayoutDashboard className="h-4 w-4" />
@@ -240,7 +246,7 @@ export function Header(): React.ReactElement {
                 {isCreator && (
                   <Link
                     href="/creator-dashboard"
-                    className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-bg hover:text-primary"
+                    className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:text-primary"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <PenLine className="h-4 w-4" />
@@ -249,7 +255,7 @@ export function Header(): React.ReactElement {
                 )}
                 <Link
                   href="/saved"
-                  className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-bg hover:text-primary"
+                  className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:text-primary"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <Bookmark className="h-4 w-4" />
@@ -257,14 +263,14 @@ export function Header(): React.ReactElement {
                 </Link>
                 <Link
                   href="/settings"
-                  className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-bg hover:text-primary"
+                  className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:text-primary"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <Settings className="h-4 w-4" />
                   Settings
                 </Link>
                 <button
-                  className="flex items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium text-danger hover:bg-bg"
+                  className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-danger transition-all duration-200 hover:bg-red-50"
                   onClick={() => {
                     setMobileMenuOpen(false);
                     signOut({ callbackUrl: "/" });
@@ -278,14 +284,14 @@ export function Header(): React.ReactElement {
               <div className="flex gap-2 px-3 pt-2">
                 <Link
                   href="/login"
-                  className="flex-1 rounded-md border border-gray-200 px-3 py-2 text-center text-sm font-medium text-muted hover:bg-bg"
+                  className="flex-1 rounded-xl border border-gray-200 px-3 py-2 text-center text-sm font-medium text-muted transition-all duration-200 hover:bg-gray-50"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Sign in
                 </Link>
                 <Link
                   href="/register"
-                  className="flex-1 rounded-md bg-primary px-3 py-2 text-center text-sm font-medium text-white hover:bg-primary/90"
+                  className="flex-1 rounded-xl bg-gradient-to-r from-[#1A365D] to-[#2B6CB0] px-3 py-2 text-center text-sm font-medium text-white shadow-md transition-all duration-200 hover:shadow-lg"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Sign up
@@ -294,7 +300,7 @@ export function Header(): React.ReactElement {
             ) : null}
           </nav>
         </div>
-      )}
+      </div>
     </header>
   );
 }

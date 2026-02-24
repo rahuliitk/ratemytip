@@ -37,21 +37,21 @@ export default function SearchPageContent(): React.ReactElement {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search creators, stocks, or tips..."
           autoFocus
-          className="w-full rounded-lg border border-gray-300 bg-surface px-4 py-3 text-base text-text placeholder:text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+          className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-base text-text placeholder:text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
         />
       </div>
 
       {/* Tabs */}
-      <div className="mt-6 flex gap-1 border-b border-gray-200">
+      <div className="mt-6 inline-flex rounded-xl bg-gray-100 p-1 gap-1">
         {tabs.map((tab) => (
           <button
             key={tab.value}
             type="button"
             onClick={() => setActiveTab(tab.value)}
-            className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
+            className={`px-4 py-2 text-sm font-medium transition-colors rounded-lg ${
               activeTab === tab.value
-                ? "border-accent text-accent"
-                : "border-transparent text-muted hover:text-text"
+                ? "bg-white text-primary shadow-sm"
+                : "text-muted hover:text-text"
             }`}
           >
             {tab.label}
@@ -87,7 +87,7 @@ export default function SearchPageContent(): React.ReactElement {
                       <Link
                         key={creator.id}
                         href={`/creator/${creator.slug}`}
-                        className="flex items-center justify-between rounded-lg border border-gray-200 bg-surface px-4 py-3 hover:shadow-sm"
+                        className="card-hover flex items-center justify-between rounded-2xl border border-gray-100 bg-white px-4 py-3 hover:bg-[#2B6CB0]/5 hover:shadow-sm"
                       >
                         <div className="flex items-center gap-3">
                           {creator.profileImageUrl ? (
@@ -128,7 +128,7 @@ export default function SearchPageContent(): React.ReactElement {
                       <Link
                         key={stock.id}
                         href={`/stock/${stock.symbol}`}
-                        className="flex items-center justify-between rounded-lg border border-gray-200 bg-surface px-4 py-3 hover:shadow-sm"
+                        className="card-hover flex items-center justify-between rounded-2xl border border-gray-100 bg-white px-4 py-3 hover:bg-[#2B6CB0]/5 hover:shadow-sm"
                       >
                         <div>
                           <p className="text-sm font-bold text-primary">
@@ -164,7 +164,7 @@ export default function SearchPageContent(): React.ReactElement {
                       <Link
                         key={tip.id}
                         href={`/tip/${tip.id}`}
-                        className="flex items-center justify-between rounded-lg border border-gray-200 bg-surface px-4 py-3 hover:shadow-sm"
+                        className="card-hover flex items-center justify-between rounded-2xl border border-gray-100 bg-white px-4 py-3 hover:bg-[#2B6CB0]/5 hover:shadow-sm"
                       >
                         <div className="flex items-center gap-3">
                           <span className="text-sm font-bold text-primary">

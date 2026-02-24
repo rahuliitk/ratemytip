@@ -61,8 +61,8 @@ function BillingContent(): React.ReactElement {
     return (
       <div className="mx-auto max-w-3xl px-4 py-12">
         <div className="animate-pulse space-y-4">
-          <div className="h-8 w-48 rounded bg-gray-200" />
-          <div className="h-40 rounded bg-gray-200" />
+          <div className="h-8 w-48 rounded-2xl shimmer" />
+          <div className="h-40 rounded-2xl shimmer" />
         </div>
       </div>
     );
@@ -73,10 +73,10 @@ function BillingContent(): React.ReactElement {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
-      <h1 className="mb-6 text-2xl font-bold text-primary">Billing & Subscription</h1>
+      <h1 className="mb-6 text-2xl font-bold text-gradient-primary">Billing & Subscription</h1>
 
       {success && (
-        <div className="mb-6 flex items-center gap-2 rounded-lg bg-green-50 p-4 text-sm text-success">
+        <div className="mb-6 flex items-center gap-2 rounded-xl bg-[#276749]/10 p-4 text-sm text-success">
           <CheckCircle2 className="h-5 w-5" />
           Subscription activated successfully!
         </div>
@@ -181,7 +181,7 @@ function BillingContent(): React.ReactElement {
 
 export default function BillingPage(): React.ReactElement {
   return (
-    <Suspense fallback={<div className="mx-auto max-w-3xl px-4 py-12"><div className="animate-pulse space-y-4"><div className="h-8 w-48 rounded bg-gray-200" /><div className="h-40 rounded bg-gray-200" /></div></div>}>
+    <Suspense fallback={<div className="mx-auto max-w-3xl px-4 py-12"><div className="animate-pulse space-y-4"><div className="h-8 w-48 rounded-2xl shimmer" /><div className="h-40 rounded-2xl shimmer" /></div></div>}>
       <BillingContent />
     </Suspense>
   );

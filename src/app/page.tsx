@@ -68,12 +68,20 @@ export default async function HomePage(): Promise<React.ReactElement> {
       <Header />
       <main className="flex-1">
       {/* Hero Section */}
-      <section className="bg-primary px-4 py-16 text-white sm:py-24">
-        <div className="mx-auto max-w-4xl text-center">
-          <h1 className="text-3xl font-bold tracking-tight sm:text-5xl">
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#0F2B4E] via-[#1A365D] to-[#2B6CB0] px-4 py-20 text-white sm:py-28">
+        {/* Subtle pattern overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)",
+            backgroundSize: "32px 32px",
+          }}
+        />
+        <div className="relative mx-auto max-w-4xl text-center">
+          <h1 className="text-4xl font-bold tracking-tight sm:text-6xl" style={{ textShadow: "0 2px 4px rgba(0,0,0,0.2)" }}>
             The Truth Behind Every Financial Tip
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-blue-200">
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-blue-100/80">
             RateMyTip tracks and scores stock market tips from influencers and
             analysts. See who actually delivers results with transparent,
             verified data.
@@ -83,34 +91,49 @@ export default async function HomePage(): Promise<React.ReactElement> {
               placeholder="Search creators or stocks..."
               size="lg"
               autoFocus={false}
+              variant="hero"
             />
           </div>
         </div>
       </section>
 
-      {/* Stats Bar */}
-      <section className="border-b border-gray-200 bg-surface">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-8 px-4 py-6 sm:gap-16">
-          <div className="flex items-center gap-2">
-            <Target className="h-5 w-5 text-accent" />
-            <span className="text-lg font-bold text-primary tabular-nums">
-              {stats.tipCount.toLocaleString("en-IN")}
-            </span>
-            <span className="text-sm text-muted">tips tracked</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-accent" />
-            <span className="text-lg font-bold text-primary tabular-nums">
-              {stats.creatorCount.toLocaleString("en-IN")}
-            </span>
-            <span className="text-sm text-muted">creators scored</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-accent" />
-            <span className="text-lg font-bold text-primary tabular-nums">
-              RMT Score
-            </span>
-            <span className="text-sm text-muted">powered rankings</span>
+      {/* Stats Bar — floating glass card */}
+      <section className="relative -mt-8 z-10 px-4">
+        <div className="mx-auto max-w-3xl rounded-2xl glass shadow-lg">
+          <div className="flex flex-wrap items-center justify-center gap-8 px-6 py-5 sm:gap-12">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#2B6CB0]/10 to-[#2B6CB0]/5">
+                <Target className="h-5 w-5 text-accent" />
+              </div>
+              <div>
+                <span className="text-2xl font-bold text-primary tabular-nums">
+                  {stats.tipCount.toLocaleString("en-IN")}
+                </span>
+                <p className="text-xs text-muted">tips tracked</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#2B6CB0]/10 to-[#2B6CB0]/5">
+                <Users className="h-5 w-5 text-accent" />
+              </div>
+              <div>
+                <span className="text-2xl font-bold text-primary tabular-nums">
+                  {stats.creatorCount.toLocaleString("en-IN")}
+                </span>
+                <p className="text-xs text-muted">creators scored</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#2B6CB0]/10 to-[#2B6CB0]/5">
+                <BarChart3 className="h-5 w-5 text-accent" />
+              </div>
+              <div>
+                <span className="text-2xl font-bold text-primary tabular-nums">
+                  RMT Score
+                </span>
+                <p className="text-xs text-muted">powered rankings</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -118,92 +141,94 @@ export default async function HomePage(): Promise<React.ReactElement> {
       {/* Top 10 Leaderboard Preview */}
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-primary">
+          <h2 className="text-2xl font-bold text-gradient-primary">
             Top Creators
           </h2>
           <Link
             href="/leaderboard"
-            className="flex items-center gap-1 text-sm font-medium text-accent hover:underline"
+            className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#1A365D] to-[#2B6CB0] px-4 py-2 text-sm font-medium text-white shadow-md transition-all duration-200 hover:shadow-lg hover:brightness-110"
           >
             View Full Leaderboard
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
-        <div className="mt-6 overflow-x-auto">
-          <table className="w-full min-w-[600px] text-left">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="px-3 py-3 text-xs font-semibold uppercase text-muted">
-                  Rank
-                </th>
-                <th className="px-3 py-3 text-xs font-semibold uppercase text-muted">
-                  Creator
-                </th>
-                <th className="px-3 py-3 text-right text-xs font-semibold uppercase text-muted">
-                  RMT Score
-                </th>
-                <th className="px-3 py-3 text-right text-xs font-semibold uppercase text-muted">
-                  Accuracy
-                </th>
-                <th className="px-3 py-3 text-right text-xs font-semibold uppercase text-muted">
-                  Tips
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {topCreators.length > 0 ? (
-                topCreators.map((creator, index) => (
-                  <tr key={creator.id} className="hover:bg-bg">
-                    <td className="px-3 py-3 text-sm font-medium text-muted tabular-nums">
-                      {index + 1}
-                    </td>
-                    <td className="px-3 py-3">
-                      <Link
-                        href={`/creator/${creator.slug}`}
-                        className="flex items-center gap-2 hover:underline"
-                      >
-                        <span className="text-sm font-medium text-text">
-                          {creator.displayName}
-                        </span>
-                        <span className="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-muted">
-                          {creator.tier}
-                        </span>
-                      </Link>
-                    </td>
-                    <td className="px-3 py-3 text-right">
-                      {creator.currentScore ? (
-                        <ScoreBadge
-                          score={creator.currentScore.rmtScore}
-                          size="sm"
-                        />
-                      ) : (
-                        <span className="text-xs text-muted">Unrated</span>
-                      )}
-                    </td>
-                    <td className="px-3 py-3 text-right text-sm tabular-nums text-text">
-                      {creator.currentScore
-                        ? `${(creator.currentScore.accuracyRate * 100).toFixed(1)}%`
-                        : "-"}
-                    </td>
-                    <td className="px-3 py-3 text-right text-sm tabular-nums text-muted">
-                      {creator.totalTips}
+        <div className="mt-6 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_1px_2px_0_rgba(26,54,93,0.04)]">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[600px] text-left">
+              <thead>
+                <tr className="bg-gradient-to-r from-gray-50 to-gray-50/50">
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted">
+                    Rank
+                  </th>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted">
+                    Creator
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted">
+                    RMT Score
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted">
+                    Accuracy
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted">
+                    Tips
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="stagger-children">
+                {topCreators.length > 0 ? (
+                  topCreators.map((creator, index) => (
+                    <tr key={creator.id} className="transition-all duration-200 hover:bg-[#2B6CB0]/[0.03] even:bg-gray-50/30">
+                      <td className="px-4 py-3.5 text-sm font-medium text-muted tabular-nums">
+                        {index + 1}
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <Link
+                          href={`/creator/${creator.slug}`}
+                          className="flex items-center gap-2.5 hover:underline"
+                        >
+                          <span className="text-sm font-medium text-text">
+                            {creator.displayName}
+                          </span>
+                          <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-muted">
+                            {creator.tier}
+                          </span>
+                        </Link>
+                      </td>
+                      <td className="px-4 py-3.5 text-right">
+                        {creator.currentScore ? (
+                          <ScoreBadge
+                            score={creator.currentScore.rmtScore}
+                            size="sm"
+                          />
+                        ) : (
+                          <span className="text-xs text-muted">Unrated</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3.5 text-right text-sm tabular-nums text-text">
+                        {creator.currentScore
+                          ? `${(creator.currentScore.accuracyRate * 100).toFixed(1)}%`
+                          : "-"}
+                      </td>
+                      <td className="px-4 py-3.5 text-right text-sm tabular-nums text-muted">
+                        {creator.totalTips}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="px-4 py-12 text-center text-sm text-muted"
+                    >
+                      No creators tracked yet. Data will appear once scraping
+                      begins.
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="px-3 py-12 text-center text-sm text-muted"
-                  >
-                    No creators tracked yet. Data will appear once scraping
-                    begins.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
@@ -211,9 +236,9 @@ export default async function HomePage(): Promise<React.ReactElement> {
       <RecentTipsSection />
 
       {/* Category Quick Links */}
-      <section className="bg-surface px-4 py-12 sm:px-6 lg:px-8">
+      <section className="px-4 py-12 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <h2 className="text-center text-2xl font-bold text-primary">
+          <h2 className="text-center text-2xl font-bold text-gradient-primary">
             Browse by Category
           </h2>
           <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
@@ -223,10 +248,12 @@ export default async function HomePage(): Promise<React.ReactElement> {
                 <Link
                   key={cat.href}
                   href={cat.href}
-                  className="flex flex-col items-center gap-3 rounded-lg border border-gray-200 bg-bg p-6 transition-shadow hover:shadow-md"
+                  className="flex flex-col items-center gap-3 rounded-2xl border border-gray-100 bg-white p-6 shadow-[0_1px_2px_0_rgba(26,54,93,0.04)] card-hover gradient-border-hover"
                 >
-                  <Icon className="h-8 w-8 text-accent" />
-                  <span className="text-sm font-semibold text-primary">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-[#2B6CB0]/10 to-[#2B6CB0]/5">
+                    <Icon className="h-7 w-7 text-accent" />
+                  </div>
+                  <span className="text-sm font-bold text-primary">
                     {cat.label}
                   </span>
                 </Link>
@@ -238,7 +265,7 @@ export default async function HomePage(): Promise<React.ReactElement> {
 
       {/* SEO Content */}
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <h2 className="text-xl font-bold text-primary">
+        <h2 className="text-xl font-bold text-gradient-primary">
           Why RateMyTip?
         </h2>
         <p className="mt-3 text-sm leading-relaxed text-muted">

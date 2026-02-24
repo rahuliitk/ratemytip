@@ -100,9 +100,9 @@ export function CommentSection({ tipId }: CommentSectionProps): React.ReactEleme
   }
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-surface p-6">
+    <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-6">
       <div className="flex items-center justify-between">
-        <h2 className="flex items-center gap-2 text-lg font-semibold text-primary">
+        <h2 className="flex items-center gap-2 text-lg font-bold text-gradient-primary">
           <MessageSquare className="h-5 w-5" />
           Comments
           {comments.length > 0 && (
@@ -113,10 +113,10 @@ export function CommentSection({ tipId }: CommentSectionProps): React.ReactEleme
           <button
             type="button"
             onClick={() => setSortBy("newest")}
-            className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+            className={`rounded-xl px-3 py-1 text-xs font-medium transition-colors ${
               sortBy === "newest"
-                ? "bg-blue-100 text-blue-700"
-                : "text-muted hover:bg-gray-100"
+                ? "bg-[#2B6CB0]/10 text-[#2B6CB0]"
+                : "text-muted hover:bg-[#F7FAFC]"
             }`}
           >
             Newest
@@ -124,10 +124,10 @@ export function CommentSection({ tipId }: CommentSectionProps): React.ReactEleme
           <button
             type="button"
             onClick={() => setSortBy("top")}
-            className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+            className={`rounded-xl px-3 py-1 text-xs font-medium transition-colors ${
               sortBy === "top"
-                ? "bg-blue-100 text-blue-700"
-                : "text-muted hover:bg-gray-100"
+                ? "bg-[#2B6CB0]/10 text-[#2B6CB0]"
+                : "text-muted hover:bg-[#F7FAFC]"
             }`}
           >
             Top
@@ -141,7 +141,7 @@ export function CommentSection({ tipId }: CommentSectionProps): React.ReactEleme
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           placeholder={session?.user ? "Share your thoughts..." : "Sign in to comment"}
-          className="w-full rounded-md border border-gray-200 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-300 focus:outline-none"
+          className="w-full rounded-xl border border-gray-200/60 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-[#2B6CB0]/40 focus:outline-none focus:ring-2 focus:ring-[#2B6CB0]/10"
           rows={3}
           maxLength={1000}
           disabled={!session?.user}
@@ -167,10 +167,10 @@ export function CommentSection({ tipId }: CommentSectionProps): React.ReactEleme
             {[1, 2, 3].map((i) => (
               <div key={i} className="animate-pulse space-y-2">
                 <div className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-full bg-gray-200" />
-                  <div className="h-4 w-24 rounded bg-gray-200" />
+                  <div className="h-7 w-7 rounded-full shimmer" />
+                  <div className="h-4 w-24 rounded-2xl shimmer" />
                 </div>
-                <div className="ml-9 h-4 w-3/4 rounded bg-gray-200" />
+                <div className="ml-9 h-4 w-3/4 rounded-2xl shimmer" />
               </div>
             ))}
           </div>

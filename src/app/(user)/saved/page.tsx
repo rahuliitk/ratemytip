@@ -34,13 +34,13 @@ export default function SavedPage(): React.ReactElement {
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="flex items-center gap-2">
         <Bookmark className="h-6 w-6 text-accent" />
-        <h1 className="text-2xl font-bold text-primary">Saved Tips</h1>
+        <h1 className="text-2xl font-bold text-gradient-primary">Saved Tips</h1>
       </div>
 
       {isLoading ? (
         <div className="mt-6 space-y-3">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-20 animate-pulse rounded-lg bg-gray-200" />
+            <div key={i} className="h-20 rounded-2xl shimmer" />
           ))}
         </div>
       ) : data?.data?.length > 0 ? (
@@ -48,7 +48,7 @@ export default function SavedPage(): React.ReactElement {
           {data.data.map((entry: SavedTipEntry) => (
             <div
               key={entry.id}
-              className="flex items-center justify-between rounded-lg border border-gray-200 bg-surface p-4"
+              className="flex items-center justify-between rounded-2xl bg-white p-4 shadow-[0_1px_2px_0_rgba(26,54,93,0.04)] card-hover"
             >
               <Link
                 href={`/tip/${entry.tip.id}`}
@@ -83,7 +83,7 @@ export default function SavedPage(): React.ReactElement {
           ))}
         </div>
       ) : (
-        <div className="mt-6 rounded-lg border border-dashed border-gray-300 p-8 text-center">
+        <div className="mt-6 rounded-2xl border border-dashed border-gray-200 p-8 text-center">
           <Bookmark className="mx-auto h-8 w-8 text-muted" />
           <p className="mt-2 text-sm text-muted">No saved tips yet.</p>
           <Link

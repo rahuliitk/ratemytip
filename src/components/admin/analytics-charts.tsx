@@ -33,7 +33,7 @@ export function AnalyticsCharts({
 }: AnalyticsChartsProps): React.ReactElement {
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-      <div className="rounded-lg border border-gray-200 bg-surface p-6">
+      <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-6">
         <h2 className="text-sm font-semibold text-primary">Tips Over Time</h2>
         {dailyTips.length > 0 ? (
           <div className="mt-4">
@@ -51,7 +51,7 @@ export function AnalyticsCharts({
           <div className="mt-4 flex h-48 items-center justify-center rounded bg-bg text-sm text-muted">No tip data available yet.</div>
         )}
       </div>
-      <div className="rounded-lg border border-gray-200 bg-surface p-6">
+      <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-6">
         <h2 className="text-sm font-semibold text-primary">Score Distribution</h2>
         {scoreDistribution.length > 0 ? (
           <div className="mt-4">

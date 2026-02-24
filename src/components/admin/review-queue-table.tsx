@@ -33,7 +33,7 @@ export function ReviewQueueTable({
 }: ReviewQueueTableProps): React.ReactElement {
   if (tips.length === 0) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-surface py-16 text-center">
+      <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] py-16 text-center">
         <p className="text-sm text-muted">
           No tips pending review. All caught up!
         </p>

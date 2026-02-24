@@ -67,7 +67,7 @@ export function ShareButton({
           <span>{copied ? "Copied!" : "Share"}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="rounded-xl shadow-lg border-gray-100">
         <DropdownMenuItem onClick={handleCopyLink}>
           {copied ? (
             <Check className="h-4 w-4 text-[#276749]" />

@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
+import { cn } from "@/lib/utils";
 
 const TIME_RANGE_OPTIONS = [
   { value: "all", label: "All Time" },
@@ -18,11 +19,42 @@ const SORT_OPTIONS = [
 ] as const;
 
 const MIN_TIPS_OPTIONS = [
-  { value: "5", label: "5+ tips" },
-  { value: "20", label: "20+ tips" },
-  { value: "50", label: "50+ tips" },
-  { value: "100", label: "100+ tips" },
+  { value: "5", label: "5+" },
+  { value: "20", label: "20+" },
+  { value: "50", label: "50+" },
+  { value: "100", label: "100+" },
 ] as const;
+
+interface PillGroupProps {
+  readonly label: string;
+  readonly options: readonly { readonly value: string; readonly label: string }[];
+  readonly currentValue: string;
+  readonly onSelect: (value: string) => void;
+}
+
+function PillGroup({ label, options, currentValue, onSelect }: PillGroupProps): React.ReactElement {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className="text-[11px] font-medium uppercase tracking-wider text-muted">{label}</span>
+      <div className="inline-flex rounded-xl bg-gray-50 p-0.5 gap-0.5">
+        {options.map((opt) => (
+          <button
+            key={opt.value}
+            onClick={() => onSelect(opt.value)}
+            className={cn(
+              "whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-200",
+              currentValue === opt.value
+                ? "bg-white text-primary shadow-sm ring-1 ring-gray-200/50"
+                : "text-muted hover:text-text"
+            )}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function LeaderboardFilters(): React.ReactElement {
   const router = useRouter();
@@ -43,42 +75,25 @@ export function LeaderboardFilters(): React.ReactElement {
   );
 
   return (
-    <div className="flex flex-wrap items-center gap-3">
-      <select
-        value={currentTimeRange}
-        onChange={(e) => updateParam("timeRange", e.target.value)}
-        className="rounded-md border border-gray-300 bg-surface px-3 py-1.5 text-sm text-text focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-      >
-        {TIME_RANGE_OPTIONS.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-
-      <select
-        value={currentSortBy}
-        onChange={(e) => updateParam("sortBy", e.target.value)}
-        className="rounded-md border border-gray-300 bg-surface px-3 py-1.5 text-sm text-text focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-      >
-        {SORT_OPTIONS.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-
-      <select
-        value={currentMinTips}
-        onChange={(e) => updateParam("minTips", e.target.value)}
-        className="rounded-md border border-gray-300 bg-surface px-3 py-1.5 text-sm text-text focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-      >
-        {MIN_TIPS_OPTIONS.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
+    <div className="flex flex-wrap items-end gap-4">
+      <PillGroup
+        label="Time Range"
+        options={TIME_RANGE_OPTIONS}
+        currentValue={currentTimeRange}
+        onSelect={(v) => updateParam("timeRange", v)}
+      />
+      <PillGroup
+        label="Sort By"
+        options={SORT_OPTIONS}
+        currentValue={currentSortBy}
+        onSelect={(v) => updateParam("sortBy", v)}
+      />
+      <PillGroup
+        label="Min Tips"
+        options={MIN_TIPS_OPTIONS}
+        currentValue={currentMinTips}
+        onSelect={(v) => updateParam("minTips", v)}
+      />
     </div>
   );
 }

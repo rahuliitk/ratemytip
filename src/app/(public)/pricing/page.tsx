@@ -93,7 +93,7 @@ function PricingContent(): React.ReactElement {
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
       <div className="mb-12 text-center">
-        <h1 className="text-4xl font-bold text-primary">Choose Your Plan</h1>
+        <h1 className="text-4xl font-bold text-gradient-primary">Choose Your Plan</h1>
         <p className="mt-3 text-lg text-muted">
           Upgrade to unlock AI recommendations, advanced analytics, and more.
         </p>
@@ -109,7 +109,7 @@ function PricingContent(): React.ReactElement {
             className={`relative flex flex-col ${
               tier.popular
                 ? "border-2 border-accent shadow-lg"
-                : "border border-gray-200"
+                : "shadow-[0_1px_2px_0_rgba(26,54,93,0.04)]"
             }`}
           >
             {tier.popular && (
@@ -122,7 +122,7 @@ function PricingContent(): React.ReactElement {
               <CardTitle className="text-xl">{tier.name}</CardTitle>
               <p className="text-sm text-muted">{tier.description}</p>
               <div className="mt-4">
-                <span className="text-4xl font-bold text-primary">{tier.price}</span>
+                <span className="text-4xl font-bold text-gradient-primary">{tier.price}</span>
                 <span className="text-muted">{tier.period}</span>
               </div>
             </CardHeader>

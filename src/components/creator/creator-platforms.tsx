@@ -13,9 +13,9 @@ const PLATFORM_ICONS: Record<string, string> = {
 
 const PLATFORM_COLORS: Record<string, string> = {
   TWITTER: "bg-black/5 text-black hover:bg-black/10",
-  YOUTUBE: "bg-red-50 text-red-700 hover:bg-red-100",
-  TELEGRAM: "bg-blue-50 text-blue-700 hover:bg-blue-100",
-  WEBSITE: "bg-gray-50 text-gray-700 hover:bg-gray-100",
+  YOUTUBE: "bg-[#C53030]/10 text-[#C53030] hover:bg-[#C53030]/15",
+  TELEGRAM: "bg-[#2B6CB0]/10 text-[#2B6CB0] hover:bg-[#2B6CB0]/15",
+  WEBSITE: "bg-gray-100 text-gray-700 hover:bg-gray-200",
 };
 
 export function CreatorPlatforms({

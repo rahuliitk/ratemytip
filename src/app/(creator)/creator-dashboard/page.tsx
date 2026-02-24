@@ -47,7 +47,7 @@ export default async function CreatorDashboardPage(): Promise<React.ReactElement
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-primary">Welcome back, {creator.displayName}</h1>
+          <h1 className="text-2xl font-bold text-gradient-primary">Welcome back, {creator.displayName}</h1>
           <p className="text-sm text-muted">{creator.tier} Tier</p>
         </div>
         <Link href="/creator-dashboard/new-tip">
@@ -68,8 +68,8 @@ export default async function CreatorDashboardPage(): Promise<React.ReactElement
 
       {/* Score History Chart */}
       {scoreHistory.length > 0 && (
-        <div className="rounded-lg border border-gray-200 bg-surface p-6">
-          <h2 className="text-lg font-bold text-primary">Performance Trend</h2>
+        <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-6">
+          <h2 className="text-lg font-bold text-gradient-primary">Performance Trend</h2>
           <p className="mt-1 text-xs text-muted">
             Score and accuracy over the last {scoreHistory.length} days
           </p>
@@ -86,9 +86,9 @@ export default async function CreatorDashboardPage(): Promise<React.ReactElement
       )}
 
       {/* Recent Tips */}
-      <div className="rounded-lg border border-gray-200 bg-surface p-6">
+      <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-primary">Recent Tips</h2>
+          <h2 className="text-lg font-bold text-gradient-primary">Recent Tips</h2>
           <Link href="/creator-dashboard/my-tips" className="text-xs text-accent hover:underline">
             View all
           </Link>

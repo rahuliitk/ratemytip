@@ -39,7 +39,7 @@ export default function AdminLoginPage(): React.ReactElement {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-bg px-4">
-      <div className="w-full max-w-sm rounded-lg border border-gray-200 bg-surface p-8 shadow-sm">
+      <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)]">
         <div className="flex flex-col items-center">
           <BarChart3 className="h-10 w-10 text-accent" />
           <h1 className="mt-3 text-xl font-bold text-primary">
@@ -52,7 +52,7 @@ export default function AdminLoginPage(): React.ReactElement {
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-4">
           {error && (
-            <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-danger">
+            <div className="rounded-xl bg-[#C53030]/10 px-3 py-2 text-sm text-danger">
               {error}
             </div>
           )}
@@ -71,7 +71,7 @@ export default function AdminLoginPage(): React.ReactElement {
               onChange={(e) => setEmail(e.target.value)}
               required
               autoFocus
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-text placeholder:text-muted focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+              className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm text-text placeholder:text-muted focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
               placeholder="admin@ratemytip.com"
             />
           </div>
@@ -89,7 +89,7 @@ export default function AdminLoginPage(): React.ReactElement {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-text placeholder:text-muted focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+              className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm text-text placeholder:text-muted focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
               placeholder="Enter your password"
             />
           </div>

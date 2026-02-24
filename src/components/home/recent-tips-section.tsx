@@ -44,17 +44,17 @@ export async function RecentTipsSection(): Promise<React.ReactElement> {
   return (
     <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-primary">Recent Tips</h2>
+        <h2 className="text-2xl font-bold text-gradient-primary">Recent Tips</h2>
         <Link
           href="/tips"
-          className="flex items-center gap-1 text-sm font-medium text-accent hover:underline"
+          className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 px-4 py-2 text-sm font-medium text-accent transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:border-[#2B6CB0]/20"
         >
           View All Tips
           <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="stagger-children mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {tips.map((tip) => (
           <TipCardWithCreator key={tip.id} tip={tip} />
         ))}

@@ -78,7 +78,7 @@ export function RecommendationCard({ recommendation }: RecommendationCardProps):
         </div>
 
         {/* Reason badge */}
-        <div className="mb-3 flex items-center gap-1.5 rounded-md bg-accent/5 px-2 py-1 text-xs text-accent">
+        <div className="mb-3 flex items-center gap-1.5 rounded-xl bg-[#2B6CB0]/10 px-2 py-1 text-xs text-accent">
           <Sparkles className="h-3 w-3" />
           {reason}
         </div>

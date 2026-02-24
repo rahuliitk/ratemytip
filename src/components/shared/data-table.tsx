@@ -64,10 +64,10 @@ export function DataTable<T>({
   };
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-gray-200 bg-surface">
+    <div className="overflow-x-auto rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)]">
       <table className="w-full text-left">
         <thead>
-          <tr className="border-b border-gray-200 bg-bg">
+          <tr className="border-b border-gray-100 bg-[#F7FAFC]">
             {columns.map((col) => (
               <th
                 key={col.key}
@@ -100,7 +100,7 @@ export function DataTable<T>({
           {sortedData.map((row) => (
             <tr
               key={String(row[keyField])}
-              className={`hover:bg-bg ${onRowClick ? "cursor-pointer" : ""}`}
+              className={`hover:bg-[#F7FAFC] transition-colors ${onRowClick ? "cursor-pointer" : ""}`}
               onClick={onRowClick ? () => onRowClick(row) : undefined}
             >
               {columns.map((col) => (

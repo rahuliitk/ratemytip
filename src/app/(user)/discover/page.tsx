@@ -48,7 +48,7 @@ export default function DiscoverPage(): React.ReactElement {
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold text-primary">
+          <h1 className="flex items-center gap-2 text-2xl font-bold text-gradient-primary">
             <Sparkles className="h-6 w-6 text-accent" />
             Discover
           </h1>
@@ -86,10 +86,10 @@ function DiscoverContent(): React.ReactElement {
 
   if (loading) {
     return (
-      <div className="animate-pulse space-y-6">
-        <div className="h-40 rounded bg-gray-200" />
+      <div className="space-y-6">
+        <div className="h-40 rounded-2xl shimmer" />
         <div className="grid gap-4 md:grid-cols-2">
-          {[1, 2, 3, 4].map((i) => <div key={i} className="h-32 rounded bg-gray-200" />)}
+          {[1, 2, 3, 4].map((i) => <div key={i} className="h-32 rounded-2xl shimmer" />)}
         </div>
       </div>
     );
@@ -111,7 +111,7 @@ function DiscoverContent(): React.ReactElement {
 
       {/* Recommended Tips */}
       <div>
-        <h2 className="mb-4 text-lg font-semibold text-primary">Recommended Tips</h2>
+        <h2 className="mb-4 text-lg font-bold text-gradient-primary">Recommended Tips</h2>
         {tips.length === 0 ? (
           <p className="py-8 text-center text-muted">
             No recommendations yet. Set your preferences to get personalized tips.

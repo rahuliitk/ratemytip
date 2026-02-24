@@ -53,7 +53,7 @@ export default async function CreatorTipDetailPage({
       </Link>
 
       {/* Tip header */}
-      <div className="mt-4 rounded-lg border border-gray-200 bg-surface p-6">
+      <div className="mt-4 rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span
@@ -144,15 +144,15 @@ export default async function CreatorTipDetailPage({
 
       {/* Engagement stats */}
       <div className="mt-4 grid grid-cols-3 gap-4">
-        <div className="rounded-lg border border-gray-200 bg-surface p-3 text-center">
+        <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-3 text-center">
           <p className="text-lg font-bold tabular-nums text-text">{tip.commentCount}</p>
           <p className="text-xs text-muted">Comments</p>
         </div>
-        <div className="rounded-lg border border-gray-200 bg-surface p-3 text-center">
+        <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-3 text-center">
           <p className="text-lg font-bold tabular-nums text-text">{tip.ratingCount}</p>
           <p className="text-xs text-muted">Ratings</p>
         </div>
-        <div className="rounded-lg border border-gray-200 bg-surface p-3 text-center">
+        <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-3 text-center">
           <p className="text-lg font-bold tabular-nums text-text">{tip.saveCount}</p>
           <p className="text-xs text-muted">Saves</p>
         </div>
@@ -160,7 +160,7 @@ export default async function CreatorTipDetailPage({
 
       {/* Explanation section */}
       <div className="mt-6">
-        <h2 className="text-lg font-bold text-primary">Explanation</h2>
+        <h2 className="text-lg font-bold text-gradient-primary">Explanation</h2>
         {tip.explanation ? (
           <div className="mt-3">
             <TipExplanation
@@ -177,7 +177,7 @@ export default async function CreatorTipDetailPage({
             </Link>
           </div>
         ) : (
-          <div className="mt-3 rounded-lg border border-dashed border-gray-300 p-6 text-center">
+          <div className="mt-3 rounded-xl border border-dashed border-gray-200 p-6 text-center">
             <p className="text-sm text-muted">
               No explanation yet. Add analysis to help your followers understand your rationale.
             </p>
@@ -187,7 +187,7 @@ export default async function CreatorTipDetailPage({
 
       {tip.rationale && (
         <div className="mt-6">
-          <h2 className="text-lg font-bold text-primary">Original Rationale</h2>
+          <h2 className="text-lg font-bold text-gradient-primary">Original Rationale</h2>
           <p className="mt-2 whitespace-pre-wrap text-sm text-text">
             {tip.rationale}
           </p>

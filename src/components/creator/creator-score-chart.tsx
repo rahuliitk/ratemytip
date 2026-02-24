@@ -20,7 +20,7 @@ export function CreatorScoreChart({
 }: CreatorScoreChartProps): React.ReactElement {
   if (snapshots.length === 0) {
     return (
-      <div className="flex h-48 items-center justify-center rounded bg-bg text-sm text-muted">
+      <div className="flex h-48 items-center justify-center rounded-2xl bg-gray-50 text-sm text-muted">
         No score history available yet.
       </div>
     );
@@ -39,7 +39,7 @@ export function CreatorScoreChart({
   return (
     <ResponsiveContainer width="100%" height={280}>
       <LineChart data={data} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+        <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" strokeOpacity={0.6} />
         <XAxis
           dataKey="date"
           tick={{ fontSize: 11, fill: "#718096" }}
@@ -55,9 +55,10 @@ export function CreatorScoreChart({
         <Tooltip
           contentStyle={{
             backgroundColor: "#fff",
-            border: "1px solid #E2E8F0",
-            borderRadius: "8px",
+            border: "none",
+            borderRadius: "12px",
             fontSize: "12px",
+            boxShadow: "0 10px 15px -3px rgba(26, 54, 93, 0.08), 0 4px 6px -4px rgba(26, 54, 93, 0.06)",
           }}
           formatter={(value: number, name: string) => {
             if (name === "rmtScore") return [`${value}`, "RMT Score"];
@@ -68,9 +69,9 @@ export function CreatorScoreChart({
           type="monotone"
           dataKey="rmtScore"
           stroke="#2B6CB0"
-          strokeWidth={2}
+          strokeWidth={2.5}
           dot={false}
-          activeDot={{ r: 4 }}
+          activeDot={{ r: 5, stroke: "#fff", strokeWidth: 2 }}
         />
         <Line
           type="monotone"
@@ -79,7 +80,7 @@ export function CreatorScoreChart({
           strokeWidth={1.5}
           dot={false}
           strokeDasharray="4 4"
-          activeDot={{ r: 3 }}
+          activeDot={{ r: 4, stroke: "#fff", strokeWidth: 2 }}
         />
       </LineChart>
     </ResponsiveContainer>

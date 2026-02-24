@@ -27,7 +27,7 @@ export function ReviewCard({ review }: ReviewCardProps): React.ReactElement {
   return (
     <div className="py-4">
       <div className="flex items-center gap-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-100 text-sm font-semibold text-purple-700">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#6B46C1]/10 text-sm font-semibold text-[#6B46C1]">
           {displayName.charAt(0).toUpperCase()}
         </div>
         <div className="flex-1">

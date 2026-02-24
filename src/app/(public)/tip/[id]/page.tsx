@@ -111,22 +111,22 @@ export default async function TipPage({
           <ShareButton title={`${tip.direction} ${tip.stock.symbol} by ${tip.creator.displayName} | RateMyTip`} />
         </div>
       </div>
-      <div className="rounded-lg border border-gray-200 bg-surface p-6">
+      <div className="rounded-2xl border border-gray-100 bg-white shadow-[0_1px_2px_0_rgba(26,54,93,0.04)] p-6">
         {/* Tip header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <div className="flex items-center gap-3">
               <Link
                 href={`/stock/${tip.stock.symbol}`}
-                className="text-2xl font-bold text-primary hover:underline"
+                className="text-2xl font-bold text-gradient-primary hover:underline"
               >
                 {tip.stock.symbol}
               </Link>
               <span
-                className={`rounded px-2 py-1 text-sm font-bold ${
+                className={`rounded-full px-2.5 py-1 text-[10px] font-bold text-white ${
                   isBuy
-                    ? "bg-green-100 text-green-800"
-                    : "bg-red-100 text-red-800"
+                    ? "bg-gradient-to-r from-green-500 to-emerald-400"
+                    : "bg-gradient-to-r from-red-500 to-rose-400"
                 }`}
               >
                 {tip.direction}
@@ -137,7 +137,9 @@ export default async function TipPage({
           </div>
 
           {tip.returnPct !== null && (
-            <div className="text-right">
+            <div className={`rounded-xl px-4 py-2 text-right ${
+              tip.returnPct >= 0 ? "bg-green-50" : "bg-red-50"
+            }`}>
               <p className="text-xs text-muted">Return</p>
               <p
                 className={`text-2xl font-bold tabular-nums ${
@@ -152,20 +154,20 @@ export default async function TipPage({
 
         {/* Price details */}
         <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <div className="rounded-md bg-bg p-3">
+          <div className="rounded-xl bg-gradient-to-b from-gray-50 to-white border border-gray-100 p-3">
             <p className="text-xs text-muted">Entry Price</p>
             <p className="mt-1 text-lg font-semibold tabular-nums text-text">
               {formatPrice(tip.entryPrice)}
             </p>
           </div>
-          <div className="rounded-md bg-bg p-3">
+          <div className="rounded-xl bg-gradient-to-b from-gray-50 to-white border border-gray-100 p-3">
             <p className="text-xs text-muted">Target 1</p>
             <p className="mt-1 text-lg font-semibold tabular-nums text-success">
               {formatPrice(tip.target1)}
             </p>
           </div>
           {tip.target2 !== null && (
-            <div className="rounded-md bg-bg p-3">
+            <div className="rounded-xl bg-gradient-to-b from-gray-50 to-white border border-gray-100 p-3">
               <p className="text-xs text-muted">Target 2</p>
               <p className="mt-1 text-lg font-semibold tabular-nums text-success">
                 {formatPrice(tip.target2)}
@@ -173,14 +175,14 @@ export default async function TipPage({
             </div>
           )}
           {tip.target3 !== null && (
-            <div className="rounded-md bg-bg p-3">
+            <div className="rounded-xl bg-gradient-to-b from-gray-50 to-white border border-gray-100 p-3">
               <p className="text-xs text-muted">Target 3</p>
               <p className="mt-1 text-lg font-semibold tabular-nums text-success">
                 {formatPrice(tip.target3)}
               </p>
             </div>
           )}
-          <div className="rounded-md bg-bg p-3">
+          <div className="rounded-xl bg-gradient-to-b from-gray-50 to-white border border-gray-100 p-3">
             <p className="text-xs text-muted">Stop Loss</p>
             <p className="mt-1 text-lg font-semibold tabular-nums text-danger">
               {formatPrice(tip.stopLoss)}
@@ -290,8 +292,8 @@ export default async function TipPage({
 
         {/* Content hash */}
         <div className="mt-6 border-t border-gray-200 pt-4">
-          <p className="text-xs text-muted">
-            Integrity hash: <code className="text-xs">{tip.contentHash}</code>
+          <p className="text-xs text-muted/60">
+            Integrity hash: <code className="text-xs text-muted/60">{tip.contentHash}</code>
           </p>
         </div>
       </div>
@@ -309,7 +311,7 @@ export default async function TipPage({
       )}
 
       {/* Creator Mini Profile */}
-      <div className="mt-6 rounded-lg border border-gray-200 bg-surface p-4">
+      <div className="mt-6 rounded-2xl border border-gray-100 bg-white shadow-[0_1px_2px_0_rgba(26,54,93,0.04)] p-4">
         <Link
           href={`/creator/${tip.creator.slug}`}
           className="flex items-center justify-between"
@@ -348,15 +350,15 @@ export default async function TipPage({
 
       {/* Amendment history */}
       {tip.amendments.length > 0 && (
-        <div className="mt-6 rounded-lg border border-gray-200 bg-surface p-4">
-          <h3 className="text-sm font-semibold text-primary">
+        <div className="mt-6 rounded-2xl border border-gray-100 bg-white shadow-[0_1px_2px_0_rgba(26,54,93,0.04)] p-4">
+          <h3 className="text-sm font-semibold text-gradient-primary">
             Amendment History
           </h3>
           <div className="mt-3 space-y-2">
             {tip.amendments.map((amendment) => (
               <div
                 key={amendment.id}
-                className="rounded bg-bg p-2 text-xs text-muted"
+                className="rounded-xl bg-gray-50 p-2 text-xs text-muted"
               >
                 <span className="font-medium">{amendment.field}</span> changed
                 from <code>{amendment.oldValue}</code> to{" "}

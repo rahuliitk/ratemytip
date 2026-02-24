@@ -7,18 +7,18 @@ interface ScoreBadgeProps {
 }
 
 const SCORE_COLORS = [
-  { min: 90, color: "bg-[#276749] text-white" },
-  { min: 75, color: "bg-[#2F855A] text-white" },
-  { min: 60, color: "bg-[#2B6CB0] text-white" },
-  { min: 45, color: "bg-[#C05621] text-white" },
-  { min: 30, color: "bg-[#C53030] text-white" },
-  { min: 0, color: "bg-[#9B2C2C] text-white" },
+  { min: 90, color: "bg-gradient-to-r from-[#22543D] to-[#38A169] text-white shadow-sm" },
+  { min: 75, color: "bg-gradient-to-r from-[#276749] to-[#48BB78] text-white shadow-sm" },
+  { min: 60, color: "bg-gradient-to-r from-[#1A365D] to-[#2B6CB0] text-white shadow-sm" },
+  { min: 45, color: "bg-gradient-to-r from-[#9C4221] to-[#ED8936] text-white shadow-sm" },
+  { min: 30, color: "bg-gradient-to-r from-[#9B2C2C] to-[#E53E3E] text-white shadow-sm" },
+  { min: 0, color: "bg-gradient-to-r from-[#742A2A] to-[#C53030] text-white shadow-sm" },
 ] as const;
 
 const SIZE_CLASSES = {
-  sm: "px-1.5 py-0.5 text-xs",
-  md: "px-2.5 py-1 text-sm",
-  lg: "px-3 py-1.5 text-base",
+  sm: "px-2 py-0.5 text-xs",
+  md: "px-3 py-1 text-sm",
+  lg: "px-3.5 py-1.5 text-base",
 } as const;
 
 function getScoreColor(score: number): string {
@@ -28,7 +28,7 @@ function getScoreColor(score: number): string {
     }
   }
   const last = SCORE_COLORS[SCORE_COLORS.length - 1];
-  return last?.color ?? "#9B2C2C";
+  return last?.color ?? "bg-[#9B2C2C] text-white";
 }
 
 function getScoreLabel(score: number): string {
@@ -50,7 +50,7 @@ export function ScoreBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-md font-semibold tabular-nums",
+        "inline-flex items-center gap-1.5 rounded-full font-bold tabular-nums",
         getScoreColor(clampedScore),
         SIZE_CLASSES[size]
       )}
