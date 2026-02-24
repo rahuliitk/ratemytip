@@ -4,7 +4,8 @@ import { useSession } from "next-auth/react";
 import useSWR from "swr";
 import Link from "next/link";
 import { ScoreBadge } from "@/components/shared/score-badge";
-import { Users, Bookmark, Star, MessageSquare } from "lucide-react";
+import { Users, Bookmark, Star, MessageSquare, Rss } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -60,6 +61,22 @@ export default function DashboardPage(): React.ReactElement {
             {profile?.data?.commentsCount ?? 0}
           </p>
         </div>
+      </div>
+
+      {/* Quick actions */}
+      <div className="mt-6 flex gap-3">
+        <Button asChild variant="outline" size="sm">
+          <Link href="/feed" className="flex items-center gap-1.5">
+            <Rss className="h-4 w-4" />
+            My Feed
+          </Link>
+        </Button>
+        <Button asChild variant="outline" size="sm">
+          <Link href="/saved" className="flex items-center gap-1.5">
+            <Bookmark className="h-4 w-4" />
+            Saved Tips
+          </Link>
+        </Button>
       </div>
 
       {/* Followed creators */}

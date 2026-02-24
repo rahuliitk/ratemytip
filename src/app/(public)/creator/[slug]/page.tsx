@@ -10,6 +10,7 @@ import { CreatorScoreBreakdown } from "@/components/creator/creator-score-breakd
 import { CreatorTipFeed } from "@/components/creator/creator-tip-feed";
 import { ShareButton } from "@/components/shared/share-button";
 import { FollowButton } from "@/components/creator/follow-button";
+import { ClaimButton } from "@/components/creator/claim-button";
 import { ReviewSection } from "@/components/creator/review-section";
 import type { CreatorDetail, TipSummary } from "@/types";
 
@@ -186,6 +187,9 @@ export default async function CreatorPage({
           <CreatorHeader creator={creator} />
         </div>
         <div className="flex items-center gap-2">
+          {!creator.isClaimed && (
+            <ClaimButton creatorId={creator.id} creatorName={creator.displayName} />
+          )}
           <FollowButton creatorId={creator.id} initialFollowing={isFollowing} />
           <ShareButton
             title={`${creator.displayName} — ${creator.score ? `RMT Score: ${creator.score.rmtScore.toFixed(1)}/100` : "Unrated"} | RateMyTip`}

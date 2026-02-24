@@ -77,11 +77,65 @@ export async function getOptionalSession(): Promise<Session | null> {
   return await auth();
 }
 
+interface CreatorSession {
+  session: Session;
+  userId: string;
+  username: string;
+  creatorId: string;
+}
+
 /**
- * Type guard: check if a result from requireAdmin/requireUser is an error response.
+ * Require that the authenticated user has the CREATOR role.
+ * Returns the session + userId + creatorId, or a 401/403 NextResponse.
+ */
+export async function requireCreator(): Promise<CreatorSession | NextResponse> {
+  const result = await requireUser();
+  if (result instanceof NextResponse) return result;
+
+  if (result.session.user.role !== "CREATOR") {
+    return FORBIDDEN_RESPONSE;
+  }
+
+  const { db } = await import("@/lib/db");
+  const user = await db.user.findUnique({
+    where: { id: result.userId },
+    select: { claimedCreatorId: true },
+  });
+
+  if (!user?.claimedCreatorId) {
+    return FORBIDDEN_RESPONSE;
+  }
+
+  return {
+    session: result.session,
+    userId: result.userId,
+    username: result.username,
+    creatorId: user.claimedCreatorId,
+  };
+}
+
+/**
+ * Require that the authenticated creator owns the specified creator profile.
+ * Used to ensure a creator can only modify their own profile/tips.
+ */
+export async function requireCreatorOwnership(
+  creatorId: string
+): Promise<CreatorSession | NextResponse> {
+  const result = await requireCreator();
+  if (result instanceof NextResponse) return result;
+
+  if (result.creatorId !== creatorId) {
+    return FORBIDDEN_RESPONSE;
+  }
+
+  return result;
+}
+
+/**
+ * Type guard: check if a result from requireAdmin/requireUser/requireCreator is an error response.
  */
 export function isAuthError(
-  result: AdminSession | UserSession | Session | NextResponse
+  result: AdminSession | UserSession | CreatorSession | Session | NextResponse
 ): result is NextResponse {
   return result instanceof NextResponse;
 }

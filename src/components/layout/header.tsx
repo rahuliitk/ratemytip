@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { Menu, X, Search, BarChart3, Github, User, LogOut, Settings, Bookmark, LayoutDashboard } from "lucide-react";
+import { Menu, X, Search, BarChart3, Github, LogOut, Settings, Bookmark, LayoutDashboard, PenLine, Rss } from "lucide-react";
+import { NotificationBell } from "@/components/shared/notification-bell";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +20,7 @@ export function Header(): React.ReactElement {
   const { data: session, status } = useSession();
 
   const isUser = session?.user?.userType === "user";
+  const isCreator = isUser && session?.user?.role === "CREATOR";
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200 bg-surface">
@@ -60,6 +62,8 @@ export function Header(): React.ReactElement {
           {status === "loading" ? (
             <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200" />
           ) : isUser ? (
+            <div className="flex items-center gap-2">
+            <NotificationBell />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
@@ -79,6 +83,20 @@ export function Header(): React.ReactElement {
                   <Link href="/dashboard" className="cursor-pointer">
                     <LayoutDashboard className="mr-2 h-4 w-4" />
                     Dashboard
+                  </Link>
+                </DropdownMenuItem>
+                {isCreator && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/creator-dashboard" className="cursor-pointer">
+                      <PenLine className="mr-2 h-4 w-4" />
+                      Creator Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem asChild>
+                  <Link href="/feed" className="cursor-pointer">
+                    <Rss className="mr-2 h-4 w-4" />
+                    My Feed
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
@@ -103,6 +121,7 @@ export function Header(): React.ReactElement {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            </div>
           ) : (
             <div className="flex items-center gap-2">
               <Button variant="ghost" size="sm" asChild>
@@ -169,6 +188,16 @@ export function Header(): React.ReactElement {
                   <LayoutDashboard className="h-4 w-4" />
                   Dashboard
                 </Link>
+                {isCreator && (
+                  <Link
+                    href="/creator-dashboard"
+                    className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-bg hover:text-primary"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <PenLine className="h-4 w-4" />
+                    Creator Dashboard
+                  </Link>
+                )}
                 <Link
                   href="/saved"
                   className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-bg hover:text-primary"

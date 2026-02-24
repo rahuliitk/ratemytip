@@ -27,6 +27,7 @@ import {
   scrapeFinnhubQueue,
   scrapeYahooAnalystQueue,
   scrapeStocktwitsQueue,
+  scrapeTelegramQueue,
 } from "../src/lib/queue/queues";
 import { createTwitterScrapeWorker, createYoutubeScrapeWorker } from "../src/lib/queue/workers/scrape-worker";
 import { createParseTipWorker } from "../src/lib/queue/workers/parse-worker";
@@ -40,6 +41,8 @@ import { createMoneyControlScrapeWorker } from "../src/lib/queue/workers/scrape-
 import { createFinnhubScrapeWorker } from "../src/lib/queue/workers/scrape-finnhub-worker";
 import { createYahooAnalystScrapeWorker } from "../src/lib/queue/workers/scrape-yahoo-analyst-worker";
 import { createStockTwitsScrapeWorker } from "../src/lib/queue/workers/scrape-stocktwits-worker";
+import { createTelegramScrapeWorker } from "../src/lib/queue/workers/scrape-telegram-worker";
+import { createNotificationWorker } from "../src/lib/queue/workers/notification-worker";
 
 // ──── Worker instances ────
 
@@ -71,6 +74,14 @@ function registerWorkers(): void {
   workers.push(createStockTwitsScrapeWorker());
   console.log("[Workers] Registered: scrape-stocktwits (concurrency: 1)");
 
+  // Telegram scraping worker
+  if (process.env.ENABLE_TELEGRAM_SCRAPER !== "false") {
+    workers.push(createTelegramScrapeWorker());
+    console.log("[Workers] Registered: scrape-telegram (concurrency: 2)");
+  } else {
+    console.log("[Workers] Skipped: scrape-telegram (disabled via ENABLE_TELEGRAM_SCRAPER)");
+  }
+
   // NLP parsing worker
   workers.push(createParseTipWorker());
   console.log("[Workers] Registered: parse-tip (concurrency: 10)");
@@ -90,6 +101,10 @@ function registerWorkers(): void {
   // Daily snapshot worker
   workers.push(createDailySnapshotWorker());
   console.log("[Workers] Registered: daily-snapshot (concurrency: 10)");
+
+  // Notification worker
+  workers.push(createNotificationWorker());
+  console.log("[Workers] Registered: notifications (concurrency: 5)");
 
   console.log(`[Workers] All ${workers.length} workers registered`);
 }
@@ -215,6 +230,19 @@ async function setupCronSchedules(): Promise<void> {
     }
   );
   console.log("[Workers] Cron: scrape-stocktwits — 2:30 PM & 6:30 PM UTC Mon-Fri");
+
+  // Telegram scraping: daily at 10 AM IST = 4:30 UTC
+  if (process.env.ENABLE_TELEGRAM_SCRAPER !== "false") {
+    await scrapeTelegramQueue.upsertJobScheduler(
+      "cron-scrape-telegram",
+      { pattern: "30 4 * * *" },
+      {
+        name: "scheduled-telegram-scrape",
+        data: { type: "full-scrape", triggeredAt: new Date().toISOString() },
+      }
+    );
+    console.log("[Workers] Cron: scrape-telegram — daily at 10 AM IST");
+  }
 
   // Expiration checks: every hour
   await checkExpirationsQueue.upsertJobScheduler(

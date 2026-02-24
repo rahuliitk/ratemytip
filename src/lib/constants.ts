@@ -156,6 +156,15 @@ export const STOCKTWITS = {
   MIN_FOLLOWERS_FOR_TRACKING: 1000,
 } as const;
 
+// ──── Telegram ────
+export const TELEGRAM = {
+  API_BASE: "https://api.telegram.org/bot",
+  MAX_REQUESTS_PER_SECOND: 30,
+  BATCH_SIZE: 100,
+  MAX_RETRIES: 3,
+  RETRY_DELAY_MS: 5000,
+} as const;
+
 // ──── Yahoo Finance Analyst ────
 export const YAHOO_ANALYST = {
   CONFIDENCE: 0.88,
@@ -188,6 +197,14 @@ export const EXCHANGE_MARKET_HOURS: Record<string, { openUTC: { hour: number; mi
   CRYPTO:   { openUTC: { hour: 0,  minute: 0 },  closeUTC: { hour: 23, minute: 59 }, timezone: "UTC",              weekdays: false },
   INDEX:    { openUTC: { hour: 0,  minute: 0 },  closeUTC: { hour: 23, minute: 59 }, timezone: "UTC",              weekdays: true },
 };
+
+// ──── Notifications ────
+export const NOTIFICATION = {
+  MAX_PER_PAGE: 50,
+  POLLING_INTERVAL_MS: 30_000, // 30 seconds
+  PASSWORD_RESET_EXPIRY_HOURS: 1,
+  EMAIL_VERIFICATION_EXPIRY_HOURS: 24,
+} as const;
 
 // Legacy compat — default market hours used when exchange is unknown
 export const MARKET_HOURS = {

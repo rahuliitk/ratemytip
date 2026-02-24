@@ -29,6 +29,7 @@ model AdminUser {
   // Relations
   moderationActions ModerationAction[]
   reviewActions     ReviewAction[]
+  claimReviews      ClaimRequest[]
 
   @@map("admin_users")
 }
@@ -644,30 +645,34 @@ enum TipSource {
 // ════════════════════════════════════════
 
 model User {
-  id               String    @id @default(cuid())
-  email            String    @unique
-  emailVerified    DateTime? @map("email_verified")
-  passwordHash     String?   @map("password_hash")
-  displayName      String    @map("display_name")
-  username         String    @unique
-  avatarUrl        String?   @map("avatar_url")
-  role             UserRole  @default(CONSUMER)
-  isActive         Boolean   @default(true) @map("is_active")
-  isBanned         Boolean   @default(false) @map("is_banned")
-  banReason        String?   @map("ban_reason")
-  claimedCreatorId String?   @unique @map("claimed_creator_id")
-  createdAt        DateTime  @default(now()) @map("created_at")
-  updatedAt        DateTime  @updatedAt @map("updated_at")
+  id                     String    @id @default(cuid())
+  email                  String    @unique
+  emailVerified          DateTime? @map("email_verified")
+  emailVerificationToken String?   @unique @map("email_verification_token")
+  passwordHash           String?   @map("password_hash")
+  displayName            String    @map("display_name")
+  username               String    @unique
+  avatarUrl              String?   @map("avatar_url")
+  role                   UserRole  @default(CONSUMER)
+  isActive               Boolean   @default(true) @map("is_active")
+  isBanned               Boolean   @default(false) @map("is_banned")
+  banReason              String?   @map("ban_reason")
+  claimedCreatorId       String?   @unique @map("claimed_creator_id")
+  createdAt              DateTime  @default(now()) @map("created_at")
+  updatedAt              DateTime  @updatedAt @map("updated_at")
 
   // Relations
-  claimedCreator Creator?       @relation("ClaimedBy", fields: [claimedCreatorId], references: [id])
-  oauthAccounts  OAuthAccount[]
-  tipRatings     TipRating[]
-  comments       Comment[]
-  commentVotes   CommentVote[]
-  savedTips      SavedTip[]
-  follows        Follow[]
-  creatorReviews CreatorReview[]
+  claimedCreator      Creator?           @relation("ClaimedBy", fields: [claimedCreatorId], references: [id])
+  oauthAccounts       OAuthAccount[]
+  tipRatings          TipRating[]
+  comments            Comment[]
+  commentVotes        CommentVote[]
+  savedTips           SavedTip[]
+  follows             Follow[]
+  creatorReviews      CreatorReview[]
+  claimRequests       ClaimRequest[]
+  notifications       Notification[]
+  passwordResetTokens PasswordResetToken[]
 
   @@index([username])
   @@index([email])
@@ -848,6 +853,39 @@ model CreatorReview {
 }
 
 // ════════════════════════════════════════
+// CLAIM REQUESTS (Creator profile claiming workflow)
+// ════════════════════════════════════════
+
+model ClaimRequest {
+  id               String       @id @default(cuid())
+  userId           String       @map("user_id")
+  creatorId        String       @map("creator_id")
+  status           ClaimStatus  @default(PENDING)
+  proofUrl         String       @map("proof_url") // Link to social profile proving ownership
+  verificationNote String?      @map("verification_note") // User's note about why they own this profile
+  reviewNote       String?      @map("review_note") // Admin's note on review decision
+  reviewedBy       String?      @map("reviewed_by")
+  reviewedAt       DateTime?    @map("reviewed_at")
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
+
+  // Relations
+  user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reviewer AdminUser? @relation(fields: [reviewedBy], references: [id])
+
+  @@unique([userId, creatorId])
+  @@index([status])
+  @@index([creatorId])
+  @@map("claim_requests")
+}
+
+enum ClaimStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// ════════════════════════════════════════
 // TIP EXPLANATIONS (Creator-written analysis)
 // ════════════════════════════════════════
 
@@ -865,4 +903,55 @@ model TipExplanation {
   tip Tip @relation(fields: [tipId], references: [id], onDelete: Cascade)
 
   @@map("tip_explanations")
+}
+
+// ════════════════════════════════════════
+// NOTIFICATIONS (In-app notifications for users)
+// ════════════════════════════════════════
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String           @map("user_id")
+  type      NotificationType
+  title     String
+  body      String
+  actionUrl String?          @map("action_url")
+  isRead    Boolean          @default(false) @map("is_read")
+  readAt    DateTime?        @map("read_at")
+  metadata  Json?
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt(sort: Desc)])
+  @@map("notifications")
+}
+
+enum NotificationType {
+  TIP_STATUS_CHANGED
+  NEW_TIP_FROM_FOLLOWED
+  CLAIM_APPROVED
+  CLAIM_REJECTED
+  COMMENT_REPLY
+}
+
+// ════════════════════════════════════════
+// PASSWORD RESET TOKENS
+// ════════════════════════════════════════
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String    @map("user_id")
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_reset_tokens")
 }
