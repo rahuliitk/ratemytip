@@ -135,6 +135,32 @@ interface TipDetail {
   readonly currentPrice: number | null;
 }
 
+// ──── Tip with creator info (used in public browse/feed views) ────
+
+interface TipWithCreator {
+  readonly id: string;
+  readonly direction: TipDirection;
+  readonly entryPrice: number;
+  readonly target1: number;
+  readonly target2: number | null;
+  readonly stopLoss: number;
+  readonly timeframe: TipTimeframe;
+  readonly status: TipStatus;
+  readonly returnPct: number | null;
+  readonly tipTimestamp: string;
+  readonly stockSymbol: string;
+  readonly stockName: string;
+  readonly creator: {
+    readonly id: string;
+    readonly slug: string;
+    readonly displayName: string;
+    readonly profileImageUrl: string | null;
+    readonly tier: string;
+    readonly isVerified: boolean;
+    readonly rmtScore: number | null;
+  };
+}
+
 // ──── Completed tip (used internally by the scoring engine) ────
 
 interface CompletedTip {
@@ -164,5 +190,6 @@ export type {
   TipAmendmentData,
   TipSummary,
   TipDetail,
+  TipWithCreator,
   CompletedTip,
 };
