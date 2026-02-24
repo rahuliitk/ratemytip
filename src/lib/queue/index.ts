@@ -17,6 +17,8 @@ export {
   scrapeYahooAnalystQueue,
   scrapeStocktwitsQueue,
   scrapeTelegramQueue,
+  portfolioQueue,
+  recommendationQueue,
   notificationQueue,
 } from "./queues";
 
@@ -30,6 +32,8 @@ import {
   scrapeYahooAnalystQueue,
   scrapeStocktwitsQueue,
   scrapeTelegramQueue,
+  portfolioQueue,
+  recommendationQueue,
   notificationQueue,
 } from "./queues";
 
@@ -177,6 +181,32 @@ export async function enqueueScrapeTelegram(
     "scrape-telegram",
     { type, triggeredAt: new Date().toISOString() },
     { jobId: `telegram-${type}-${Date.now()}` }
+  );
+}
+
+/**
+ * Enqueue a portfolio P&L recalculation job.
+ */
+export async function enqueuePortfolioUpdate(
+  type: "recalculate-all" | "snapshot" = "recalculate-all"
+): Promise<void> {
+  await portfolioQueue.add(
+    "portfolio-update",
+    { type, triggeredAt: new Date().toISOString() },
+    { jobId: `portfolio-${type}-${Date.now()}` }
+  );
+}
+
+/**
+ * Enqueue a recommendation pre-computation job.
+ */
+export async function enqueueRecommendationCompute(
+  userId?: string
+): Promise<void> {
+  await recommendationQueue.add(
+    "compute-recommendations",
+    { userId, triggeredAt: new Date().toISOString() },
+    { jobId: `reco-${userId ?? "all"}-${Date.now()}` }
   );
 }
 

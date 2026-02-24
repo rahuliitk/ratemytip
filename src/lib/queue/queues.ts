@@ -151,6 +151,27 @@ export const scrapeTelegramQueue = new Queue("scrape-telegram", {
   },
 });
 
+/** Queue for portfolio P&L recalculation during market hours */
+export const portfolioQueue = new Queue("portfolio", {
+  connection,
+  defaultJobOptions: {
+    attempts: 2,
+    backoff: { type: "exponential", delay: 5000 },
+    removeOnComplete: { age: 3600 },
+    removeOnFail: { age: 86400 },
+  },
+});
+
+/** Queue for pre-computing personalized recommendations */
+export const recommendationQueue = new Queue("recommendations", {
+  connection,
+  defaultJobOptions: {
+    attempts: 1,
+    removeOnComplete: { age: 86400 },
+    removeOnFail: { age: 604800 },
+  },
+});
+
 /** Queue for in-app notifications — dispatches notifications to users */
 export const notificationQueue = new Queue("notifications", {
   connection,

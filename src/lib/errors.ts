@@ -37,3 +37,22 @@ export class UnauthorizedError extends AppError {
     this.name = "UnauthorizedError";
   }
 }
+
+export class PaymentRequiredError extends AppError {
+  constructor(requiredTier: string) {
+    super(
+      `This feature requires a ${requiredTier} subscription`,
+      "PAYMENT_REQUIRED",
+      402,
+      { requiredTier }
+    );
+    this.name = "PaymentRequiredError";
+  }
+}
+
+export class SubscriptionError extends AppError {
+  constructor(message = "Subscription error") {
+    super(message, "SUBSCRIPTION_ERROR", 403);
+    this.name = "SubscriptionError";
+  }
+}

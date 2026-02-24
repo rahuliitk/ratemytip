@@ -131,11 +131,58 @@ export async function requireCreatorOwnership(
   return result;
 }
 
+interface SubscribedUserSession extends UserSession {
+  subscriptionTier: string;
+}
+
+const TIER_RANK: Record<string, number> = {
+  FREE: 0,
+  PRO: 1,
+  PREMIUM: 2,
+};
+
+/**
+ * Require the authenticated user has at least the given subscription tier.
+ * Returns the session + userId + tier, or a 402 NextResponse if tier is insufficient.
+ */
+export async function requireSubscription(
+  minTier: "PRO" | "PREMIUM"
+): Promise<SubscribedUserSession | NextResponse> {
+  const result = await requireUser();
+  if (result instanceof NextResponse) return result;
+
+  const { db } = await import("@/lib/db");
+  const user = await db.user.findUnique({
+    where: { id: result.userId },
+    select: { subscriptionTier: true },
+  });
+
+  const currentTier = user?.subscriptionTier ?? "FREE";
+  if ((TIER_RANK[currentTier] ?? 0) < (TIER_RANK[minTier] ?? 0)) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: "PAYMENT_REQUIRED",
+          message: `This feature requires a ${minTier} subscription`,
+          requiredTier: minTier,
+        },
+      },
+      { status: 402 }
+    );
+  }
+
+  return {
+    ...result,
+    subscriptionTier: currentTier,
+  };
+}
+
 /**
  * Type guard: check if a result from requireAdmin/requireUser/requireCreator is an error response.
  */
 export function isAuthError(
-  result: AdminSession | UserSession | CreatorSession | Session | NextResponse
+  result: AdminSession | UserSession | CreatorSession | SubscribedUserSession | Session | NextResponse
 ): result is NextResponse {
   return result instanceof NextResponse;
 }

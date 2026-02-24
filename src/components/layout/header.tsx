@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { Menu, X, Search, BarChart3, Github, LogOut, Settings, Bookmark, LayoutDashboard, PenLine, Rss } from "lucide-react";
+import { Menu, X, Search, BarChart3, Github, LogOut, Settings, Bookmark, LayoutDashboard, PenLine, Rss, Crown, Briefcase, Sparkles } from "lucide-react";
 import { NotificationBell } from "@/components/shared/notification-bell";
 import {
   DropdownMenu,
@@ -21,6 +21,7 @@ export function Header(): React.ReactElement {
 
   const isUser = session?.user?.userType === "user";
   const isCreator = isUser && session?.user?.role === "CREATOR";
+  const subTier = (session?.user as Record<string, unknown> | undefined)?.subscriptionTier as string | undefined;
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200 bg-surface">
@@ -47,6 +48,12 @@ export function Header(): React.ReactElement {
           >
             <Search className="h-4 w-4" />
             Search
+          </Link>
+          <Link
+            href="/pricing"
+            className="text-sm font-medium text-muted transition-colors hover:text-primary"
+          >
+            Pricing
           </Link>
           <a
             href="https://github.com/rahuliitk/ratemytip"
@@ -75,8 +82,18 @@ export function Header(): React.ReactElement {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>
-                  <p className="text-sm font-medium">{session.user.name}</p>
-                  <p className="text-xs text-muted">@{session.user.username}</p>
+                  <div className="flex items-center gap-2">
+                    <div>
+                      <p className="text-sm font-medium">{session.user.name}</p>
+                      <p className="text-xs text-muted">@{session.user.username}</p>
+                    </div>
+                    {subTier === "PRO" && (
+                      <span className="rounded bg-accent/10 px-1.5 py-0.5 text-[10px] font-bold text-accent">PRO</span>
+                    )}
+                    {subTier === "PREMIUM" && (
+                      <span className="rounded bg-yellow-100 px-1.5 py-0.5 text-[10px] font-bold text-yellow-700">PREMIUM</span>
+                    )}
+                  </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
@@ -97,6 +114,18 @@ export function Header(): React.ReactElement {
                   <Link href="/feed" className="cursor-pointer">
                     <Rss className="mr-2 h-4 w-4" />
                     My Feed
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/portfolio" className="cursor-pointer">
+                    <Briefcase className="mr-2 h-4 w-4" />
+                    Portfolio
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/discover" className="cursor-pointer">
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Discover
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
@@ -166,6 +195,13 @@ export function Header(): React.ReactElement {
               onClick={() => setMobileMenuOpen(false)}
             >
               Search
+            </Link>
+            <Link
+              href="/pricing"
+              className="rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-bg hover:text-primary"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Pricing
             </Link>
             <a
               href="https://github.com/rahuliitk/ratemytip"
