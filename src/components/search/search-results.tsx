@@ -42,7 +42,7 @@ export function SearchResults({
               <Link
                 key={creator.id}
                 href={`/creator/${creator.slug}`}
-                className="flex items-center justify-between rounded-lg border border-gray-200 bg-surface p-4 transition-shadow hover:shadow-md"
+                className="flex items-center justify-between rounded-2xl bg-white p-4 shadow-[0_1px_2px_0_rgba(26,54,93,0.04)] card-hover"
               >
                 <div className="flex items-center gap-3">
                   {creator.profileImageUrl ? (
@@ -65,7 +65,7 @@ export function SearchResults({
                     </p>
                   </div>
                 </div>
-                <span className="rounded bg-gray-100 px-2 py-0.5 text-xs font-medium text-muted">
+                <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-bold text-muted">
                   {creator.tier}
                 </span>
               </Link>
@@ -85,13 +85,13 @@ export function SearchResults({
               <Link
                 key={stock.id}
                 href={`/stock/${stock.symbol}`}
-                className="rounded-lg border border-gray-200 bg-surface p-4 transition-shadow hover:shadow-md"
+                className="rounded-2xl bg-white p-4 shadow-[0_1px_2px_0_rgba(26,54,93,0.04)] card-hover"
               >
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-bold text-primary">
                     {stock.symbol}
                   </span>
-                  <span className="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-muted">
+                  <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-muted">
                     {stock.exchange}
                   </span>
                 </div>

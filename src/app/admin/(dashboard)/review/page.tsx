@@ -117,16 +117,16 @@ export default function ReviewQueuePage(): React.ReactElement {
     <div>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-primary">Review Queue</h1>
+          <h1 className="text-2xl font-bold text-gradient-primary">Review Queue</h1>
           <p className="mt-1 text-sm text-muted">
             {tips.length} tips pending review
           </p>
         </div>
         <div className="flex items-center gap-3 text-xs text-muted">
-          <span className="rounded border border-gray-300 px-1.5 py-0.5 font-mono">A</span> Approve
-          <span className="rounded border border-gray-300 px-1.5 py-0.5 font-mono">R</span> Reject
-          <span className="rounded border border-gray-300 px-1.5 py-0.5 font-mono">N</span> Next
-          <span className="rounded border border-gray-300 px-1.5 py-0.5 font-mono">P</span> Prev
+          <span className="rounded border border-gray-200 px-1.5 py-0.5 font-mono">A</span> Approve
+          <span className="rounded border border-gray-200 px-1.5 py-0.5 font-mono">R</span> Reject
+          <span className="rounded border border-gray-200 px-1.5 py-0.5 font-mono">N</span> Next
+          <span className="rounded border border-gray-200 px-1.5 py-0.5 font-mono">P</span> Prev
         </div>
       </div>
 
@@ -135,7 +135,7 @@ export default function ReviewQueuePage(): React.ReactElement {
           <Loader2 className="h-6 w-6 animate-spin text-muted" />
         </div>
       ) : tips.length === 0 ? (
-        <div className="mt-8 rounded-lg border border-gray-200 bg-surface py-16 text-center">
+        <div className="mt-8 rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] py-16 text-center">
           <p className="text-sm text-muted">
             No tips pending review. All caught up!
           </p>
@@ -148,7 +148,7 @@ export default function ReviewQueuePage(): React.ReactElement {
             return (
               <div
                 key={tip.id}
-                className={`rounded-lg border bg-surface ${isSelected ? "border-accent ring-1 ring-accent/30" : "border-gray-200"}`}
+                className={`rounded-2xl bg-white shadow-[0_1px_2px_0_rgba(26,54,93,0.04)] ${isSelected ? "ring-1 ring-accent/30" : ""}`}
               >
                 {/* Summary row */}
                 <div className="flex items-center justify-between px-4 py-3">

@@ -44,7 +44,7 @@ export default function FeedPage(): React.ReactElement {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
-      <h1 className="text-2xl font-bold text-primary">My Feed</h1>
+      <h1 className="text-2xl font-bold text-gradient-primary">My Feed</h1>
       <p className="mt-1 text-sm text-muted">
         Tips from creators you follow
       </p>
@@ -52,7 +52,7 @@ export default function FeedPage(): React.ReactElement {
       {isLoading ? (
         <div className="mt-6 space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-24 animate-pulse rounded-lg bg-bg" />
+            <div key={i} className="h-24 rounded-2xl shimmer" />
           ))}
         </div>
       ) : tips.length === 0 ? (
@@ -73,7 +73,7 @@ export default function FeedPage(): React.ReactElement {
               <Link
                 key={tip.id}
                 href={`/tip/${tip.id}`}
-                className="block rounded-lg border border-gray-200 bg-surface p-4 transition-colors hover:bg-bg"
+                className="block rounded-2xl bg-white p-4 shadow-[0_1px_2px_0_rgba(26,54,93,0.04)] card-hover"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -92,10 +92,10 @@ export default function FeedPage(): React.ReactElement {
                 </div>
                 <div className="mt-2 flex items-center gap-3">
                   <span
-                    className={`rounded px-1.5 py-0.5 text-xs font-bold ${
+                    className={`rounded-full px-2 py-0.5 text-xs font-bold ${
                       tip.direction === "BUY"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
+                        ? "bg-[#276749]/10 text-[#276749]"
+                        : "bg-[#C53030]/10 text-[#C53030]"
                     }`}
                   >
                     {tip.direction}

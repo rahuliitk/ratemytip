@@ -197,13 +197,13 @@ export function CommentCard({
       <div className="py-3">
         {/* Header */}
         <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 text-xs font-semibold text-blue-700">
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#2B6CB0]/10 text-xs font-semibold text-[#2B6CB0]">
             {displayName.charAt(0).toUpperCase()}
           </div>
           <span className="text-sm font-medium text-primary">{displayName}</span>
           <TimeAgo date={comment.createdAt} className="text-xs" />
           {comment.isPinned && (
-            <span className="rounded bg-yellow-100 px-1.5 py-0.5 text-xs font-medium text-yellow-700">
+            <span className="rounded-md bg-[#C05621]/10 px-1.5 py-0.5 text-xs font-medium text-[#C05621]">
               Pinned
             </span>
           )}
@@ -218,7 +218,7 @@ export function CommentCard({
               <textarea
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
-                className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:border-blue-300 focus:outline-none"
+                className="w-full rounded-xl border border-gray-200/60 px-3 py-2 text-sm focus:border-[#2B6CB0]/40 focus:outline-none focus:ring-2 focus:ring-[#2B6CB0]/10"
                 rows={3}
                 maxLength={1000}
               />
@@ -322,7 +322,7 @@ export function CommentCard({
                 value={replyContent}
                 onChange={(e) => setReplyContent(e.target.value)}
                 placeholder="Write a reply..."
-                className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:border-blue-300 focus:outline-none"
+                className="w-full rounded-xl border border-gray-200/60 px-3 py-2 text-sm focus:border-[#2B6CB0]/40 focus:outline-none focus:ring-2 focus:ring-[#2B6CB0]/10"
                 rows={2}
                 maxLength={1000}
               />

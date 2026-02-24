@@ -12,7 +12,7 @@ export function TipExplanation({
   updatedAt,
 }: TipExplanationProps): React.ReactElement {
   return (
-    <div className="rounded-lg border border-gray-200 bg-surface p-6">
+    <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-6">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-primary">Creator&apos;s Analysis</h3>
         <span className="text-xs text-muted">
@@ -35,7 +35,7 @@ export function TipExplanation({
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="overflow-hidden rounded-md border border-gray-200"
+              className="overflow-hidden rounded-xl border border-gray-200/60"
             >
               <img
                 src={url}

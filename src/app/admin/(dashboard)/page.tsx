@@ -143,7 +143,7 @@ export default async function AdminDashboardPage(): Promise<React.ReactElement> 
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-primary">Dashboard</h1>
+      <h1 className="text-2xl font-bold text-gradient-primary">Dashboard</h1>
       <p className="mt-1 text-sm text-muted">
         Overview of platform activity
       </p>
@@ -154,7 +154,7 @@ export default async function AdminDashboardPage(): Promise<React.ReactElement> 
           return (
             <div
               key={card.label}
-              className="rounded-lg border border-gray-200 bg-surface p-5"
+              className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-5"
             >
               <div className="flex items-center gap-3">
                 <div className={`rounded-lg p-2 ${card.bgColor}`}>
@@ -177,7 +177,7 @@ export default async function AdminDashboardPage(): Promise<React.ReactElement> 
       {/* Activity Feed */}
       <div className="mt-8 grid gap-6 lg:grid-cols-3">
         {/* Recent Scrape Jobs */}
-        <div className="rounded-lg border border-gray-200 bg-surface p-5">
+        <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-5">
           <div className="flex items-center gap-2">
             <Bot className="h-4 w-4 text-accent" />
             <h2 className="text-sm font-semibold text-primary">
@@ -216,7 +216,7 @@ export default async function AdminDashboardPage(): Promise<React.ReactElement> 
         </div>
 
         {/* Recent Reviews */}
-        <div className="rounded-lg border border-gray-200 bg-surface p-5">
+        <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-5">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4 text-success" />
             <h2 className="text-sm font-semibold text-primary">
@@ -255,7 +255,7 @@ export default async function AdminDashboardPage(): Promise<React.ReactElement> 
         </div>
 
         {/* Recent Score Updates */}
-        <div className="rounded-lg border border-gray-200 bg-surface p-5">
+        <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-5">
           <div className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4 text-warning" />
             <h2 className="text-sm font-semibold text-primary">

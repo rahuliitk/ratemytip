@@ -167,7 +167,7 @@ export default async function TipsPage({
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-primary">Browse Tips</h1>
+          <h1 className="text-3xl font-bold text-gradient-primary">Browse Tips</h1>
           <p className="mt-2 text-sm text-muted">
             {total.toLocaleString("en-IN")} tips from verified creators
           </p>
@@ -182,7 +182,7 @@ export default async function TipsPage({
       </div>
 
       {/* Tip cards */}
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="stagger-children mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {tips.map((tip) => (
           <TipCardWithCreator key={tip.id} tip={tip} />
         ))}
@@ -200,7 +200,7 @@ export default async function TipsPage({
           {page > 1 && (
             <Link
               href={paginationHref(page - 1)}
-              className="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-muted hover:bg-bg"
+              className="rounded-full border border-gray-200 px-3 py-1.5 text-sm text-muted transition-all duration-200 hover:bg-gray-50 hover:text-text"
             >
               Previous
             </Link>
@@ -211,7 +211,7 @@ export default async function TipsPage({
           {page < totalPages && (
             <Link
               href={paginationHref(page + 1)}
-              className="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-muted hover:bg-bg"
+              className="rounded-full border border-gray-200 px-3 py-1.5 text-sm text-muted transition-all duration-200 hover:bg-gray-50 hover:text-text"
             >
               Next
             </Link>

@@ -25,7 +25,7 @@ interface PortfolioPnlChartProps {
 export function PortfolioPnlChart({ data }: PortfolioPnlChartProps): React.ReactElement {
   if (data.length === 0) {
     return (
-      <div className="flex h-48 items-center justify-center rounded-lg border border-gray-200 bg-white text-sm text-[#718096]">
+      <div className="flex h-48 items-center justify-center rounded-2xl bg-white shadow-[0_1px_2px_0_rgba(26,54,93,0.04)] text-sm text-[#718096]">
         No portfolio history available yet.
       </div>
     );
@@ -50,7 +50,7 @@ export function PortfolioPnlChart({ data }: PortfolioPnlChartProps): React.React
   const padding = (maxValue - minValue) * 0.1 || 100;
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4">
+    <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-4">
       <h3 className="mb-4 text-sm font-semibold text-[#1A202C]">Portfolio Value</h3>
       <ResponsiveContainer width="100%" height={280}>
         <AreaChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>

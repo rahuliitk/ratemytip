@@ -125,7 +125,7 @@ export default async function AdminAnalyticsPage(): Promise<React.ReactElement> 
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-primary">Analytics</h1>
+      <h1 className="text-2xl font-bold text-gradient-primary">Analytics</h1>
       <p className="mt-1 text-sm text-muted">
         Platform-wide performance metrics
       </p>
@@ -136,7 +136,7 @@ export default async function AdminAnalyticsPage(): Promise<React.ReactElement> 
           return (
             <div
               key={card.label}
-              className="rounded-lg border border-gray-200 bg-surface p-5"
+              className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-5"
             >
               <div className="flex items-center gap-3">
                 <Icon className={`h-5 w-5 ${card.color}`} />
@@ -154,7 +154,7 @@ export default async function AdminAnalyticsPage(): Promise<React.ReactElement> 
         })}
       </div>
 
-      <div className="mt-6 rounded-lg border border-gray-200 bg-surface p-5">
+      <div className="mt-6 rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-5">
         <h2 className="text-sm font-semibold text-primary">
           Average RMT Score
         </h2>

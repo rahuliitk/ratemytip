@@ -108,7 +108,7 @@ function ResetPasswordForm(): React.ReactElement {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="rounded-md bg-red-50 p-3 text-sm text-danger">
+            <div className="rounded-xl bg-[#C53030]/10 p-3 text-sm text-[#C53030]">
               {error}
             </div>
           )}
@@ -154,7 +154,7 @@ function ResetPasswordForm(): React.ReactElement {
 
 export default function ResetPasswordPage(): React.ReactElement {
   return (
-    <Suspense fallback={<div className="h-96 animate-pulse rounded-lg bg-gray-100" />}>
+    <Suspense fallback={<div className="h-96 rounded-2xl shimmer" />}>
       <ResetPasswordForm />
     </Suspense>
   );

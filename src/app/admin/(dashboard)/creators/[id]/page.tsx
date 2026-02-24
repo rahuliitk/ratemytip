@@ -185,7 +185,7 @@ export default function AdminCreatorDetailPage(): React.ReactElement {
       </Link>
 
       {/* Header */}
-      <div className="flex items-start justify-between rounded-lg border border-gray-200 bg-surface p-6">
+      <div className="flex items-start justify-between rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-6">
         <div className="flex items-center gap-4">
           {creator.profileImageUrl ? (
             <img
@@ -200,7 +200,7 @@ export default function AdminCreatorDetailPage(): React.ReactElement {
           )}
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-primary">
+              <h1 className="text-2xl font-bold text-gradient-primary">
                 {creator.displayName}
               </h1>
               <span
@@ -258,7 +258,7 @@ export default function AdminCreatorDetailPage(): React.ReactElement {
         ].map((stat) => (
           <div
             key={stat.label}
-            className="rounded-lg border border-gray-200 bg-surface p-4"
+            className="rounded-2xl bg-white shadow-[0_1px_2px_0_rgba(26,54,93,0.04)] p-4"
           >
             <p className="text-xs text-muted">{stat.label}</p>
             <p className="mt-1 text-lg font-bold tabular-nums text-text">
@@ -270,7 +270,7 @@ export default function AdminCreatorDetailPage(): React.ReactElement {
 
       {/* Score Breakdown */}
       {creator.currentScore && (
-        <div className="rounded-lg border border-gray-200 bg-surface p-6">
+        <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-6">
           <h2 className="text-sm font-semibold text-primary">Score Breakdown</h2>
           <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
             {[
@@ -300,7 +300,7 @@ export default function AdminCreatorDetailPage(): React.ReactElement {
 
       {/* Platforms */}
       {creator.platforms.length > 0 && (
-        <div className="rounded-lg border border-gray-200 bg-surface p-6">
+        <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-6">
           <h2 className="text-sm font-semibold text-primary">Platforms</h2>
           <div className="mt-3 space-y-2">
             {creator.platforms.map((p) => (
@@ -337,7 +337,7 @@ export default function AdminCreatorDetailPage(): React.ReactElement {
       )}
 
       {/* Moderation Actions */}
-      <div className="rounded-lg border border-gray-200 bg-surface p-6">
+      <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-6">
         <h2 className="text-sm font-semibold text-primary">Moderation</h2>
         <div className="mt-4 flex flex-col gap-3 sm:flex-row">
           <input
@@ -345,7 +345,7 @@ export default function AdminCreatorDetailPage(): React.ReactElement {
             value={moderationReason}
             onChange={(e) => setModerationReason(e.target.value)}
             placeholder="Reason for moderation action..."
-            className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-accent focus:outline-none"
+            className="flex-1 rounded-md border border-gray-200 px-3 py-2 text-sm focus:border-accent focus:outline-none"
           />
           <div className="flex gap-2">
             <button
@@ -401,7 +401,7 @@ export default function AdminCreatorDetailPage(): React.ReactElement {
       </div>
 
       {/* Recent Tips */}
-      <div className="rounded-lg border border-gray-200 bg-surface p-6">
+      <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-6">
         <h2 className="text-sm font-semibold text-primary">
           Recent Tips ({creator.recentTips.length})
         </h2>
@@ -440,7 +440,7 @@ export default function AdminCreatorDetailPage(): React.ReactElement {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {creator.recentTips.map((tip) => (
-                  <tr key={tip.id} className="hover:bg-bg">
+                  <tr key={tip.id} className="hover:bg-[#2B6CB0]/5">
                     <td className="py-2 text-sm font-medium text-text">
                       <Link
                         href={`/tip/${tip.id}`}

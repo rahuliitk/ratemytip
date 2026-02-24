@@ -10,7 +10,7 @@ export default function CreatorLayout({
       <div className="flex flex-col gap-8 md:flex-row">
         {/* Sidebar */}
         <aside className="w-full shrink-0 md:w-56">
-          <h2 className="mb-4 text-lg font-bold text-primary">Creator Dashboard</h2>
+          <h2 className="mb-4 text-lg font-bold text-gradient-primary">Creator Dashboard</h2>
           <CreatorSidebar />
         </aside>
 

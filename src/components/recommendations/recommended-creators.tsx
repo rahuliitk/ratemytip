@@ -38,7 +38,7 @@ export function RecommendedCreators({ creators }: RecommendedCreatorsProps): Rea
           <Link
             key={rec.creatorId}
             href={`/creator/${c.slug}`}
-            className="flex min-w-[200px] flex-col rounded-lg border border-gray-200 p-4 transition-shadow hover:shadow-md"
+            className="flex min-w-[200px] flex-col rounded-2xl bg-white shadow-[0_1px_2px_0_rgba(26,54,93,0.04)] p-4 transition-shadow hover:shadow-[0_4px_12px_0_rgba(26,54,93,0.10)]"
           >
             <div className="mb-2 flex items-center gap-2">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10 text-sm font-bold text-accent">

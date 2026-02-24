@@ -40,17 +40,17 @@ export function CreatorTipFeed({
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold text-primary">Tip History</h2>
+        <h2 className="text-lg font-bold text-gradient-primary">Tip History</h2>
         <div className="flex gap-1">
           {STATUS_FILTERS.map((filter) => (
             <button
               key={filter.value}
               type="button"
               onClick={() => setStatusFilter(filter.value)}
-              className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+              className={`rounded-xl px-3 py-1 text-xs font-medium transition-colors ${
                 statusFilter === filter.value
-                  ? "bg-accent text-white"
-                  : "bg-gray-100 text-muted hover:bg-gray-200"
+                  ? "bg-[#1A365D] text-white"
+                  : "bg-[#F7FAFC] text-muted hover:bg-gray-200"
               }`}
             >
               {filter.label}

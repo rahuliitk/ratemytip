@@ -108,9 +108,9 @@ export function ReviewSection({ creatorId }: ReviewSectionProps): React.ReactEle
   const displayRating = hoverRating || formRating;
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-surface p-6">
+    <div className="rounded-2xl bg-white p-6 shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)]">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-primary">Reviews</h2>
+        <h2 className="text-lg font-bold text-gradient-primary">Reviews</h2>
         {session?.user?.userId && (
           <Button
             size="sm"
@@ -150,8 +150,8 @@ export function ReviewSection({ creatorId }: ReviewSectionProps): React.ReactEle
 
       {/* Review form */}
       {showForm && (
-        <div className="mt-4 rounded-md border border-gray-200 bg-gray-50 p-4">
-          <p className="text-sm font-medium text-primary">
+        <div className="mt-4 rounded-xl border border-gray-100 bg-gray-50/50 p-4">
+          <p className="text-sm font-medium text-[#1A365D]">
             {userReview ? "Update your review" : "Rate this creator"}
           </p>
           <div className="mt-2 flex items-center gap-1">
@@ -179,7 +179,7 @@ export function ReviewSection({ creatorId }: ReviewSectionProps): React.ReactEle
             value={formContent}
             onChange={(e) => setFormContent(e.target.value)}
             placeholder="Share your experience with this creator (optional)"
-            className="mt-3 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:border-blue-300 focus:outline-none"
+            className="mt-3 w-full rounded-xl border border-gray-100 bg-white px-3 py-2 text-sm placeholder:text-gray-400 transition-colors duration-200 focus:border-[#2B6CB0] focus:outline-none focus:ring-1 focus:ring-[#2B6CB0]/20"
             rows={3}
             maxLength={2000}
           />

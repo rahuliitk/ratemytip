@@ -25,7 +25,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 export function ScraperStatus({ jobs }: ScraperStatusProps): React.ReactElement {
   return (
-    <div className="overflow-x-auto rounded-lg border border-gray-200 bg-surface">
+    <div className="overflow-x-auto rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)]">
       <table className="w-full min-w-[700px] text-left">
         <thead>
           <tr className="border-b border-gray-200 bg-bg">
@@ -54,7 +54,7 @@ export function ScraperStatus({ jobs }: ScraperStatusProps): React.ReactElement 
         </thead>
         <tbody className="divide-y divide-gray-100">
           {jobs.map((job) => (
-            <tr key={job.id} className="hover:bg-bg">
+            <tr key={job.id} className="hover:bg-[#2B6CB0]/5">
               <td className="px-4 py-3 text-sm font-medium text-text">
                 {job.platform}
               </td>

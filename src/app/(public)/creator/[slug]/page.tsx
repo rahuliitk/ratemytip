@@ -203,8 +203,8 @@ export default async function CreatorPage({
 
       {/* Score History Chart */}
       {creator.scoreHistory.length > 0 && (
-        <div className="mt-8 rounded-lg border border-gray-200 bg-surface p-6">
-          <h2 className="text-lg font-bold text-primary">Score History</h2>
+        <div className="mt-8 rounded-2xl bg-white p-6 shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)]">
+          <h2 className="text-lg font-bold text-gradient-primary">Score History</h2>
           <p className="mt-1 text-sm text-muted">
             RMT Score trend over the last {creator.scoreHistory.length} days
           </p>
@@ -217,8 +217,8 @@ export default async function CreatorPage({
       {/* Score Breakdown + Accuracy by Timeframe */}
       {creator.score && (
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
-          <div className="rounded-lg border border-gray-200 bg-surface p-6">
-            <h2 className="text-lg font-bold text-primary">Score Breakdown</h2>
+          <div className="rounded-2xl bg-white p-6 shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)]">
+            <h2 className="text-lg font-bold text-gradient-primary">Score Breakdown</h2>
             <p className="mt-1 text-sm text-muted">
               Component scores that make up the RMT Score
             </p>
@@ -226,8 +226,8 @@ export default async function CreatorPage({
               <CreatorScoreBreakdown score={creator.score} />
             </div>
           </div>
-          <div className="rounded-lg border border-gray-200 bg-surface p-6">
-            <h2 className="text-lg font-bold text-primary">Accuracy by Timeframe</h2>
+          <div className="rounded-2xl bg-white p-6 shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)]">
+            <h2 className="text-lg font-bold text-gradient-primary">Accuracy by Timeframe</h2>
             <p className="mt-1 text-sm text-muted">
               Performance breakdown by trading style
             </p>

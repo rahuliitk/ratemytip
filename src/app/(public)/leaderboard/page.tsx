@@ -6,6 +6,8 @@ import { LeaderboardTable } from "@/components/leaderboard/leaderboard-table";
 import { LeaderboardFilters } from "@/components/leaderboard/leaderboard-filters";
 import { CategoryTabs } from "@/components/leaderboard/category-tabs";
 import { ShareButton } from "@/components/shared/share-button";
+import { ScoreRing } from "@/components/shared/score-ring";
+import { cn } from "@/lib/utils";
 import type { LeaderboardEntry } from "@/types";
 
 export const revalidate = 300; // 5 minutes
@@ -91,6 +93,12 @@ async function getLeaderboardData(params: {
   }
 }
 
+const PODIUM_STYLES = [
+  { ring: "ring-2 ring-yellow-300/50", medal: "bg-gradient-to-br from-yellow-400 to-yellow-500", label: "1st" },
+  { ring: "ring-2 ring-gray-300/50", medal: "bg-gradient-to-br from-gray-300 to-gray-400", label: "2nd" },
+  { ring: "ring-2 ring-orange-300/50", medal: "bg-gradient-to-br from-orange-300 to-orange-400", label: "3rd" },
+] as const;
+
 export default async function LeaderboardPage({
   searchParams,
 }: LeaderboardPageProps): Promise<React.ReactElement> {
@@ -108,12 +116,13 @@ export default async function LeaderboardPage({
   });
 
   const totalPages = Math.ceil(total / pageSize);
+  const top3 = page === 1 ? entries.slice(0, 3) : [];
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-primary">Leaderboard</h1>
+          <h1 className="text-3xl font-bold text-gradient-primary">Leaderboard</h1>
           <p className="mt-2 text-sm text-muted">
             Top stock tip creators ranked by verified performance
           </p>
@@ -131,6 +140,56 @@ export default async function LeaderboardPage({
         </Suspense>
       </div>
 
+      {/* Top 3 Podium */}
+      {top3.length >= 3 && (
+        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {[top3[1], top3[0], top3[2]].map((entry, i) => {
+            if (!entry) return null;
+            const podiumIndex = i === 0 ? 1 : i === 1 ? 0 : 2;
+            const style = PODIUM_STYLES[podiumIndex];
+            if (!style) return null;
+            return (
+              <a
+                key={entry.creator.id}
+                href={`/creator/${entry.creator.slug}`}
+                className={cn(
+                  "flex flex-col items-center rounded-2xl bg-white p-6 shadow-md transition-all duration-200 hover:shadow-lg",
+                  style.ring,
+                  i === 1 && "sm:-mt-4 sm:pb-8",
+                )}
+              >
+                <span
+                  className={cn(
+                    "mb-3 inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white shadow-sm",
+                    style.medal,
+                  )}
+                >
+                  {style.label}
+                </span>
+                {entry.creator.profileImageUrl ? (
+                  <img
+                    src={entry.creator.profileImageUrl}
+                    alt={entry.creator.displayName}
+                    className="h-14 w-14 rounded-full object-cover ring-2 ring-gray-100"
+                  />
+                ) : (
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#1A365D]/10 to-[#2B6CB0]/10 text-lg font-bold text-accent ring-2 ring-gray-100">
+                    {entry.creator.displayName.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <p className="mt-3 text-sm font-semibold text-text">{entry.creator.displayName}</p>
+                <div className="mt-3">
+                  <ScoreRing score={entry.score.rmtScore} size="sm" />
+                </div>
+                <p className="mt-2 text-xs text-muted">
+                  {(entry.score.accuracyRate * 100).toFixed(1)}% accuracy
+                </p>
+              </a>
+            );
+          })}
+        </div>
+      )}
+
       <div className="mt-6">
         <LeaderboardTable entries={entries} />
       </div>
@@ -141,18 +200,18 @@ export default async function LeaderboardPage({
           {page > 1 && (
             <a
               href={`?page=${page - 1}&sortBy=${sortBy}&minTips=${minTips}`}
-              className="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-muted hover:bg-bg"
+              className="rounded-full border border-gray-200 px-4 py-1.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-gray-50 hover:text-text"
             >
               Previous
             </a>
           )}
-          <span className="text-sm text-muted">
+          <span className="text-sm text-muted tabular-nums">
             Page {page} of {totalPages}
           </span>
           {page < totalPages && (
             <a
               href={`?page=${page + 1}&sortBy=${sortBy}&minTips=${minTips}`}
-              className="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-muted hover:bg-bg"
+              className="rounded-full border border-gray-200 px-4 py-1.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-gray-50 hover:text-text"
             >
               Next
             </a>

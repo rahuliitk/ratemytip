@@ -52,7 +52,7 @@ export function ClaimButton({ creatorId, creatorName }: ClaimButtonProps): React
 
   if (result?.success) {
     return (
-      <div className="rounded-md bg-green-50 px-3 py-2 text-sm text-green-800">
+      <div className="rounded-xl bg-[#276749]/10 px-3 py-2 text-sm text-[#276749]">
         {result.message}
       </div>
     );
@@ -73,8 +73,8 @@ export function ClaimButton({ creatorId, creatorName }: ClaimButtonProps): React
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-lg border border-gray-200 bg-surface p-4">
-      <h3 className="text-sm font-semibold text-primary">
+    <form onSubmit={handleSubmit} className="rounded-2xl bg-white p-4 shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)]">
+      <h3 className="text-sm font-bold text-gradient-primary">
         Claim {creatorName}&apos;s profile
       </h3>
       <p className="mt-1 text-xs text-muted">
@@ -93,7 +93,7 @@ export function ClaimButton({ creatorId, creatorName }: ClaimButtonProps): React
             placeholder="https://twitter.com/yourusername"
             value={proofUrl}
             onChange={(e) => setProofUrl(e.target.value)}
-            className="mt-1 w-full rounded-md border border-gray-200 px-3 py-1.5 text-sm focus:border-accent focus:outline-none"
+            className="mt-1 w-full rounded-xl border border-gray-100 px-3 py-2 text-sm transition-colors duration-200 focus:border-[#2B6CB0] focus:outline-none focus:ring-1 focus:ring-[#2B6CB0]/20"
           />
         </div>
 
@@ -107,7 +107,7 @@ export function ClaimButton({ creatorId, creatorName }: ClaimButtonProps): React
             placeholder="Any additional information to help verify your identity..."
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            className="mt-1 w-full rounded-md border border-gray-200 px-3 py-1.5 text-sm focus:border-accent focus:outline-none"
+            className="mt-1 w-full rounded-xl border border-gray-100 px-3 py-2 text-sm transition-colors duration-200 focus:border-[#2B6CB0] focus:outline-none focus:ring-1 focus:ring-[#2B6CB0]/20"
             maxLength={1000}
           />
         </div>

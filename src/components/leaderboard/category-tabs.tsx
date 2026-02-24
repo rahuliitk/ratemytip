@@ -24,16 +24,16 @@ export function CategoryTabs(): React.ReactElement {
   }
 
   return (
-    <div className="flex gap-1 overflow-x-auto border-b border-gray-200">
+    <div className="inline-flex rounded-xl bg-gray-100 p-1 gap-1">
       {CATEGORIES.map((cat) => (
         <Link
           key={cat.href}
           href={cat.href}
           className={cn(
-            "whitespace-nowrap border-b-2 px-4 py-2.5 text-sm font-medium transition-colors",
+            "whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200",
             isActive(cat.href)
-              ? "border-accent text-accent"
-              : "border-transparent text-muted hover:border-gray-300 hover:text-text"
+              ? "bg-white text-primary shadow-sm"
+              : "text-muted hover:text-text"
           )}
         >
           {cat.label}

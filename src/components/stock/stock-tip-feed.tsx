@@ -33,19 +33,19 @@ export function StockTipFeed({
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold text-primary">
+        <h2 className="text-lg font-bold text-gradient-primary">
           Tips for {stockSymbol} ({filteredTips.length})
         </h2>
-        <div className="flex gap-1">
+        <div className="flex gap-1 rounded-xl bg-gray-100 p-1">
           {FILTER_OPTIONS.map((opt) => (
             <button
               key={opt}
               type="button"
               onClick={() => setFilter(opt)}
-              className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
                 filter === opt
-                  ? "bg-accent text-white"
-                  : "bg-bg text-muted hover:bg-gray-200"
+                  ? "bg-white text-[#1A365D] shadow-[0_1px_2px_0_rgba(26,54,93,0.08)]"
+                  : "text-muted hover:text-text"
               }`}
             >
               {opt === "ALL" ? "All" : opt.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (l) => l.toUpperCase())}

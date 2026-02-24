@@ -97,11 +97,11 @@ export default function ProfilePage(): React.ReactElement {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-primary">Edit Profile</h1>
+        <h1 className="text-2xl font-bold text-gradient-primary">Edit Profile</h1>
         <p className="text-sm text-muted">Update your creator profile information</p>
       </div>
 
-      <div className="rounded-lg border border-gray-200 bg-surface p-6">
+      <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-6">
         <div className="mb-4">
           <p className="text-sm font-medium text-text">{profile.displayName}</p>
           <p className="text-xs text-muted">@{profile.slug} &middot; {profile.tier}</p>
@@ -115,7 +115,7 @@ export default function ProfilePage(): React.ReactElement {
               rows={3}
               value={bio}
               onChange={(e) => setBio(e.target.value)}
-              className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:border-accent focus:outline-none"
+              className="mt-1 w-full rounded-xl border border-gray-100 px-3 py-2 text-sm focus:border-accent focus:outline-none"
               maxLength={500}
               placeholder="Tell people about yourself and your trading style..."
             />
@@ -131,7 +131,7 @@ export default function ProfilePage(): React.ReactElement {
               type="text"
               value={specializations}
               onChange={(e) => setSpecializations(e.target.value)}
-              className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:border-accent focus:outline-none"
+              className="mt-1 w-full rounded-xl border border-gray-100 px-3 py-2 text-sm focus:border-accent focus:outline-none"
               placeholder="INTRADAY, OPTIONS, LARGE_CAP (comma-separated)"
             />
             <p className="mt-1 text-xs text-muted">Comma-separated tags</p>
@@ -146,7 +146,7 @@ export default function ProfilePage(): React.ReactElement {
               type="url"
               value={profileImageUrl}
               onChange={(e) => setProfileImageUrl(e.target.value)}
-              className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:border-accent focus:outline-none"
+              className="mt-1 w-full rounded-xl border border-gray-100 px-3 py-2 text-sm focus:border-accent focus:outline-none"
               placeholder="https://example.com/avatar.jpg"
             />
           </div>
@@ -164,8 +164,8 @@ export default function ProfilePage(): React.ReactElement {
       </div>
 
       {/* Connected Platforms (read-only) */}
-      <div className="rounded-lg border border-gray-200 bg-surface p-6">
-        <h2 className="text-lg font-bold text-primary">Connected Platforms</h2>
+      <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-6">
+        <h2 className="text-lg font-bold text-gradient-primary">Connected Platforms</h2>
         <p className="mt-1 text-xs text-muted">
           Platforms linked to your creator profile (managed by admin)
         </p>

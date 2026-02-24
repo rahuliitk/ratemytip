@@ -69,7 +69,7 @@ export default function AdminScrapersPage(): React.ReactElement {
     <div>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-primary">Scraper Jobs</h1>
+          <h1 className="text-2xl font-bold text-gradient-primary">Scraper Jobs</h1>
           <p className="mt-1 text-sm text-muted">
             Manage and monitor scraping jobs
           </p>
@@ -104,7 +104,7 @@ export default function AdminScrapersPage(): React.ReactElement {
           <button
             type="button"
             onClick={fetchJobs}
-            className="inline-flex items-center gap-2 rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-muted hover:bg-bg"
+            className="inline-flex items-center gap-2 rounded-md border border-gray-200 px-3 py-2 text-sm font-medium text-muted hover:bg-[#2B6CB0]/5"
           >
             <RotateCw className="h-4 w-4" />
             Refresh
@@ -117,7 +117,7 @@ export default function AdminScrapersPage(): React.ReactElement {
           <Loader2 className="h-6 w-6 animate-spin text-muted" />
         </div>
       ) : (
-        <div className="mt-6 overflow-x-auto rounded-lg border border-gray-200 bg-surface">
+        <div className="mt-6 overflow-x-auto rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)]">
           <table className="w-full min-w-[700px] text-left">
             <thead>
               <tr className="border-b border-gray-200 bg-bg">
@@ -146,7 +146,7 @@ export default function AdminScrapersPage(): React.ReactElement {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {jobs.map((job) => (
-                <tr key={job.id} className="hover:bg-bg">
+                <tr key={job.id} className="hover:bg-[#2B6CB0]/5">
                   <td className="px-4 py-3 text-sm font-medium text-text">
                     {job.platform}
                   </td>

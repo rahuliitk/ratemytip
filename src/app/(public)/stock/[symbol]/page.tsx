@@ -161,8 +161,8 @@ export default async function StockPage({
 
       {/* Price Chart */}
       {priceData.length > 0 && (
-        <div className="mt-6 rounded-lg border border-gray-200 bg-surface p-6">
-          <h2 className="text-lg font-bold text-primary">Price History</h2>
+        <div className="mt-6 rounded-2xl bg-white p-6 shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)]">
+          <h2 className="text-lg font-bold text-gradient-primary">Price History</h2>
           <p className="mt-1 text-sm text-muted">Last 90 days</p>
           <div className="mt-4">
             <StockPriceChart priceHistory={priceData} symbol={stock.symbol} />
@@ -182,16 +182,16 @@ export default async function StockPage({
 
           {/* Top Creators for this stock */}
           {topCreators.length > 0 && (
-            <div className="rounded-lg border border-gray-200 bg-surface p-4">
-              <h3 className="text-sm font-semibold text-primary">
+            <div className="rounded-2xl bg-white p-4 shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)]">
+              <h3 className="text-sm font-bold text-gradient-primary">
                 Top Creators for {stock.symbol}
               </h3>
-              <div className="mt-3 space-y-2">
+              <div className="mt-3 space-y-1">
                 {topCreators.map(({ creator, hits, total }) => (
                   <Link
                     key={creator.id}
                     href={`/creator/${creator.slug}`}
-                    className="flex items-center justify-between rounded-md px-2 py-1.5 hover:bg-bg"
+                    className="flex items-center justify-between rounded-xl px-2.5 py-2 transition-colors duration-200 hover:bg-[#2B6CB0]/5"
                   >
                     <span className="text-sm font-medium text-text">
                       {creator.displayName}

@@ -112,7 +112,7 @@ export default function SettingsPage(): React.ReactElement {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8">
-      <h1 className="text-2xl font-bold text-primary">Settings</h1>
+      <h1 className="text-2xl font-bold text-gradient-primary">Settings</h1>
 
       {/* Profile section */}
       <Card className="mt-6">
@@ -123,7 +123,7 @@ export default function SettingsPage(): React.ReactElement {
         <CardContent>
           <form onSubmit={handleProfileSubmit} className="space-y-4">
             {profileMsg && (
-              <div className={`rounded-md p-3 text-sm ${profileMsg.type === "success" ? "bg-green-50 text-success" : "bg-red-50 text-danger"}`}>
+              <div className={`rounded-xl p-3 text-sm ${profileMsg.type === "success" ? "bg-[#276749]/10 text-[#276749]" : "bg-[#C53030]/10 text-[#C53030]"}`}>
                 {profileMsg.text}
               </div>
             )}
@@ -163,7 +163,7 @@ export default function SettingsPage(): React.ReactElement {
         <CardContent>
           <form onSubmit={handlePasswordSubmit} className="space-y-4">
             {passwordMsg && (
-              <div className={`rounded-md p-3 text-sm ${passwordMsg.type === "success" ? "bg-green-50 text-success" : "bg-red-50 text-danger"}`}>
+              <div className={`rounded-xl p-3 text-sm ${passwordMsg.type === "success" ? "bg-[#276749]/10 text-[#276749]" : "bg-[#C53030]/10 text-[#C53030]"}`}>
                 {passwordMsg.text}
               </div>
             )}
@@ -229,7 +229,7 @@ export default function SettingsPage(): React.ReactElement {
           ) : (
             <form onSubmit={handleDeleteAccount} className="space-y-4">
               {deleteMsg && (
-                <div className={`rounded-md p-3 text-sm ${deleteMsg.type === "error" ? "bg-red-50 text-danger" : "bg-green-50 text-success"}`}>
+                <div className={`rounded-xl p-3 text-sm ${deleteMsg.type === "error" ? "bg-[#C53030]/10 text-[#C53030]" : "bg-[#276749]/10 text-[#276749]"}`}>
                   {deleteMsg.text}
                 </div>
               )}

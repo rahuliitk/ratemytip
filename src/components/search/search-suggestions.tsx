@@ -20,14 +20,14 @@ export function SearchSuggestions({
 
   if (!hasResults) {
     return (
-      <div className="absolute z-50 mt-1 w-full rounded-lg border border-gray-200 bg-surface shadow-lg">
+      <div className="absolute z-50 mt-1 w-full rounded-2xl bg-white shadow-[0_4px_24px_0_rgba(26,54,93,0.10)]">
         <p className="px-4 py-3 text-sm text-muted">No suggestions found</p>
       </div>
     );
   }
 
   return (
-    <div className="absolute z-50 mt-1 w-full rounded-lg border border-gray-200 bg-surface shadow-lg">
+    <div className="absolute z-50 mt-1 w-full rounded-2xl bg-white shadow-[0_4px_24px_0_rgba(26,54,93,0.10)]">
       <div className="max-h-80 overflow-y-auto py-2">
         {creators.length > 0 && (
           <div>
@@ -38,7 +38,7 @@ export function SearchSuggestions({
               <button
                 key={creator.id}
                 type="button"
-                className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm hover:bg-bg"
+                className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm hover:bg-[#F7FAFC]"
                 onClick={() => {
                   onSelect();
                   router.push(`/creator/${creator.slug}`);
@@ -73,7 +73,7 @@ export function SearchSuggestions({
               <button
                 key={stock.id}
                 type="button"
-                className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm hover:bg-bg"
+                className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm hover:bg-[#F7FAFC]"
                 onClick={() => {
                   onSelect();
                   router.push(`/stock/${stock.symbol}`);

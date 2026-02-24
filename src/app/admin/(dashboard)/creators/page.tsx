@@ -27,7 +27,7 @@ export default async function AdminCreatorsPage(): Promise<React.ReactElement> {
     <div>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-primary">
+          <h1 className="text-2xl font-bold text-gradient-primary">
             Creator Management
           </h1>
           <p className="mt-1 text-sm text-muted">
@@ -36,7 +36,7 @@ export default async function AdminCreatorsPage(): Promise<React.ReactElement> {
         </div>
       </div>
 
-      <div className="mt-6 overflow-x-auto rounded-lg border border-gray-200 bg-surface">
+      <div className="mt-6 overflow-x-auto rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)]">
         <table className="w-full min-w-[800px] text-left">
           <thead>
             <tr className="border-b border-gray-200 bg-bg">
@@ -71,7 +71,7 @@ export default async function AdminCreatorsPage(): Promise<React.ReactElement> {
                 .sort((a, b) => (b?.getTime() ?? 0) - (a?.getTime() ?? 0))[0];
 
               return (
-                <tr key={creator.id} className="hover:bg-bg">
+                <tr key={creator.id} className="hover:bg-[#2B6CB0]/5">
                   <td className="px-4 py-3">
                     <Link
                       href={`/admin/creators/${creator.id}`}

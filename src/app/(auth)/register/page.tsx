@@ -114,7 +114,7 @@ export default function RegisterPage(): React.ReactElement {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="rounded-md bg-red-50 p-3 text-sm text-danger">
+            <div className="rounded-xl bg-[#C53030]/10 p-3 text-sm text-[#C53030]">
               {error}
             </div>
           )}

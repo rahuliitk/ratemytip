@@ -54,17 +54,17 @@ function getCurrentPrice(entry: PortfolioEntry): number | null {
 export function PortfolioPositions({ entries }: PortfolioPositionsProps): React.ReactElement {
   if (entries.length === 0) {
     return (
-      <div className="flex h-48 items-center justify-center rounded-lg border border-gray-200 bg-white text-sm text-[#718096]">
+      <div className="flex h-48 items-center justify-center rounded-2xl bg-white shadow-[0_1px_2px_0_rgba(26,54,93,0.04)] text-sm text-[#718096]">
         No positions yet. Add tips to your portfolio to start tracking.
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
+    <div className="overflow-x-auto rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)]">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-[#718096]">
+          <tr className="border-b border-gray-100 bg-[#F7FAFC] text-left text-xs font-medium text-[#718096]">
             <th className="px-4 py-3">Stock</th>
             <th className="px-4 py-3">Creator</th>
             <th className="px-4 py-3">Direction</th>
@@ -86,7 +86,7 @@ export function PortfolioPositions({ entries }: PortfolioPositionsProps): React.
             return (
               <tr
                 key={entry.id}
-                className="border-b border-gray-100 transition-colors hover:bg-gray-50"
+                className="border-b border-gray-100 transition-colors hover:bg-[#F7FAFC]"
               >
                 <td className="px-4 py-3">
                   <Link
