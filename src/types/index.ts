@@ -36,6 +36,7 @@ export type {
   TipAmendmentData,
   TipSummary,
   TipDetail,
+  TipWithCreator,
   CompletedTip,
 } from "./tip";
 

@@ -7,6 +7,7 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { ScoreBadge } from "@/components/shared/score-badge";
 import { SearchBar } from "@/components/search/search-bar";
+import { RecentTipsSection } from "@/components/home/recent-tips-section";
 import {
   TrendingUp,
   Users,
@@ -205,6 +206,9 @@ export default async function HomePage(): Promise<React.ReactElement> {
           </table>
         </div>
       </section>
+
+      {/* Recent Tips */}
+      <RecentTipsSection />
 
       {/* Category Quick Links */}
       <section className="bg-surface px-4 py-12 sm:px-6 lg:px-8">
