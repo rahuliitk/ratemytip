@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { compare } from "bcryptjs";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { updateProfileSchema } from "@/lib/validators/user";
@@ -82,4 +83,85 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
   });
 
   return NextResponse.json({ success: true, data: updated });
+}
+
+/**
+ * DELETE /api/v1/user/profile
+ * Soft-delete account: deactivate + anonymize PII.
+ */
+export async function DELETE(request: NextRequest): Promise<NextResponse> {
+  const session = await auth();
+  if (!session?.user?.userId) {
+    return NextResponse.json(
+      { success: false, error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
+      { status: 401 }
+    );
+  }
+
+  try {
+    const body: unknown = await request.json();
+
+    if (typeof body !== "object" || body === null || !("password" in body)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: "VALIDATION_ERROR", message: "Password confirmation required" },
+        },
+        { status: 400 }
+      );
+    }
+
+    const { password } = body as { password: string };
+
+    const user = await db.user.findUnique({
+      where: { id: session.user.userId },
+      select: { passwordHash: true },
+    });
+
+    if (!user?.passwordHash) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: "VALIDATION_ERROR", message: "Cannot delete OAuth-only account this way" },
+        },
+        { status: 400 }
+      );
+    }
+
+    const isValid = await compare(password, user.passwordHash);
+    if (!isValid) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: "INVALID_PASSWORD", message: "Incorrect password" },
+        },
+        { status: 403 }
+      );
+    }
+
+    // Soft-delete: deactivate and anonymize PII
+    const deletedId = session.user.userId;
+    await db.user.update({
+      where: { id: deletedId },
+      data: {
+        isActive: false,
+        email: `deleted-${deletedId}@ratemytip.com`,
+        displayName: "Deleted User",
+        username: `deleted-${deletedId}`,
+        avatarUrl: null,
+        passwordHash: null,
+        emailVerificationToken: null,
+      },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json(
+      {
+        success: false,
+        error: { code: "INTERNAL_ERROR", message: "Failed to delete account" },
+      },
+      { status: 500 }
+    );
+  }
 }

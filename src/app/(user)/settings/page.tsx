@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +16,11 @@ export default function SettingsPage(): React.ReactElement {
   const [passwordForm, setPasswordForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
   const [passwordMsg, setPasswordMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [passwordLoading, setPasswordLoading] = useState(false);
+
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteMsg, setDeleteMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (session?.user?.name) {
@@ -79,6 +84,30 @@ export default function SettingsPage(): React.ReactElement {
       setPasswordMsg({ type: "error", text: "An unexpected error occurred" });
     }
     setPasswordLoading(false);
+  }
+
+  async function handleDeleteAccount(e: React.FormEvent): Promise<void> {
+    e.preventDefault();
+    setDeleteMsg(null);
+    setDeleteLoading(true);
+
+    try {
+      const res = await fetch("/api/v1/user/profile", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: deletePassword }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setDeleteMsg({ type: "error", text: data.error?.message ?? "Failed to delete account" });
+      } else {
+        await signOut({ callbackUrl: "/" });
+      }
+    } catch {
+      setDeleteMsg({ type: "error", text: "An unexpected error occurred" });
+    }
+    setDeleteLoading(false);
   }
 
   return (
@@ -177,6 +206,70 @@ export default function SettingsPage(): React.ReactElement {
               {passwordLoading ? "Changing..." : "Change password"}
             </Button>
           </form>
+        </CardContent>
+      </Card>
+
+      {/* Danger zone */}
+      <Card className="mt-6 border-red-200">
+        <CardHeader>
+          <CardTitle className="text-danger">Danger Zone</CardTitle>
+          <CardDescription>
+            Permanently delete your account and all associated data
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {!showDeleteConfirm ? (
+            <Button
+              variant="outline"
+              className="border-red-200 text-danger hover:bg-red-50"
+              onClick={() => setShowDeleteConfirm(true)}
+            >
+              Delete my account
+            </Button>
+          ) : (
+            <form onSubmit={handleDeleteAccount} className="space-y-4">
+              {deleteMsg && (
+                <div className={`rounded-md p-3 text-sm ${deleteMsg.type === "error" ? "bg-red-50 text-danger" : "bg-green-50 text-success"}`}>
+                  {deleteMsg.text}
+                </div>
+              )}
+              <p className="text-sm text-danger">
+                This action is irreversible. Your profile, comments, and ratings will be anonymized.
+              </p>
+              <div className="space-y-2">
+                <Label htmlFor="deletePassword">Confirm your password</Label>
+                <Input
+                  id="deletePassword"
+                  type="password"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  required
+                  autoComplete="current-password"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  type="submit"
+                  variant="outline"
+                  className="border-red-200 text-danger hover:bg-red-50"
+                  disabled={deleteLoading}
+                >
+                  {deleteLoading ? "Deleting..." : "Permanently delete"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => {
+                    setShowDeleteConfirm(false);
+                    setDeletePassword("");
+                    setDeleteMsg(null);
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          )}
         </CardContent>
       </Card>
     </div>

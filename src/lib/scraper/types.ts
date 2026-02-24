@@ -60,6 +60,15 @@ export interface YahooAnalystMetadata {
   readonly epochGradeDate: number;
 }
 
+/** Metadata specific to a Telegram channel message */
+export interface TelegramPostMetadata {
+  readonly messageId: number;
+  readonly chatId: number;
+  readonly chatTitle: string;
+  readonly viewCount: number;
+  readonly forwardCount: number;
+}
+
 /** Union of platform-specific metadata */
 export type PlatformMetadata =
   | TwitterPostMetadata
@@ -67,7 +76,8 @@ export type PlatformMetadata =
   | MoneyControlPostMetadata
   | FinnhubUpgradeMetadata
   | StockTwitsPostMetadata
-  | YahooAnalystMetadata;
+  | YahooAnalystMetadata
+  | TelegramPostMetadata;
 
 /** A single scraped post from any platform, before NLP parsing */
 export interface ScrapedPost {

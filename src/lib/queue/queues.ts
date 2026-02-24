@@ -139,3 +139,25 @@ export const scrapeStocktwitsQueue = new Queue("scrape-stocktwits", {
     removeOnFail: { age: 604800 },
   },
 });
+
+/** Queue for Telegram scraping — channel messages for NLP parsing */
+export const scrapeTelegramQueue = new Queue("scrape-telegram", {
+  connection,
+  defaultJobOptions: {
+    attempts: 3,
+    backoff: { type: "exponential", delay: 5000 },
+    removeOnComplete: { age: 86400 },
+    removeOnFail: { age: 604800 },
+  },
+});
+
+/** Queue for in-app notifications — dispatches notifications to users */
+export const notificationQueue = new Queue("notifications", {
+  connection,
+  defaultJobOptions: {
+    attempts: 3,
+    backoff: { type: "exponential", delay: 3000 },
+    removeOnComplete: { age: 86400 },
+    removeOnFail: { age: 259200 },
+  },
+});

@@ -16,6 +16,8 @@ export {
   scrapeFinnhubQueue,
   scrapeYahooAnalystQueue,
   scrapeStocktwitsQueue,
+  scrapeTelegramQueue,
+  notificationQueue,
 } from "./queues";
 
 import {
@@ -27,7 +29,11 @@ import {
   scrapeFinnhubQueue,
   scrapeYahooAnalystQueue,
   scrapeStocktwitsQueue,
+  scrapeTelegramQueue,
+  notificationQueue,
 } from "./queues";
+
+import type { NotificationType } from "@prisma/client";
 
 /**
  * Enqueue a Twitter scraping job for a specific creator platform.
@@ -156,5 +162,38 @@ export async function enqueueScrapeStocktwits(): Promise<void> {
     "scrape-stocktwits",
     { type: "full-scrape", triggeredAt: new Date().toISOString() },
     { jobId: `stocktwits-${Date.now()}` }
+  );
+}
+
+/**
+ * Enqueue a Telegram channel scraping job.
+ *
+ * @param type - The scrape type: "full-scrape" for all channels, or omit for individual
+ */
+export async function enqueueScrapeTelegram(
+  type: "full-scrape" | "incremental" = "full-scrape"
+): Promise<void> {
+  await scrapeTelegramQueue.add(
+    "scrape-telegram",
+    { type, triggeredAt: new Date().toISOString() },
+    { jobId: `telegram-${type}-${Date.now()}` }
+  );
+}
+
+/**
+ * Enqueue a notification job.
+ */
+export async function enqueueNotification(payload: {
+  type: NotificationType;
+  userId?: string;
+  tipId?: string;
+  creatorId?: string;
+  claimId?: string;
+  commentId?: string;
+}): Promise<void> {
+  await notificationQueue.add(
+    "send-notification",
+    { ...payload, enqueuedAt: new Date().toISOString() },
+    { jobId: `notification-${payload.type}-${Date.now()}` }
   );
 }

@@ -19,7 +19,8 @@ export default auth((req) => {
   const isAuthPage =
     pathname === "/login" ||
     pathname === "/register" ||
-    pathname === "/forgot-password";
+    pathname === "/forgot-password" ||
+    pathname === "/reset-password";
 
   if (isAuthPage && req.auth?.user?.userType === "user") {
     return NextResponse.redirect(new URL("/", req.url));
@@ -29,12 +30,28 @@ export default auth((req) => {
   const isUserProtectedRoute =
     pathname.startsWith("/settings") ||
     pathname.startsWith("/saved") ||
-    pathname.startsWith("/dashboard");
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/notifications") ||
+    pathname.startsWith("/feed");
 
   if (isUserProtectedRoute && !req.auth) {
     const loginUrl = new URL("/login", req.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
+  }
+
+  // ─── Creator dashboard routes (require CREATOR role) ───
+  const isCreatorRoute = pathname.startsWith("/creator-dashboard");
+
+  if (isCreatorRoute) {
+    if (!req.auth) {
+      const loginUrl = new URL("/login", req.url);
+      loginUrl.searchParams.set("callbackUrl", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+    if (req.auth.user?.userType !== "user" || req.auth.user?.role !== "CREATOR") {
+      return NextResponse.redirect(new URL("/", req.url));
+    }
   }
 
   return NextResponse.next();
@@ -47,8 +64,12 @@ export const config = {
     "/login",
     "/register",
     "/forgot-password",
+    "/reset-password",
     "/settings/:path*",
     "/saved/:path*",
     "/dashboard/:path*",
+    "/notifications/:path*",
+    "/feed/:path*",
+    "/creator-dashboard/:path*",
   ],
 };

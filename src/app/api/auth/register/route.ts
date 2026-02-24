@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomBytes } from "crypto";
 import { hash } from "bcryptjs";
 import { db } from "@/lib/db";
 import { registerSchema } from "@/lib/validators/auth";
+import { sendEmailVerificationEmail } from "@/lib/email";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
@@ -63,6 +65,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     const passwordHash = await hash(password, 12);
+    const emailVerificationToken = randomBytes(32).toString("hex");
 
     const user = await db.user.create({
       data: {
@@ -70,6 +73,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         passwordHash,
         displayName,
         username,
+        emailVerificationToken,
       },
       select: {
         id: true,
@@ -79,6 +83,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         role: true,
         createdAt: true,
       },
+    });
+
+    // Send verification email (fire and forget)
+    sendEmailVerificationEmail(email, emailVerificationToken).catch(() => {
+      // Silently fail — user can re-request
     });
 
     return NextResponse.json(

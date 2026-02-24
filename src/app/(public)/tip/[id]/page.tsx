@@ -10,6 +10,7 @@ import { ShareButton } from "@/components/shared/share-button";
 import { StarRating } from "@/components/tip/star-rating";
 import { BookmarkButton } from "@/components/tip/bookmark-button";
 import { CommentSection } from "@/components/tip/comment-section";
+import { TipExplanation } from "@/components/tip/tip-explanation";
 import { formatPrice, formatPercent } from "@/lib/utils/format";
 import { subDays } from "date-fns";
 
@@ -27,6 +28,7 @@ async function getTip(id: string) {
         creator: { include: { currentScore: true } },
         stock: true,
         amendments: { orderBy: { amendedAt: "desc" } },
+        explanation: true,
       },
     });
 
@@ -293,6 +295,18 @@ export default async function TipPage({
           </p>
         </div>
       </div>
+
+      {/* Creator's Explanation */}
+      {tip.explanation && (
+        <div className="mt-6">
+          <TipExplanation
+            content={tip.explanation.content}
+            imageUrls={tip.explanation.imageUrls}
+            version={tip.explanation.version}
+            updatedAt={tip.explanation.updatedAt.toISOString()}
+          />
+        </div>
+      )}
 
       {/* Creator Mini Profile */}
       <div className="mt-6 rounded-lg border border-gray-200 bg-surface p-4">

@@ -9,6 +9,8 @@ import {
   Bot,
   Shield,
   BarChart3,
+  UserCheck,
+  MessageSquareWarning,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +25,8 @@ const NAV_ITEMS: readonly NavItem[] = [
   { label: "Review Queue", href: "/admin/review", icon: ClipboardCheck },
   { label: "Creators", href: "/admin/creators", icon: Users },
   { label: "Scrapers", href: "/admin/scrapers", icon: Bot },
+  { label: "Claims", href: "/admin/claims", icon: UserCheck },
+  { label: "Comments", href: "/admin/comments", icon: MessageSquareWarning },
   { label: "Moderation", href: "/admin/moderation", icon: Shield },
   { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
 ] as const;
