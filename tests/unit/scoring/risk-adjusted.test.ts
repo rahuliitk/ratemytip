@@ -12,6 +12,7 @@ import {
   buildExpiredTip,
   buildSellTip,
   buildMultiTargetTip,
+  buildWinningTips,
   resetTipCounter,
   BASE_DATE,
 } from "../../fixtures/scoring";
