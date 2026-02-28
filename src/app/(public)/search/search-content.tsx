@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useSearch } from "@/hooks/use-search";
 import { TipStatusBadge } from "@/components/tip/tip-status-badge";
 import { formatPrice } from "@/lib/utils/format";
@@ -91,10 +92,13 @@ export default function SearchPageContent(): React.ReactElement {
                       >
                         <div className="flex items-center gap-3">
                           {creator.profileImageUrl ? (
-                            <img
+                            <Image
                               src={creator.profileImageUrl}
                               alt={creator.displayName}
+                              width={32}
+                              height={32}
                               className="h-8 w-8 rounded-full object-cover"
+                              unoptimized
                             />
                           ) : (
                             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/10 text-sm font-bold text-accent">

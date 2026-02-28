@@ -115,7 +115,7 @@ export async function GET(
       data,
       meta: buildPaginationMeta(page, pageSize, total),
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         success: false,

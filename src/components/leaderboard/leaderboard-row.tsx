@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { ScoreBadge } from "@/components/shared/score-badge";
 import { formatPercent } from "@/lib/utils/format";
@@ -56,10 +57,13 @@ export function LeaderboardRow({ entry }: LeaderboardRowProps): React.ReactEleme
           className="flex items-center gap-3"
         >
           {entry.creator.profileImageUrl ? (
-            <img
+            <Image
               src={entry.creator.profileImageUrl}
               alt={entry.creator.displayName}
+              width={36}
+              height={36}
               className="h-9 w-9 rounded-full object-cover ring-2 ring-gray-100"
+              unoptimized
             />
           ) : (
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#1A365D]/10 to-[#2B6CB0]/10 text-sm font-semibold text-accent ring-2 ring-gray-100">

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { TipCard } from "@/components/tip/tip-card";
-import type { TipSummary, TipStatus } from "@/types";
+import type { TipSummary } from "@/types";
 
 interface CreatorTipFeedProps {
   readonly initialTips: readonly TipSummary[];
@@ -19,7 +19,6 @@ const STATUS_FILTERS: { value: string; label: string }[] = [
 
 export function CreatorTipFeed({
   initialTips,
-  creatorSlug,
 }: CreatorTipFeedProps): React.ReactElement {
   const [statusFilter, setStatusFilter] = useState("all");
 

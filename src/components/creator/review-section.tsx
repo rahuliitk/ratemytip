@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -39,7 +39,32 @@ export function ReviewSection({ creatorId }: ReviewSectionProps): React.ReactEle
   const [hoverRating, setHoverRating] = useState(0);
   const [submitting, setSubmitting] = useState(false);
 
-  const fetchReviews = useCallback(async (pageNum: number) => {
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const res = await fetch(`/api/v1/creators/${creatorId}/reviews?page=1`);
+        if (res.ok && !cancelled) {
+          const json = await res.json();
+          setReviews(json.data.reviews);
+          setSummary(json.data.summary);
+          setHasMore(json.meta.hasMore);
+          if (json.data.userReview) {
+            setUserReview(json.data.userReview);
+            setFormRating(json.data.userReview.rating);
+            setFormContent(json.data.userReview.content || "");
+          }
+        }
+      } catch {
+        // keep existing state on error
+      }
+      if (!cancelled) setLoading(false);
+    }
+    void load();
+    return () => { cancelled = true; };
+  }, [creatorId]);
+
+  async function fetchReviews(pageNum: number) {
     try {
       const res = await fetch(`/api/v1/creators/${creatorId}/reviews?page=${pageNum}`);
       if (res.ok) {
@@ -61,11 +86,7 @@ export function ReviewSection({ creatorId }: ReviewSectionProps): React.ReactEle
       // keep existing state on error
     }
     setLoading(false);
-  }, [creatorId]);
-
-  useEffect(() => {
-    fetchReviews(1);
-  }, [fetchReviews]);
+  }
 
   async function handleSubmit(): Promise<void> {
     if (!session?.user?.userId) {

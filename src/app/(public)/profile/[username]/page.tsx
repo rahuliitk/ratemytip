@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
 import { ScoreBadge } from "@/components/shared/score-badge";
-import { User, Calendar, Users } from "lucide-react";
+import { Calendar, Users } from "lucide-react";
 
 interface PageProps {
   params: Promise<{ username: string }>;
@@ -82,10 +83,13 @@ export default async function PublicProfilePage({
       {/* Profile header */}
       <div className="flex items-center gap-4">
         {user.avatarUrl ? (
-          <img
+          <Image
             src={user.avatarUrl}
             alt={user.displayName}
+            width={64}
+            height={64}
             className="h-16 w-16 rounded-full object-cover"
+            unoptimized
           />
         ) : (
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent/10 text-xl font-bold text-accent">

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { TipStatusBadge } from "./tip-status-badge";
 import { ScoreBadge } from "@/components/shared/score-badge";
 import { formatPrice, formatPercent } from "@/lib/utils/format";
@@ -23,10 +24,13 @@ export function TipCardWithCreator({ tip }: TipCardWithCreatorProps): React.Reac
           className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#1A365D]/10 to-[#2B6CB0]/10 text-xs font-bold text-accent ring-1 ring-gray-100"
         >
           {creator.profileImageUrl ? (
-            <img
+            <Image
               src={creator.profileImageUrl}
               alt={creator.displayName}
+              width={28}
+              height={28}
               className="h-7 w-7 rounded-full object-cover"
+              unoptimized
             />
           ) : (
             creator.displayName.charAt(0).toUpperCase()
