@@ -134,7 +134,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       data,
       meta: buildPaginationMeta(page, pageSize, total),
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         success: false,

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { TipStatusBadge } from "@/components/tip/tip-status-badge";
@@ -318,10 +319,13 @@ export default async function TipPage({
         >
           <div className="flex items-center gap-3">
             {tip.creator.profileImageUrl ? (
-              <img
+              <Image
                 src={tip.creator.profileImageUrl}
                 alt={tip.creator.displayName}
+                width={40}
+                height={40}
                 className="h-10 w-10 rounded-full object-cover"
+                unoptimized
               />
             ) : (
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10 text-sm font-bold text-accent">

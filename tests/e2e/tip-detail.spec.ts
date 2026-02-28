@@ -14,7 +14,7 @@ test.describe("Tip Detail Page", () => {
   });
 
   test("shows 404 or not-found state for invalid tip ID", async ({ page }) => {
-    const response = await page.goto("/tip/does-not-exist-abc123");
+    await page.goto("/tip/does-not-exist-abc123");
     // Should show not-found page
     const body = page.locator("body");
     await expect(body).toBeVisible();

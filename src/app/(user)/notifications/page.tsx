@@ -2,7 +2,7 @@
 
 import useSWR from "swr";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -47,8 +47,8 @@ export default function NotificationsPage(): React.ReactElement {
     mutate();
   }
 
-  function formatTimeAgo(dateStr: string): string {
-    const diff = Date.now() - new Date(dateStr).getTime();
+  const formatTimeAgo = useCallback((dateStr: string): string => {
+    const diff = globalThis.Date.now() - new Date(dateStr).getTime();
     const minutes = Math.floor(diff / 60000);
     if (minutes < 1) return "just now";
     if (minutes < 60) return `${minutes}m ago`;
@@ -56,7 +56,7 @@ export default function NotificationsPage(): React.ReactElement {
     if (hours < 24) return `${hours}h ago`;
     const days = Math.floor(hours / 24);
     return `${days}d ago`;
-  }
+  }, []);
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8">

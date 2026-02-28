@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -30,36 +30,46 @@ export default function RegisterPage(): React.ReactElement {
   const [usernameStatus, setUsernameStatus] = useState<
     "idle" | "checking" | "available" | "taken"
   >("idle");
+  const [passwordTouched, setPasswordTouched] = useState(false);
 
   const debouncedUsername = useDebounce(form.username, 500);
 
-  // Check username availability
-  const checkUsername = useCallback(async (username: string) => {
-    if (username.length < 3) {
-      setUsernameStatus("idle");
-      return;
+  // Set "checking" synchronously during render when debounced value changes
+  const [prevDebounced, setPrevDebounced] = useState(debouncedUsername);
+  if (prevDebounced !== debouncedUsername) {
+    setPrevDebounced(debouncedUsername);
+    if (debouncedUsername.length >= 3) {
+      setUsernameStatus("checking");
     }
-    setUsernameStatus("checking");
-    try {
-      const res = await fetch(
-        `/api/auth/check-username?username=${encodeURIComponent(username)}`
-      );
-      const data = await res.json();
-      setUsernameStatus(data.available ? "available" : "taken");
-    } catch {
-      setUsernameStatus("idle");
-    }
-  }, []);
-
-  // Trigger check when debounced value changes
-  if (debouncedUsername.length >= 3 && usernameStatus !== "checking") {
-    // We use a ref-like pattern here — the effect is debounce-driven
-    void checkUsername(debouncedUsername);
   }
+
+  // Trigger username availability check when debounced value changes
+  useEffect(() => {
+    if (debouncedUsername.length < 3) return;
+    let cancelled = false;
+    fetch(`/api/auth/check-username?username=${encodeURIComponent(debouncedUsername)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!cancelled) setUsernameStatus(data.available ? "available" : "taken");
+      })
+      .catch(() => {
+        if (!cancelled) setUsernameStatus("idle");
+      });
+    return () => { cancelled = true; };
+  }, [debouncedUsername]);
+
+  const passwordChecks = {
+    minLength: form.password.length >= 8,
+    hasUppercase: /[A-Z]/.test(form.password),
+    hasLowercase: /[a-z]/.test(form.password),
+    hasNumber: /\d/.test(form.password),
+  };
+  const isPasswordValid = Object.values(passwordChecks).every(Boolean);
 
   function updateField(field: string, value: string): void {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (field === "username") setUsernameStatus("idle");
+    if (field === "password" && !passwordTouched) setPasswordTouched(true);
   }
 
   async function handleSubmit(e: React.FormEvent): Promise<void> {
@@ -186,14 +196,32 @@ export default function RegisterPage(): React.ReactElement {
               maxLength={128}
               autoComplete="new-password"
             />
-            <p className="text-xs text-muted">
-              Must contain uppercase, lowercase, and a number
-            </p>
+            {passwordTouched && !isPasswordValid && (
+              <ul className="mt-1 space-y-0.5 text-xs">
+                <li className={passwordChecks.minLength ? "text-success" : "text-danger"}>
+                  {passwordChecks.minLength ? "\u2713" : "\u2717"} At least 8 characters
+                </li>
+                <li className={passwordChecks.hasUppercase ? "text-success" : "text-danger"}>
+                  {passwordChecks.hasUppercase ? "\u2713" : "\u2717"} One uppercase letter
+                </li>
+                <li className={passwordChecks.hasLowercase ? "text-success" : "text-danger"}>
+                  {passwordChecks.hasLowercase ? "\u2713" : "\u2717"} One lowercase letter
+                </li>
+                <li className={passwordChecks.hasNumber ? "text-success" : "text-danger"}>
+                  {passwordChecks.hasNumber ? "\u2713" : "\u2717"} One number
+                </li>
+              </ul>
+            )}
+            {(!passwordTouched || isPasswordValid) && (
+              <p className="text-xs text-muted">
+                Must contain uppercase, lowercase, and a number
+              </p>
+            )}
           </div>
           <Button
             type="submit"
             className="w-full"
-            disabled={loading || usernameStatus === "taken"}
+            disabled={loading || usernameStatus === "taken" || !isPasswordValid}
           >
             {loading ? "Creating account..." : "Create account"}
           </Button>

@@ -454,8 +454,6 @@ async function main(): Promise<void> {
       const existingTip = await db.tip.findUnique({ where: { contentHash } });
       if (existingTip) continue;
 
-      const isResolved = tipData.status !== "ACTIVE";
-
       await db.tip.create({
         data: {
           creatorId,

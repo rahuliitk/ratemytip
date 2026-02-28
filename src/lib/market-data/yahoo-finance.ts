@@ -10,12 +10,10 @@ import type {
   HistoricalPriceParams,
   PriceData,
   YahooChartResponse,
-  YahooQuoteResponse,
 } from "./types";
 
 const log = createLogger("market-data/yahoo");
 
-const YAHOO_QUOTE_URL = "https://query1.finance.yahoo.com/v7/finance/quote";
 const YAHOO_CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart";
 
 /** Exchange suffix map for Yahoo Finance ticker symbols */

@@ -77,7 +77,7 @@ export async function scrapeCreator(
   }
 
   // Store raw posts in database
-  const storeResult = await storeRawPosts(creatorPlatform.id, posts);
+  await storeRawPosts(creatorPlatform.id, posts);
 
   // Update last scraped timestamp
   await db.creatorPlatform.update({
@@ -152,6 +152,7 @@ export async function scrapeAllCreators(
  */
 async function scrapeTwitterCreator(
   platformUserId: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   lastScrapedAt: Date | null
 ): Promise<ScrapedPost[]> {
   const bearerToken = process.env.TWITTER_BEARER_TOKEN;

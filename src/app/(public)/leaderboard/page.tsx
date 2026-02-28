@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import Image from "next/image";
 import { db } from "@/lib/db";
 import { PAGINATION, SCORING } from "@/lib/constants";
 import { LeaderboardTable } from "@/components/leaderboard/leaderboard-table";
@@ -167,10 +168,13 @@ export default async function LeaderboardPage({
                   {style.label}
                 </span>
                 {entry.creator.profileImageUrl ? (
-                  <img
+                  <Image
                     src={entry.creator.profileImageUrl}
                     alt={entry.creator.displayName}
+                    width={56}
+                    height={56}
                     className="h-14 w-14 rounded-full object-cover ring-2 ring-gray-100"
+                    unoptimized
                   />
                 ) : (
                   <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#1A365D]/10 to-[#2B6CB0]/10 text-lg font-bold text-accent ring-2 ring-gray-100">

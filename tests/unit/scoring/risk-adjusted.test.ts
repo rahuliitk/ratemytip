@@ -5,15 +5,13 @@
 
 import { describe, it, expect, beforeEach } from "vitest";
 import { calculateRiskAdjustedReturn } from "@/lib/scoring/risk-adjusted";
-import { TIP_STATUS, TIP_DIRECTION, SCORING } from "@/lib/constants";
+import { TIP_STATUS } from "@/lib/constants";
 import {
   buildCompletedTip,
   buildLosingTip,
   buildExpiredTip,
   buildSellTip,
   buildMultiTargetTip,
-  buildWinningTips,
-  buildLosingTips,
   resetTipCounter,
   BASE_DATE,
 } from "../../fixtures/scoring";

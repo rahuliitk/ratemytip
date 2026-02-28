@@ -43,7 +43,7 @@ test.describe("Stock Page", () => {
   });
 
   test("returns 404 for non-existent stock", async ({ page }) => {
-    const response = await page.goto("/stock/ZZZZNOTEXIST");
+    await page.goto("/stock/ZZZZNOTEXIST");
     // Should either show 404 page or render gracefully
     const body = page.locator("body");
     await expect(body).toBeVisible();

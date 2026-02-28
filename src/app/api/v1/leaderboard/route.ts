@@ -135,7 +135,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       data: result.entries,
       meta: result.meta,
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         success: false,

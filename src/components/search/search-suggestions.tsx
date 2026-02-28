@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import type { CreatorSummary, StockSummary } from "@/types";
 
 interface SearchSuggestionsProps {
@@ -45,10 +46,13 @@ export function SearchSuggestions({
                 }}
               >
                 {creator.profileImageUrl ? (
-                  <img
+                  <Image
                     src={creator.profileImageUrl}
                     alt=""
+                    width={24}
+                    height={24}
                     className="h-6 w-6 rounded-full object-cover"
+                    unoptimized
                   />
                 ) : (
                   <div className="flex h-6 w-6 items-center justify-center rounded-full bg-accent/10 text-xs font-bold text-accent">
