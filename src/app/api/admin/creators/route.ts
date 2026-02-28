@@ -128,7 +128,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       data,
       meta: buildPaginationMeta(page, pageSize, total),
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         success: false,
@@ -216,7 +216,7 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
         updatedAt: updated.updatedAt.toISOString(),
       },
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         success: false,

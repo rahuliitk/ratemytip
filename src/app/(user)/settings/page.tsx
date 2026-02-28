@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 
 export default function SettingsPage(): React.ReactElement {
   const { data: session, update: updateSession } = useSession();
-  const [displayName, setDisplayName] = useState("");
+  const sessionName = session?.user?.name ?? "";
+  const [displayName, setDisplayName] = useState(sessionName);
   const [profileMsg, setProfileMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
 
@@ -22,11 +23,12 @@ export default function SettingsPage(): React.ReactElement {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  useEffect(() => {
-    if (session?.user?.name) {
-      setDisplayName(session.user.name);
-    }
-  }, [session?.user?.name]);
+  // Sync display name when session loads
+  const [prevSessionName, setPrevSessionName] = useState(sessionName);
+  if (sessionName !== prevSessionName) {
+    setPrevSessionName(sessionName);
+    if (sessionName) setDisplayName(sessionName);
+  }
 
   async function handleProfileSubmit(e: React.FormEvent): Promise<void> {
     e.preventDefault();

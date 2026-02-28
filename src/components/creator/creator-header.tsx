@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { ScoreRing } from "@/components/shared/score-ring";
 import type { CreatorDetail } from "@/types";
@@ -33,10 +34,13 @@ export function CreatorHeader({ creator }: CreatorHeaderProps): React.ReactEleme
         {/* Avatar + Info */}
         <div className="flex flex-1 items-start gap-4">
           {creator.profileImageUrl ? (
-            <img
+            <Image
               src={creator.profileImageUrl}
               alt={creator.displayName}
+              width={80}
+              height={80}
               className="-mt-14 h-20 w-20 rounded-full border-4 border-white object-cover shadow-md ring-4 ring-white"
+              unoptimized
             />
           ) : (
             <div className="-mt-14 flex h-20 w-20 items-center justify-center rounded-full border-4 border-white bg-gradient-to-br from-[#1A365D]/10 to-[#2B6CB0]/10 text-2xl font-bold text-accent shadow-md ring-4 ring-white">

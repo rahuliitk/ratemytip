@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { TipStatusBadge } from "@/components/tip/tip-status-badge";
 import { formatPrice } from "@/lib/utils/format";
 import { Check, X, ChevronDown, ChevronRight, Loader2 } from "lucide-react";
 

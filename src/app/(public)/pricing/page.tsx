@@ -83,7 +83,7 @@ function PricingContent(): React.ReactElement {
       });
       const data = await res.json();
       if (data.success && data.data.url) {
-        window.location.href = data.data.url;
+        window.location.assign(data.data.url);
       }
     } catch {
       setLoading(null);

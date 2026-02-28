@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 interface TipExplanationProps {
   readonly content: string;
   readonly imageUrls: string[];
@@ -37,10 +39,13 @@ export function TipExplanation({
               rel="noopener noreferrer"
               className="overflow-hidden rounded-xl border border-gray-200/60"
             >
-              <img
+              <Image
                 src={url}
                 alt={`Analysis image ${i + 1}`}
+                width={256}
+                height={128}
                 className="h-32 w-auto object-cover"
+                unoptimized
               />
             </a>
           ))}
