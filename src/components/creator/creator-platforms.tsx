@@ -1,21 +1,15 @@
 import type { CreatorPlatformInfo } from "@/types";
+import { ExternalLink } from "lucide-react";
 
 interface CreatorPlatformsProps {
   readonly platforms: readonly CreatorPlatformInfo[];
 }
 
 const PLATFORM_ICONS: Record<string, string> = {
-  TWITTER: "𝕏",
-  YOUTUBE: "▶",
-  TELEGRAM: "✈",
-  WEBSITE: "🌐",
-};
-
-const PLATFORM_COLORS: Record<string, string> = {
-  TWITTER: "bg-black/5 text-black hover:bg-black/10",
-  YOUTUBE: "bg-[#C53030]/10 text-[#C53030] hover:bg-[#C53030]/15",
-  TELEGRAM: "bg-[#2B6CB0]/10 text-[#2B6CB0] hover:bg-[#2B6CB0]/15",
-  WEBSITE: "bg-gray-100 text-gray-700 hover:bg-gray-200",
+  TWITTER: "X",
+  YOUTUBE: "YT",
+  TELEGRAM: "TG",
+  WEBSITE: "WEB",
 };
 
 export function CreatorPlatforms({
@@ -33,21 +27,20 @@ export function CreatorPlatforms({
           href={platform.platformUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
-            PLATFORM_COLORS[platform.platform] ?? "bg-gray-50 text-gray-700 hover:bg-gray-100"
-          }`}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted transition-colors hover:bg-bg-alt hover:text-text"
         >
-          <span className="text-base">
-            {PLATFORM_ICONS[platform.platform] ?? "🔗"}
+          <span className="text-xs font-semibold">
+            {PLATFORM_ICONS[platform.platform] ?? "LINK"}
           </span>
           <span>@{platform.platformHandle}</span>
           {platform.followerCount > 0 && (
-            <span className="ml-1 text-xs opacity-60">
+            <span className="ml-1 text-xs text-muted-light">
               {platform.followerCount >= 1000
                 ? `${(platform.followerCount / 1000).toFixed(1)}K`
                 : platform.followerCount}
             </span>
           )}
+          <ExternalLink className="h-3 w-3 text-muted" />
         </a>
       ))}
     </div>

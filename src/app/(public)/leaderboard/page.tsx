@@ -95,9 +95,21 @@ async function getLeaderboardData(params: {
 }
 
 const PODIUM_STYLES = [
-  { ring: "ring-2 ring-yellow-300/50", medal: "bg-gradient-to-br from-yellow-400 to-yellow-500", label: "1st" },
-  { ring: "ring-2 ring-gray-300/50", medal: "bg-gradient-to-br from-gray-300 to-gray-400", label: "2nd" },
-  { ring: "ring-2 ring-orange-300/50", medal: "bg-gradient-to-br from-orange-300 to-orange-400", label: "3rd" },
+  {
+    ring: "ring-2 ring-amber-400/70",
+    badge: "bg-amber-400 text-amber-950",
+    label: "1st",
+  },
+  {
+    ring: "ring-2 ring-sky-400/70",
+    badge: "bg-sky-400 text-sky-950",
+    label: "2nd",
+  },
+  {
+    ring: "ring-2 ring-orange-400/70",
+    badge: "bg-orange-400 text-orange-950",
+    label: "3rd",
+  },
 ] as const;
 
 export default async function LeaderboardPage({
@@ -121,9 +133,10 @@ export default async function LeaderboardPage({
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      {/* Page Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gradient-primary">Leaderboard</h1>
+          <h1 className="text-3xl font-bold text-text">Leaderboard</h1>
           <p className="mt-2 text-sm text-muted">
             Top stock tip creators ranked by verified performance
           </p>
@@ -131,10 +144,12 @@ export default async function LeaderboardPage({
         <ShareButton title="Top Stock Tip Creators Leaderboard | RateMyTip" />
       </div>
 
+      {/* Category Tabs */}
       <div className="mt-6">
         <CategoryTabs />
       </div>
 
+      {/* Filters */}
       <div className="mt-4">
         <Suspense fallback={null}>
           <LeaderboardFilters />
@@ -154,15 +169,15 @@ export default async function LeaderboardPage({
                 key={entry.creator.id}
                 href={`/creator/${entry.creator.slug}`}
                 className={cn(
-                  "flex flex-col items-center rounded-2xl bg-white p-6 shadow-md transition-all duration-200 hover:shadow-lg",
+                  "flex flex-col items-center rounded-xl border border-border/60 bg-surface p-6 shadow-sm transition-all duration-200 hover:shadow-md",
                   style.ring,
                   i === 1 && "sm:-mt-4 sm:pb-8",
                 )}
               >
                 <span
                   className={cn(
-                    "mb-3 inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white shadow-sm",
-                    style.medal,
+                    "mb-3 inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold",
+                    style.badge,
                   )}
                 >
                   {style.label}
@@ -173,11 +188,11 @@ export default async function LeaderboardPage({
                     alt={entry.creator.displayName}
                     width={56}
                     height={56}
-                    className="h-14 w-14 rounded-full object-cover ring-2 ring-gray-100"
+                    className="h-14 w-14 rounded-full object-cover ring-1 ring-border/40"
                     unoptimized
                   />
                 ) : (
-                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#1A365D]/10 to-[#2B6CB0]/10 text-lg font-bold text-accent ring-2 ring-gray-100">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent-subtle text-lg font-bold text-accent ring-1 ring-border/40">
                     {entry.creator.displayName.charAt(0).toUpperCase()}
                   </div>
                 )}
@@ -194,6 +209,7 @@ export default async function LeaderboardPage({
         </div>
       )}
 
+      {/* Leaderboard Table */}
       <div className="mt-6">
         <LeaderboardTable entries={entries} />
       </div>
@@ -204,7 +220,7 @@ export default async function LeaderboardPage({
           {page > 1 && (
             <a
               href={`?page=${page - 1}&sortBy=${sortBy}&minTips=${minTips}`}
-              className="rounded-full border border-gray-200 px-4 py-1.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-gray-50 hover:text-text"
+              className="rounded-lg border border-border px-4 py-1.5 text-sm font-medium text-muted transition-colors duration-200 hover:bg-bg-alt hover:text-text"
             >
               Previous
             </a>
@@ -215,7 +231,7 @@ export default async function LeaderboardPage({
           {page < totalPages && (
             <a
               href={`?page=${page + 1}&sortBy=${sortBy}&minTips=${minTips}`}
-              className="rounded-full border border-gray-200 px-4 py-1.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-gray-50 hover:text-text"
+              className="rounded-lg border border-border px-4 py-1.5 text-sm font-medium text-muted transition-colors duration-200 hover:bg-bg-alt hover:text-text"
             >
               Next
             </a>

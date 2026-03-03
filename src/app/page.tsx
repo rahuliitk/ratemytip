@@ -68,25 +68,19 @@ export default async function HomePage(): Promise<React.ReactElement> {
       <Header />
       <main className="flex-1">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#0F2B4E] via-[#1A365D] to-[#2B6CB0] px-4 py-20 text-white sm:py-28">
-        {/* Subtle pattern overlay */}
-        <div
-          className="absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)",
-            backgroundSize: "32px 32px",
-          }}
-        />
+      <section className="relative overflow-hidden px-4 py-24 text-white sm:py-32" style={{ background: "var(--gradient-hero)" }}>
+        {/* Dot pattern overlay */}
+        <div className="dot-pattern absolute inset-0" />
         <div className="relative mx-auto max-w-4xl text-center">
-          <h1 className="text-4xl font-bold tracking-tight sm:text-6xl" style={{ textShadow: "0 2px 4px rgba(0,0,0,0.2)" }}>
+          <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
             The Truth Behind Every Financial Tip
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-blue-100/80">
+          <p className="mx-auto mt-5 max-w-2xl text-lg text-white/70">
             RateMyTip tracks and scores stock market tips from influencers and
             analysts. See who actually delivers results with transparent,
             verified data.
           </p>
-          <div className="mx-auto mt-8 max-w-xl">
+          <div className="mx-auto mt-10 max-w-xl">
             <SearchBar
               placeholder="Search creators or stocks..."
               size="lg"
@@ -99,36 +93,36 @@ export default async function HomePage(): Promise<React.ReactElement> {
 
       {/* Stats Bar — floating glass card */}
       <section className="relative -mt-8 z-10 px-4">
-        <div className="mx-auto max-w-3xl rounded-2xl glass shadow-lg">
+        <div className="mx-auto max-w-3xl glass rounded-xl shadow-lg">
           <div className="flex flex-wrap items-center justify-center gap-8 px-6 py-5 sm:gap-12">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#2B6CB0]/10 to-[#2B6CB0]/5">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/10">
                 <Target className="h-5 w-5 text-accent" />
               </div>
               <div>
-                <span className="text-2xl font-bold text-primary tabular-nums">
+                <span className="text-2xl font-bold text-text tabular-nums">
                   {stats.tipCount.toLocaleString("en-IN")}
                 </span>
                 <p className="text-xs text-muted">tips tracked</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#2B6CB0]/10 to-[#2B6CB0]/5">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/10">
                 <Users className="h-5 w-5 text-accent" />
               </div>
               <div>
-                <span className="text-2xl font-bold text-primary tabular-nums">
+                <span className="text-2xl font-bold text-text tabular-nums">
                   {stats.creatorCount.toLocaleString("en-IN")}
                 </span>
                 <p className="text-xs text-muted">creators scored</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#2B6CB0]/10 to-[#2B6CB0]/5">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/10">
                 <BarChart3 className="h-5 w-5 text-accent" />
               </div>
               <div>
-                <span className="text-2xl font-bold text-primary tabular-nums">
+                <span className="text-2xl font-bold text-text tabular-nums">
                   RMT Score
                 </span>
                 <p className="text-xs text-muted">powered rankings</p>
@@ -141,23 +135,23 @@ export default async function HomePage(): Promise<React.ReactElement> {
       {/* Top 10 Leaderboard Preview */}
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-gradient-primary">
+          <h2 className="text-2xl font-bold text-text">
             Top Creators
           </h2>
           <Link
             href="/leaderboard"
-            className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#1A365D] to-[#2B6CB0] px-4 py-2 text-sm font-medium text-white shadow-md transition-all duration-200 hover:shadow-lg hover:brightness-110"
+            className="inline-flex items-center gap-1.5 bg-accent text-white shadow-sm hover:bg-accent-hover rounded-lg px-4 py-2 text-sm font-medium transition-colors"
           >
             View Full Leaderboard
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
-        <div className="mt-6 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_1px_2px_0_rgba(26,54,93,0.04)]">
+        <div className="mt-6 rounded-xl border border-border/60 bg-surface shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[600px] text-left">
               <thead>
-                <tr className="bg-gradient-to-r from-gray-50 to-gray-50/50">
+                <tr className="bg-bg-alt/80">
                   <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted">
                     Rank
                   </th>
@@ -178,8 +172,8 @@ export default async function HomePage(): Promise<React.ReactElement> {
               <tbody className="stagger-children">
                 {topCreators.length > 0 ? (
                   topCreators.map((creator, index) => (
-                    <tr key={creator.id} className="transition-all duration-200 hover:bg-[#2B6CB0]/[0.03] even:bg-gray-50/30">
-                      <td className="px-4 py-3.5 text-sm font-medium text-muted tabular-nums">
+                    <tr key={creator.id} className="hover:bg-bg-alt/80 transition-colors border-b border-border-light">
+                      <td className="px-4 py-3.5 text-sm text-muted tabular-nums">
                         {index + 1}
                       </td>
                       <td className="px-4 py-3.5">
@@ -187,10 +181,10 @@ export default async function HomePage(): Promise<React.ReactElement> {
                           href={`/creator/${creator.slug}`}
                           className="flex items-center gap-2.5 hover:underline"
                         >
-                          <span className="text-sm font-medium text-text">
+                          <span className="font-medium text-text text-sm">
                             {creator.displayName}
                           </span>
-                          <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-muted">
+                          <span className="bg-bg-alt text-muted text-[10px] rounded-md px-1.5 py-0.5">
                             {creator.tier}
                           </span>
                         </Link>
@@ -219,7 +213,7 @@ export default async function HomePage(): Promise<React.ReactElement> {
                   <tr>
                     <td
                       colSpan={5}
-                      className="px-4 py-12 text-center text-sm text-muted"
+                      className="px-4 py-12 text-center text-muted text-sm"
                     >
                       No creators tracked yet. Data will appear once scraping
                       begins.
@@ -238,7 +232,7 @@ export default async function HomePage(): Promise<React.ReactElement> {
       {/* Category Quick Links */}
       <section className="px-4 py-12 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <h2 className="text-center text-2xl font-bold text-gradient-primary">
+          <h2 className="text-2xl font-bold text-text text-center">
             Browse by Category
           </h2>
           <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
@@ -248,12 +242,12 @@ export default async function HomePage(): Promise<React.ReactElement> {
                 <Link
                   key={cat.href}
                   href={cat.href}
-                  className="flex flex-col items-center gap-3 rounded-2xl border border-gray-100 bg-white p-6 shadow-[0_1px_2px_0_rgba(26,54,93,0.04)] card-hover gradient-border-hover"
+                  className="flex flex-col items-center gap-3 rounded-xl border border-border/60 bg-surface p-6 shadow-sm card-hover gradient-border-hover"
                 >
-                  <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-[#2B6CB0]/10 to-[#2B6CB0]/5">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-accent/10">
                     <Icon className="h-7 w-7 text-accent" />
                   </div>
-                  <span className="text-sm font-bold text-primary">
+                  <span className="text-sm font-semibold text-text">
                     {cat.label}
                   </span>
                 </Link>
@@ -265,10 +259,10 @@ export default async function HomePage(): Promise<React.ReactElement> {
 
       {/* SEO Content */}
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <h2 className="text-xl font-bold text-gradient-primary">
+        <h2 className="text-xl font-bold text-text">
           Why RateMyTip?
         </h2>
-        <p className="mt-3 text-sm leading-relaxed text-muted">
+        <p className="text-sm leading-relaxed text-muted mt-3">
           Financial influencers across the globe offer stock and crypto tips on
           social media. But how do you know which ones to trust? RateMyTip
           solves this by tracking every tip, measuring actual performance

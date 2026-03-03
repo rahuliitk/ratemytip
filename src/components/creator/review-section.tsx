@@ -129,9 +129,9 @@ export function ReviewSection({ creatorId }: ReviewSectionProps): React.ReactEle
   const displayRating = hoverRating || formRating;
 
   return (
-    <div className="rounded-2xl bg-white p-6 shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)]">
+    <div className="rounded-xl border border-border/60 bg-surface p-6 shadow-sm">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold text-gradient-primary">Reviews</h2>
+        <h2 className="text-base font-semibold text-text">Reviews</h2>
         {session?.user?.userId && (
           <Button
             size="sm"
@@ -147,7 +147,7 @@ export function ReviewSection({ creatorId }: ReviewSectionProps): React.ReactEle
       {!loading && summary.totalReviews > 0 && (
         <div className="mt-3 flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <span className="text-2xl font-bold text-primary tabular-nums">
+            <span className="text-2xl font-bold text-text tabular-nums">
               {summary.avgRating.toFixed(1)}
             </span>
             <div className="flex items-center gap-0.5">
@@ -157,7 +157,7 @@ export function ReviewSection({ creatorId }: ReviewSectionProps): React.ReactEle
                   className={`h-4 w-4 ${
                     star <= Math.round(summary.avgRating)
                       ? "fill-yellow-400 text-yellow-400"
-                      : "text-gray-300"
+                      : "text-border"
                   }`}
                 />
               ))}
@@ -171,8 +171,8 @@ export function ReviewSection({ creatorId }: ReviewSectionProps): React.ReactEle
 
       {/* Review form */}
       {showForm && (
-        <div className="mt-4 rounded-xl border border-gray-100 bg-gray-50/50 p-4">
-          <p className="text-sm font-medium text-[#1A365D]">
+        <div className="mt-4 rounded-lg border border-border/60 bg-bg p-4">
+          <p className="text-sm font-medium text-text">
             {userReview ? "Update your review" : "Rate this creator"}
           </p>
           <div className="mt-2 flex items-center gap-1">
@@ -190,7 +190,7 @@ export function ReviewSection({ creatorId }: ReviewSectionProps): React.ReactEle
                   className={`h-6 w-6 ${
                     star <= displayRating
                       ? "fill-yellow-400 text-yellow-400"
-                      : "text-gray-300"
+                      : "text-border"
                   }`}
                 />
               </button>
@@ -200,7 +200,7 @@ export function ReviewSection({ creatorId }: ReviewSectionProps): React.ReactEle
             value={formContent}
             onChange={(e) => setFormContent(e.target.value)}
             placeholder="Share your experience with this creator (optional)"
-            className="mt-3 w-full rounded-xl border border-gray-100 bg-white px-3 py-2 text-sm placeholder:text-gray-400 transition-colors duration-200 focus:border-[#2B6CB0] focus:outline-none focus:ring-1 focus:ring-[#2B6CB0]/20"
+            className="mt-3 w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text placeholder:text-muted-light transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
             rows={3}
             maxLength={2000}
           />
@@ -219,21 +219,21 @@ export function ReviewSection({ creatorId }: ReviewSectionProps): React.ReactEle
       )}
 
       {/* Review list */}
-      <div className="mt-4 divide-y divide-gray-100">
+      <div className="mt-4 divide-y divide-border/60">
         {loading ? (
           <div className="space-y-4 py-4">
             {[1, 2, 3].map((i) => (
               <div key={i} className="animate-pulse space-y-2">
                 <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-full bg-gray-200" />
-                  <div className="h-4 w-24 rounded bg-gray-200" />
+                  <div className="h-8 w-8 rounded-full bg-bg-alt" />
+                  <div className="h-4 w-24 rounded bg-bg-alt" />
                 </div>
-                <div className="ml-11 h-4 w-3/4 rounded bg-gray-200" />
+                <div className="ml-11 h-4 w-3/4 rounded bg-bg-alt" />
               </div>
             ))}
           </div>
         ) : reviews.length === 0 ? (
-          <div className="py-8 text-center text-sm text-muted">
+          <div className="py-12 text-center text-sm text-muted">
             No reviews yet. Be the first to review this creator!
           </div>
         ) : (

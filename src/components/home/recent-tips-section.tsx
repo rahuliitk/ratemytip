@@ -42,19 +42,24 @@ export async function RecentTipsSection(): Promise<React.ReactElement> {
   }
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gradient-primary">Recent Tips</h2>
+        <div>
+          <h2 className="text-2xl font-bold text-text">Recent Tips</h2>
+          <p className="mt-1 text-muted">
+            Latest stock tips from tracked creators
+          </p>
+        </div>
         <Link
           href="/tips"
-          className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 px-4 py-2 text-sm font-medium text-accent transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:border-[#2B6CB0]/20"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-secondary shadow-xs transition-all duration-200 hover:bg-bg-alt hover:text-text hover:shadow-sm"
         >
           View All Tips
           <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
 
-      <div className="stagger-children mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {tips.map((tip) => (
           <TipCardWithCreator key={tip.id} tip={tip} />
         ))}

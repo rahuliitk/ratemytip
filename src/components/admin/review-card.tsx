@@ -36,9 +36,9 @@ export function ReviewCard({
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <div className="rounded-2xl bg-white shadow-[0_1px_2px_0_rgba(26,54,93,0.04)]">
+    <div className="rounded-xl border border-border/60 bg-surface shadow-sm">
       {/* Summary row */}
-      <div className="flex items-center justify-between px-4 py-3">
+      <div className="flex items-center justify-between px-5 py-3.5">
         <button
           type="button"
           className="flex flex-1 items-center gap-3 text-left"
@@ -49,14 +49,14 @@ export function ReviewCard({
           ) : (
             <ChevronRight className="h-4 w-4 text-muted" />
           )}
-          <span className="text-sm font-bold text-primary">
+          <span className="text-sm font-bold text-text">
             {tip.stock.symbol}
           </span>
           <span
-            className={`rounded px-1.5 py-0.5 text-xs font-semibold ${
+            className={`rounded-md px-2 py-0.5 text-xs font-semibold ${
               tip.direction === "BUY"
-                ? "bg-green-100 text-green-800"
-                : "bg-red-100 text-red-800"
+                ? "bg-emerald-50 text-emerald-700"
+                : "bg-red-50 text-red-700"
             }`}
           >
             {tip.direction}
@@ -66,12 +66,12 @@ export function ReviewCard({
           </span>
           {tip.parseConfidence !== null && (
             <span
-              className={`rounded px-1.5 py-0.5 text-xs ${
+              className={`rounded-md px-2 py-0.5 text-xs font-medium ${
                 tip.parseConfidence >= 0.85
-                  ? "bg-green-100 text-green-700"
+                  ? "bg-emerald-50 text-emerald-700"
                   : tip.parseConfidence >= 0.5
-                    ? "bg-yellow-100 text-yellow-700"
-                    : "bg-red-100 text-red-700"
+                    ? "bg-amber-50 text-amber-700"
+                    : "bg-red-50 text-red-700"
               }`}
             >
               {(tip.parseConfidence * 100).toFixed(0)}% conf
@@ -84,7 +84,7 @@ export function ReviewCard({
             type="button"
             onClick={() => onApprove(tip.id)}
             disabled={isActionLoading}
-            className="inline-flex items-center gap-1 rounded-md bg-success px-3 py-1.5 text-xs font-medium text-white hover:bg-success/90 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-emerald-600 disabled:opacity-50"
           >
             {isActionLoading ? (
               <Loader2 className="h-3 w-3 animate-spin" />
@@ -97,7 +97,7 @@ export function ReviewCard({
             type="button"
             onClick={() => onReject(tip.id)}
             disabled={isActionLoading}
-            className="inline-flex items-center gap-1 rounded-md bg-danger px-3 py-1.5 text-xs font-medium text-white hover:bg-danger/90 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-red-500 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-red-600 disabled:opacity-50"
           >
             <X className="h-3 w-3" />
             Reject
@@ -107,41 +107,41 @@ export function ReviewCard({
 
       {/* Expanded detail */}
       {isExpanded && (
-        <div className="border-t border-gray-200 px-4 py-4">
+        <div className="border-t border-border/60 px-5 py-4">
           <div className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
             <div>
-              <p className="text-xs text-muted">Entry</p>
-              <p className="font-medium tabular-nums">
+              <p className="text-xs font-medium text-muted">Entry</p>
+              <p className="mt-0.5 font-semibold tabular-nums text-text">
                 {formatPrice(tip.entryPrice)}
               </p>
             </div>
             <div>
-              <p className="text-xs text-muted">Target 1</p>
-              <p className="font-medium tabular-nums text-success">
+              <p className="text-xs font-medium text-muted">Target 1</p>
+              <p className="mt-0.5 font-semibold tabular-nums text-emerald-600">
                 {formatPrice(tip.target1)}
               </p>
             </div>
             {tip.target2 !== null && (
               <div>
-                <p className="text-xs text-muted">Target 2</p>
-                <p className="font-medium tabular-nums text-success">
+                <p className="text-xs font-medium text-muted">Target 2</p>
+                <p className="mt-0.5 font-semibold tabular-nums text-emerald-600">
                   {formatPrice(tip.target2)}
                 </p>
               </div>
             )}
             <div>
-              <p className="text-xs text-muted">Stop Loss</p>
-              <p className="font-medium tabular-nums text-danger">
+              <p className="text-xs font-medium text-muted">Stop Loss</p>
+              <p className="mt-0.5 font-semibold tabular-nums text-red-600">
                 {formatPrice(tip.stopLoss)}
               </p>
             </div>
             <div>
-              <p className="text-xs text-muted">Timeframe</p>
-              <p className="font-medium">{tip.timeframe}</p>
+              <p className="text-xs font-medium text-muted">Timeframe</p>
+              <p className="mt-0.5 font-medium text-text">{tip.timeframe}</p>
             </div>
             <div>
-              <p className="text-xs text-muted">Tip Date</p>
-              <p className="font-medium">
+              <p className="text-xs font-medium text-muted">Tip Date</p>
+              <p className="mt-0.5 font-medium text-text">
                 {new Date(tip.tipTimestamp).toLocaleDateString("en-IN")}
               </p>
             </div>
@@ -149,8 +149,8 @@ export function ReviewCard({
 
           {tip.rawPost && (
             <div className="mt-4">
-              <p className="text-xs font-medium text-muted">Original Post</p>
-              <div className="mt-1 rounded bg-bg p-3 text-sm text-text">
+              <p className="text-xs font-semibold text-muted">Original Post</p>
+              <div className="mt-1.5 rounded-lg border border-border/40 bg-bg-alt p-3 text-sm leading-relaxed text-text">
                 {tip.rawPost.content}
               </div>
             </div>

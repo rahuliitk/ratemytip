@@ -40,7 +40,7 @@ export function TimeAgo({
     <time
       dateTime={dateObj.toISOString()}
       title={dateObj.toLocaleString()}
-      className={cn("text-sm text-[#718096]", className)}
+      className={cn("text-sm text-muted", className)}
     >
       {timeAgo}
     </time>

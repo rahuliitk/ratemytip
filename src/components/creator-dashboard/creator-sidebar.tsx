@@ -25,10 +25,10 @@ export function CreatorSidebar(): React.ReactElement {
           <Link
             key={item.href}
             href={item.href}
-            className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+            className={`flex items-center gap-3 px-3 py-2 text-sm transition-colors ${
               isActive
-                ? "bg-accent/10 text-accent"
-                : "text-muted hover:bg-bg hover:text-primary"
+                ? "bg-accent/10 text-accent font-medium rounded-lg"
+                : "text-muted hover:text-text hover:bg-bg-alt rounded-lg"
             }`}
           >
             <Icon className="h-4 w-4" />

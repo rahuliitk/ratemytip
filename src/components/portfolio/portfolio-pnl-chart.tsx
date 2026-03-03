@@ -23,15 +23,15 @@ interface PortfolioPnlChartProps {
 export function PortfolioPnlChart({ data }: PortfolioPnlChartProps): React.ReactElement {
   if (data.length === 0) {
     return (
-      <div className="flex h-48 items-center justify-center rounded-2xl bg-white shadow-[0_1px_2px_0_rgba(26,54,93,0.04)] text-sm text-[#718096]">
+      <div className="flex h-48 items-center justify-center rounded-xl border border-dashed border-border bg-surface text-sm text-muted">
         No portfolio history available yet.
       </div>
     );
   }
 
   const latestPnl = data[data.length - 1]?.totalPnl ?? 0;
-  const lineColor = latestPnl >= 0 ? "#276749" : "#C53030";
-  const fillColor = latestPnl >= 0 ? "#C6F6D5" : "#FED7D7";
+  const lineColor = latestPnl >= 0 ? "var(--color-success)" : "var(--color-danger)";
+  const fillColor = latestPnl >= 0 ? "var(--color-success-light)" : "var(--color-danger-light)";
 
   const chartData = data.map((d) => ({
     date: new Date(d.date).toLocaleDateString("en-IN", {
@@ -48,8 +48,8 @@ export function PortfolioPnlChart({ data }: PortfolioPnlChartProps): React.React
   const padding = (maxValue - minValue) * 0.1 || 100;
 
   return (
-    <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-4">
-      <h3 className="mb-4 text-sm font-semibold text-[#1A202C]">Portfolio Value</h3>
+    <div className="rounded-xl border border-border/60 bg-surface p-5 shadow-sm">
+      <h3 className="mb-4 text-sm font-semibold text-text">Portfolio Value</h3>
       <ResponsiveContainer width="100%" height={280}>
         <AreaChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
           <defs>
@@ -60,30 +60,31 @@ export function PortfolioPnlChart({ data }: PortfolioPnlChartProps): React.React
           </defs>
           <XAxis
             dataKey="date"
-            tick={{ fontSize: 11, fill: "#718096" }}
+            tick={{ fontSize: 11, fill: "var(--color-muted)" }}
             tickLine={false}
             axisLine={false}
             interval="preserveStartEnd"
           />
           <YAxis
             domain={[Math.floor(minValue - padding), Math.ceil(maxValue + padding)]}
-            tick={{ fontSize: 11, fill: "#718096" }}
+            tick={{ fontSize: 11, fill: "var(--color-muted)" }}
             tickLine={false}
             axisLine={false}
             tickFormatter={(value: number) => formatPrice(value)}
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: "#fff",
-              border: "1px solid #E2E8F0",
-              borderRadius: "8px",
+              backgroundColor: "var(--color-surface)",
+              border: "1px solid var(--color-border)",
+              borderRadius: "0.75rem",
               fontSize: "12px",
+              boxShadow: "var(--shadow-md)",
             }}
             formatter={(value: number, name: string) => {
               if (name === "totalValue") return [formatPrice(value), "Value"];
               return [formatPrice(value), "P&L"];
             }}
-            labelStyle={{ color: "#718096", fontSize: "11px" }}
+            labelStyle={{ color: "var(--color-muted)", fontSize: "11px" }}
           />
           <Area
             type="monotone"

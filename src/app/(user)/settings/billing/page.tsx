@@ -3,7 +3,6 @@
 import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CreditCard, ExternalLink, XCircle, CheckCircle2 } from "lucide-react";
 
@@ -59,10 +58,10 @@ function BillingContent(): React.ReactElement {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-12">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="animate-pulse space-y-4">
-          <div className="h-8 w-48 rounded-2xl shimmer" />
-          <div className="h-40 rounded-2xl shimmer" />
+          <div className="h-8 w-48 rounded-xl shimmer" />
+          <div className="h-40 rounded-xl shimmer" />
         </div>
       </div>
     );
@@ -72,99 +71,102 @@ function BillingContent(): React.ReactElement {
   const tier = data?.tier ?? "FREE";
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
-      <h1 className="mb-6 text-2xl font-bold text-gradient-primary">Billing & Subscription</h1>
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-text">Billing & Subscription</h1>
+        <p className="mt-1 text-sm text-muted">Manage your plan and payment history</p>
+      </div>
 
-      {success && (
-        <div className="mb-6 flex items-center gap-2 rounded-xl bg-[#276749]/10 p-4 text-sm text-success">
-          <CheckCircle2 className="h-5 w-5" />
-          Subscription activated successfully!
-        </div>
-      )}
+      <div className="max-w-3xl space-y-6">
+        {success && (
+          <div className="flex items-center gap-2 rounded-xl border border-success/20 bg-success-light p-4 text-sm text-success">
+            <CheckCircle2 className="h-5 w-5 flex-shrink-0" />
+            Subscription activated successfully!
+          </div>
+        )}
 
-      {/* Current Plan */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CreditCard className="h-5 w-5" />
-            Current Plan
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div>
-              <Badge variant={tier === "FREE" ? "secondary" : "default"} className="text-sm">
-                {tier}
-              </Badge>
-              {sub && (
-                <div className="mt-2 text-sm text-muted">
-                  {sub.cancelAtPeriodEnd ? (
-                    <span className="text-warning">
-                      Cancels on {new Date(sub.currentPeriodEnd).toLocaleDateString()}
-                    </span>
-                  ) : (
-                    <>Renews on {new Date(sub.currentPeriodEnd).toLocaleDateString()}</>
-                  )}
-                </div>
-              )}
-            </div>
-            <div className="flex gap-2">
-              {sub && sub.status === "ACTIVE" && !sub.cancelAtPeriodEnd && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleCancel}
-                  disabled={canceling}
-                >
-                  <XCircle className="mr-1.5 h-4 w-4" />
-                  {canceling ? "Canceling..." : "Cancel"}
-                </Button>
-              )}
-              {sub && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handlePortal}
-                  disabled={portalLoading}
-                >
-                  <ExternalLink className="mr-1.5 h-4 w-4" />
-                  Manage in Stripe
-                </Button>
-              )}
-              {tier === "FREE" && (
-                <Button size="sm" asChild>
-                  <a href="/pricing">Upgrade</a>
-                </Button>
-              )}
+        {/* Current Plan */}
+        <div className="rounded-xl border border-border/60 bg-surface shadow-sm">
+          <div className="border-b border-border/60 px-6 py-4">
+            <h2 className="flex items-center gap-2 text-base font-semibold text-text">
+              <CreditCard className="h-5 w-5 text-muted" />
+              Current Plan
+            </h2>
+          </div>
+          <div className="px-6 py-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <Badge variant={tier === "FREE" ? "secondary" : "default"} className="text-sm">
+                  {tier}
+                </Badge>
+                {sub && (
+                  <div className="mt-2 text-sm text-muted">
+                    {sub.cancelAtPeriodEnd ? (
+                      <span className="text-warning">
+                        Cancels on {new Date(sub.currentPeriodEnd).toLocaleDateString()}
+                      </span>
+                    ) : (
+                      <>Renews on {new Date(sub.currentPeriodEnd).toLocaleDateString()}</>
+                    )}
+                  </div>
+                )}
+              </div>
+              <div className="flex gap-2">
+                {sub && sub.status === "ACTIVE" && !sub.cancelAtPeriodEnd && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCancel}
+                    disabled={canceling}
+                  >
+                    <XCircle className="mr-1.5 h-4 w-4" />
+                    {canceling ? "Canceling..." : "Cancel"}
+                  </Button>
+                )}
+                {sub && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handlePortal}
+                    disabled={portalLoading}
+                  >
+                    <ExternalLink className="mr-1.5 h-4 w-4" />
+                    Manage in Stripe
+                  </Button>
+                )}
+                {tier === "FREE" && (
+                  <Button size="sm" asChild>
+                    <a href="/pricing">Upgrade</a>
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Payment History */}
-      {data?.payments && data.payments.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Payment History</CardTitle>
-            <CardDescription>Your recent transactions</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="divide-y">
+        {/* Payment History */}
+        {data?.payments && data.payments.length > 0 && (
+          <div className="rounded-xl border border-border/60 bg-surface shadow-sm">
+            <div className="border-b border-border/60 px-6 py-4">
+              <h2 className="text-base font-semibold text-text">Payment History</h2>
+              <p className="mt-0.5 text-sm text-muted">Your recent transactions</p>
+            </div>
+            <div className="divide-y divide-border/60 px-6">
               {data.payments.map((p, i) => (
-                <div key={i} className="flex items-center justify-between py-3">
+                <div key={i} className="flex items-center justify-between py-4">
                   <div>
-                    <p className="text-sm font-medium">{p.description ?? "Subscription payment"}</p>
-                    <p className="text-xs text-muted">
+                    <p className="text-sm font-medium text-text">{p.description ?? "Subscription payment"}</p>
+                    <p className="mt-0.5 text-xs text-muted">
                       {new Date(p.createdAt).toLocaleDateString()}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-medium">
+                    <p className="text-sm font-medium tabular-nums text-text">
                       {(p.amount / 100).toFixed(2)} {p.currency.toUpperCase()}
                     </p>
                     <Badge
                       variant={p.status === "SUCCEEDED" ? "default" : "destructive"}
-                      className="text-xs"
+                      className="mt-1 text-xs"
                     >
                       {p.status}
                     </Badge>
@@ -172,16 +174,23 @@ function BillingContent(): React.ReactElement {
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
 export default function BillingPage(): React.ReactElement {
   return (
-    <Suspense fallback={<div className="mx-auto max-w-3xl px-4 py-12"><div className="animate-pulse space-y-4"><div className="h-8 w-48 rounded-2xl shimmer" /><div className="h-40 rounded-2xl shimmer" /></div></div>}>
+    <Suspense fallback={
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 w-48 rounded-xl shimmer" />
+          <div className="h-40 rounded-xl shimmer" />
+        </div>
+      </div>
+    }>
       <BillingContent />
     </Suspense>
   );

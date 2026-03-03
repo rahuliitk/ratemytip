@@ -20,7 +20,7 @@ export function CreatorScoreChart({
 }: CreatorScoreChartProps): React.ReactElement {
   if (snapshots.length === 0) {
     return (
-      <div className="flex h-48 items-center justify-center rounded-2xl bg-gray-50 text-sm text-muted">
+      <div className="flex h-48 items-center justify-center rounded-xl bg-bg-alt text-sm text-muted">
         No score history available yet.
       </div>
     );
@@ -39,26 +39,26 @@ export function CreatorScoreChart({
   return (
     <ResponsiveContainer width="100%" height={280}>
       <LineChart data={data} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" strokeOpacity={0.6} />
+        <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-light)" strokeOpacity={0.8} />
         <XAxis
           dataKey="date"
-          tick={{ fontSize: 11, fill: "#718096" }}
+          tick={{ fontSize: 11, fill: "var(--color-muted)" }}
           tickLine={false}
           interval="preserveStartEnd"
         />
         <YAxis
           domain={[0, 100]}
-          tick={{ fontSize: 11, fill: "#718096" }}
+          tick={{ fontSize: 11, fill: "var(--color-muted)" }}
           tickLine={false}
           axisLine={false}
         />
         <Tooltip
           contentStyle={{
-            backgroundColor: "#fff",
-            border: "none",
-            borderRadius: "12px",
+            backgroundColor: "var(--color-surface)",
+            border: "1px solid var(--color-border)",
+            borderRadius: "8px",
             fontSize: "12px",
-            boxShadow: "0 10px 15px -3px rgba(26, 54, 93, 0.08), 0 4px 6px -4px rgba(26, 54, 93, 0.06)",
+            boxShadow: "var(--shadow-md)",
           }}
           formatter={(value: number, name: string) => {
             if (name === "rmtScore") return [`${value}`, "RMT Score"];
@@ -68,19 +68,19 @@ export function CreatorScoreChart({
         <Line
           type="monotone"
           dataKey="rmtScore"
-          stroke="#2B6CB0"
+          stroke="var(--color-accent)"
           strokeWidth={2.5}
           dot={false}
-          activeDot={{ r: 5, stroke: "#fff", strokeWidth: 2 }}
+          activeDot={{ r: 5, stroke: "var(--color-surface)", strokeWidth: 2 }}
         />
         <Line
           type="monotone"
           dataKey="accuracyRate"
-          stroke="#38A169"
+          stroke="var(--color-success)"
           strokeWidth={1.5}
           dot={false}
           strokeDasharray="4 4"
-          activeDot={{ r: 4, stroke: "#fff", strokeWidth: 2 }}
+          activeDot={{ r: 4, stroke: "var(--color-surface)", strokeWidth: 2 }}
         />
       </LineChart>
     </ResponsiveContainer>

@@ -11,6 +11,7 @@ import {
   BarChart3,
   UserCheck,
   MessageSquareWarning,
+  ExternalLink,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -20,15 +21,35 @@ interface NavItem {
   readonly icon: React.ComponentType<{ className?: string }>;
 }
 
-const NAV_ITEMS: readonly NavItem[] = [
-  { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { label: "Review Queue", href: "/admin/review", icon: ClipboardCheck },
-  { label: "Creators", href: "/admin/creators", icon: Users },
-  { label: "Scrapers", href: "/admin/scrapers", icon: Bot },
-  { label: "Claims", href: "/admin/claims", icon: UserCheck },
-  { label: "Comments", href: "/admin/comments", icon: MessageSquareWarning },
-  { label: "Moderation", href: "/admin/moderation", icon: Shield },
-  { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+interface NavSection {
+  readonly title: string;
+  readonly items: readonly NavItem[];
+}
+
+const NAV_SECTIONS: readonly NavSection[] = [
+  {
+    title: "Overview",
+    items: [
+      { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+      { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+    ],
+  },
+  {
+    title: "Content",
+    items: [
+      { label: "Review Queue", href: "/admin/review", icon: ClipboardCheck },
+      { label: "Creators", href: "/admin/creators", icon: Users },
+      { label: "Scrapers", href: "/admin/scrapers", icon: Bot },
+    ],
+  },
+  {
+    title: "Management",
+    items: [
+      { label: "Claims", href: "/admin/claims", icon: UserCheck },
+      { label: "Comments", href: "/admin/comments", icon: MessageSquareWarning },
+      { label: "Moderation", href: "/admin/moderation", icon: Shield },
+    ],
+  },
 ] as const;
 
 export function AdminSidebar(): React.ReactElement {
@@ -42,42 +63,58 @@ export function AdminSidebar(): React.ReactElement {
   }
 
   return (
-    <aside className="flex h-full w-64 flex-col border-r border-gray-200 bg-surface">
-      <div className="flex h-16 items-center border-b border-gray-200 px-6">
-        <Link href="/admin" className="flex items-center gap-2">
-          <BarChart3 className="h-6 w-6 text-accent" />
-          <span className="text-lg font-bold text-primary">RMT Admin</span>
-        </Link>
+    <aside className="flex h-full w-64 flex-col bg-primary">
+      {/* Logo */}
+      <div className="flex h-16 items-center gap-3 px-6">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
+          <BarChart3 className="h-4 w-4 text-white" />
+        </div>
+        <div className="flex flex-col">
+          <span className="text-sm font-bold text-white tracking-tight">RateMyTip</span>
+          <span className="text-[10px] font-medium uppercase tracking-widest text-white/70">Admin</span>
+        </div>
       </div>
 
-      <nav className="flex-1 space-y-1 px-3 py-4">
-        {NAV_ITEMS.map((item) => {
-          const active = isActive(item.href);
-          const Icon = item.icon;
+      {/* Navigation */}
+      <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-6">
+        {NAV_SECTIONS.map((section) => (
+          <div key={section.title}>
+            <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-white/50">
+              {section.title}
+            </p>
+            <div className="space-y-0.5">
+              {section.items.map((item) => {
+                const active = isActive(item.href);
+                const Icon = item.icon;
 
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                active
-                  ? "bg-accent/10 text-accent"
-                  : "text-muted hover:bg-bg hover:text-primary"
-              )}
-            >
-              <Icon className="h-5 w-5 shrink-0" />
-              {item.label}
-            </Link>
-          );
-        })}
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150",
+                      active
+                        ? "bg-white/10 text-white"
+                        : "text-white/70 hover:bg-white/5 hover:text-white"
+                    )}
+                  >
+                    <Icon className="h-4 w-4 shrink-0" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
-      <div className="border-t border-gray-200 px-3 py-4">
+      {/* Footer */}
+      <div className="border-t border-white/10 px-3 py-4">
         <Link
           href="/"
-          className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-bg hover:text-primary"
+          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-white/70 transition-all duration-150 hover:bg-white/5 hover:text-white/70"
         >
+          <ExternalLink className="h-4 w-4 shrink-0" />
           View Public Site
         </Link>
       </div>

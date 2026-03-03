@@ -4,29 +4,29 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         default:
-          "bg-gradient-to-r from-[#1A365D] to-[#2B6CB0] text-white shadow-md hover:shadow-lg hover:brightness-110",
+          "bg-primary text-white shadow-sm hover:bg-primary-light active:scale-[0.98]",
         destructive:
-          "bg-gradient-to-r from-[#C53030] to-[#E53E3E] text-white shadow-sm hover:shadow-md hover:brightness-110",
+          "bg-danger text-white shadow-sm hover:bg-red-700 active:scale-[0.98]",
         outline:
-          "border border-gray-200 bg-white shadow-sm hover:bg-gray-50 hover:text-[#1A365D] hover:border-gray-300",
+          "border border-border bg-surface text-text shadow-xs hover:bg-bg-alt hover:border-border active:scale-[0.98]",
         secondary:
-          "bg-gray-100 text-[#1A202C] shadow-sm hover:bg-gray-200",
+          "bg-bg-alt text-text-secondary shadow-xs hover:bg-border active:scale-[0.98]",
         ghost:
-          "hover:bg-[#2B6CB0]/5 hover:text-[#1A202C]",
+          "text-text-secondary hover:bg-bg-alt hover:text-text",
         link:
-          "text-[#2B6CB0] underline-offset-4 hover:underline",
+          "text-accent underline-offset-4 hover:underline",
         glow:
-          "bg-gradient-to-r from-[#1A365D] to-[#2B6CB0] text-white shadow-md hover:shadow-[0_0_20px_rgba(43,108,176,0.4)] hover:brightness-110",
+          "bg-accent text-white shadow-md shadow-accent/25 hover:bg-accent-hover hover:shadow-lg hover:shadow-accent/30 active:scale-[0.98]",
       },
       size: {
         default: "h-9 px-4 py-2",
-        sm: "h-8 rounded-xl px-3 text-xs",
-        lg: "h-10 rounded-xl px-8",
+        sm: "h-8 rounded-lg px-3 text-xs",
+        lg: "h-11 rounded-lg px-6 text-sm",
         icon: "h-9 w-9",
       },
     },

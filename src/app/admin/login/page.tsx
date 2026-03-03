@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { BarChart3, Loader2 } from "lucide-react";
+import { BarChart3, Loader2, Lock } from "lucide-react";
 
 export default function AdminLoginPage(): React.ReactElement {
   const [email, setEmail] = useState("");
@@ -38,71 +38,80 @@ export default function AdminLoginPage(): React.ReactElement {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-bg px-4">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)]">
-        <div className="flex flex-col items-center">
-          <BarChart3 className="h-10 w-10 text-accent" />
-          <h1 className="mt-3 text-xl font-bold text-primary">
-            RateMyTip Admin
-          </h1>
-          <p className="mt-1 text-sm text-muted">
-            Sign in to access the admin dashboard
-          </p>
-        </div>
+    <div className="flex min-h-screen items-center justify-center bg-primary px-4">
+      {/* Subtle background pattern */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary via-primary to-accent/90" />
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-4">
-          {error && (
-            <div className="rounded-xl bg-[#C53030]/10 px-3 py-2 text-sm text-danger">
-              {error}
+      <div className="relative w-full max-w-sm">
+        <div className="rounded-xl bg-surface p-8 shadow-xl">
+          {/* Logo & Title */}
+          <div className="flex flex-col items-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
+              <BarChart3 className="h-6 w-6 text-white" />
             </div>
-          )}
-
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-text"
-            >
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoFocus
-              className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm text-text placeholder:text-muted focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-              placeholder="admin@ratemytip.com"
-            />
+            <h1 className="mt-4 text-xl font-bold text-text">
+              RateMyTip Admin
+            </h1>
+            <p className="mt-1 text-sm text-muted">
+              Sign in to access the admin dashboard
+            </p>
           </div>
 
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-text"
-            >
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm text-text placeholder:text-muted focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-              placeholder="Enter your password"
-            />
-          </div>
+          <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+            {error && (
+              <div className="flex items-center gap-2 rounded-lg bg-danger/10 px-4 py-3 text-sm text-danger">
+                <Lock className="h-4 w-4 shrink-0" />
+                {error}
+              </div>
+            )}
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="flex w-full items-center justify-center gap-2 rounded-md bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent/90 disabled:opacity-50"
-          >
-            {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-            Sign In
-          </button>
-        </form>
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-text"
+              >
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoFocus
+                className="mt-1.5 w-full rounded-lg border border-border bg-surface px-3.5 py-2.5 text-sm text-text placeholder:text-muted/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10"
+                placeholder="admin@ratemytip.com"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-text"
+              >
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="mt-1.5 w-full rounded-lg border border-border bg-surface px-3.5 py-2.5 text-sm text-text placeholder:text-muted/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10"
+                placeholder="Enter your password"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-primary/90 disabled:opacity-50"
+            >
+              {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+              Sign In
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

@@ -101,10 +101,10 @@ export function CommentSection({ tipId }: CommentSectionProps): React.ReactEleme
   }
 
   return (
-    <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-6">
+    <div className="rounded-xl border border-border/60 bg-surface p-5 shadow-sm">
       <div className="flex items-center justify-between">
-        <h2 className="flex items-center gap-2 text-lg font-bold text-gradient-primary">
-          <MessageSquare className="h-5 w-5" />
+        <h2 className="flex items-center gap-2 text-base font-semibold text-text">
+          <MessageSquare className="h-4 w-4 text-muted" />
           Comments
           {comments.length > 0 && (
             <span className="text-sm font-normal text-muted">({comments.length})</span>
@@ -114,10 +114,10 @@ export function CommentSection({ tipId }: CommentSectionProps): React.ReactEleme
           <button
             type="button"
             onClick={() => setSortBy("newest")}
-            className={`rounded-xl px-3 py-1 text-xs font-medium transition-colors ${
+            className={`rounded-md px-3 py-1 text-xs font-medium transition-colors duration-150 ${
               sortBy === "newest"
-                ? "bg-[#2B6CB0]/10 text-[#2B6CB0]"
-                : "text-muted hover:bg-[#F7FAFC]"
+                ? "bg-accent text-white"
+                : "text-muted hover:bg-bg-alt hover:text-text"
             }`}
           >
             Newest
@@ -125,10 +125,10 @@ export function CommentSection({ tipId }: CommentSectionProps): React.ReactEleme
           <button
             type="button"
             onClick={() => setSortBy("top")}
-            className={`rounded-xl px-3 py-1 text-xs font-medium transition-colors ${
+            className={`rounded-md px-3 py-1 text-xs font-medium transition-colors duration-150 ${
               sortBy === "top"
-                ? "bg-[#2B6CB0]/10 text-[#2B6CB0]"
-                : "text-muted hover:bg-[#F7FAFC]"
+                ? "bg-accent text-white"
+                : "text-muted hover:bg-bg-alt hover:text-text"
             }`}
           >
             Top
@@ -142,13 +142,13 @@ export function CommentSection({ tipId }: CommentSectionProps): React.ReactEleme
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           placeholder={session?.user ? "Share your thoughts..." : "Sign in to comment"}
-          className="w-full rounded-xl border border-gray-200/60 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-[#2B6CB0]/40 focus:outline-none focus:ring-2 focus:ring-[#2B6CB0]/10"
+          className="w-full rounded-lg border border-border px-4 py-3 text-sm text-text placeholder:text-muted-light focus:border-accent/40 focus:outline-none focus:ring-2 focus:ring-accent/10"
           rows={3}
           maxLength={1000}
           disabled={!session?.user}
         />
         <div className="mt-2 flex items-center justify-between">
-          <span className="text-xs text-muted">
+          <span className="text-xs tabular-nums text-muted">
             {newComment.length}/1000
           </span>
           <Button
@@ -162,16 +162,16 @@ export function CommentSection({ tipId }: CommentSectionProps): React.ReactEleme
       </div>
 
       {/* Comment list */}
-      <div className="mt-4 divide-y divide-gray-100">
+      <div className="mt-4 divide-y divide-border/40">
         {loading ? (
           <div className="space-y-4 py-4">
             {[1, 2, 3].map((i) => (
               <div key={i} className="animate-pulse space-y-2">
                 <div className="flex items-center gap-2">
                   <div className="h-7 w-7 rounded-full shimmer" />
-                  <div className="h-4 w-24 rounded-2xl shimmer" />
+                  <div className="h-4 w-24 rounded shimmer" />
                 </div>
-                <div className="ml-9 h-4 w-3/4 rounded-2xl shimmer" />
+                <div className="ml-9 h-4 w-3/4 rounded shimmer" />
               </div>
             ))}
           </div>

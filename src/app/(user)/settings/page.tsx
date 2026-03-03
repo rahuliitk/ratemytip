@@ -5,7 +5,6 @@ import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 export default function SettingsPage(): React.ReactElement {
   const { data: session, update: updateSession } = useSession();
@@ -113,167 +112,172 @@ export default function SettingsPage(): React.ReactElement {
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8">
-      <h1 className="text-2xl font-bold text-gradient-primary">Settings</h1>
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-text">Settings</h1>
+        <p className="mt-1 text-sm text-muted">Manage your account and preferences</p>
+      </div>
 
-      {/* Profile section */}
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle>Profile</CardTitle>
-          <CardDescription>Update your display name and profile information</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleProfileSubmit} className="space-y-4">
-            {profileMsg && (
-              <div className={`rounded-xl p-3 text-sm ${profileMsg.type === "success" ? "bg-[#276749]/10 text-[#276749]" : "bg-[#C53030]/10 text-[#C53030]"}`}>
-                {profileMsg.text}
-              </div>
-            )}
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" value={session?.user?.email ?? ""} disabled />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
-              <Input id="username" value={session?.user?.username ?? ""} disabled />
-              <p className="text-xs text-muted">Username cannot be changed</p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="displayName">Display Name</Label>
-              <Input
-                id="displayName"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                minLength={2}
-                maxLength={50}
-                required
-              />
-            </div>
-            <Button type="submit" disabled={profileLoading}>
-              {profileLoading ? "Saving..." : "Save changes"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-
-      {/* Password section */}
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle>Change Password</CardTitle>
-          <CardDescription>Update your account password</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handlePasswordSubmit} className="space-y-4">
-            {passwordMsg && (
-              <div className={`rounded-xl p-3 text-sm ${passwordMsg.type === "success" ? "bg-[#276749]/10 text-[#276749]" : "bg-[#C53030]/10 text-[#C53030]"}`}>
-                {passwordMsg.text}
-              </div>
-            )}
-            <div className="space-y-2">
-              <Label htmlFor="currentPassword">Current Password</Label>
-              <Input
-                id="currentPassword"
-                type="password"
-                value={passwordForm.currentPassword}
-                onChange={(e) => setPasswordForm((p) => ({ ...p, currentPassword: e.target.value }))}
-                required
-                autoComplete="current-password"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="newPassword">New Password</Label>
-              <Input
-                id="newPassword"
-                type="password"
-                value={passwordForm.newPassword}
-                onChange={(e) => setPasswordForm((p) => ({ ...p, newPassword: e.target.value }))}
-                required
-                minLength={8}
-                autoComplete="new-password"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm New Password</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                value={passwordForm.confirmPassword}
-                onChange={(e) => setPasswordForm((p) => ({ ...p, confirmPassword: e.target.value }))}
-                required
-                minLength={8}
-                autoComplete="new-password"
-              />
-            </div>
-            <Button type="submit" disabled={passwordLoading}>
-              {passwordLoading ? "Changing..." : "Change password"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-
-      {/* Danger zone */}
-      <Card className="mt-6 border-red-200">
-        <CardHeader>
-          <CardTitle className="text-danger">Danger Zone</CardTitle>
-          <CardDescription>
-            Permanently delete your account and all associated data
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {!showDeleteConfirm ? (
-            <Button
-              variant="outline"
-              className="border-red-200 text-danger hover:bg-red-50"
-              onClick={() => setShowDeleteConfirm(true)}
-            >
-              Delete my account
-            </Button>
-          ) : (
-            <form onSubmit={handleDeleteAccount} className="space-y-4">
-              {deleteMsg && (
-                <div className={`rounded-xl p-3 text-sm ${deleteMsg.type === "error" ? "bg-[#C53030]/10 text-[#C53030]" : "bg-[#276749]/10 text-[#276749]"}`}>
-                  {deleteMsg.text}
+      <div className="max-w-2xl space-y-6">
+        {/* Profile section */}
+        <div className="rounded-xl border border-border/60 bg-surface shadow-sm">
+          <div className="border-b border-border/60 px-6 py-4">
+            <h2 className="text-base font-semibold text-text">Profile</h2>
+            <p className="mt-0.5 text-sm text-muted">Update your display name and profile information</p>
+          </div>
+          <div className="px-6 py-5">
+            <form onSubmit={handleProfileSubmit} className="space-y-4">
+              {profileMsg && (
+                <div className={`rounded-lg p-3 text-sm ${profileMsg.type === "success" ? "bg-success-light text-success" : "bg-danger-light text-danger"}`}>
+                  {profileMsg.text}
                 </div>
               )}
-              <p className="text-sm text-danger">
-                This action is irreversible. Your profile, comments, and ratings will be anonymized.
-              </p>
               <div className="space-y-2">
-                <Label htmlFor="deletePassword">Confirm your password</Label>
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" value={session?.user?.email ?? ""} disabled className="bg-bg-alt" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="username">Username</Label>
+                <Input id="username" value={session?.user?.username ?? ""} disabled className="bg-bg-alt" />
+                <p className="text-xs text-muted">Username cannot be changed</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="displayName">Display Name</Label>
                 <Input
-                  id="deletePassword"
+                  id="displayName"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  minLength={2}
+                  maxLength={50}
+                  required
+                />
+              </div>
+              <Button type="submit" variant="glow" disabled={profileLoading}>
+                {profileLoading ? "Saving..." : "Save changes"}
+              </Button>
+            </form>
+          </div>
+        </div>
+
+        {/* Password section */}
+        <div className="rounded-xl border border-border/60 bg-surface shadow-sm">
+          <div className="border-b border-border/60 px-6 py-4">
+            <h2 className="text-base font-semibold text-text">Change Password</h2>
+            <p className="mt-0.5 text-sm text-muted">Update your account password</p>
+          </div>
+          <div className="px-6 py-5">
+            <form onSubmit={handlePasswordSubmit} className="space-y-4">
+              {passwordMsg && (
+                <div className={`rounded-lg p-3 text-sm ${passwordMsg.type === "success" ? "bg-success-light text-success" : "bg-danger-light text-danger"}`}>
+                  {passwordMsg.text}
+                </div>
+              )}
+              <div className="space-y-2">
+                <Label htmlFor="currentPassword">Current Password</Label>
+                <Input
+                  id="currentPassword"
                   type="password"
-                  value={deletePassword}
-                  onChange={(e) => setDeletePassword(e.target.value)}
+                  value={passwordForm.currentPassword}
+                  onChange={(e) => setPasswordForm((p) => ({ ...p, currentPassword: e.target.value }))}
                   required
                   autoComplete="current-password"
                 />
               </div>
-              <div className="flex gap-2">
-                <Button
-                  type="submit"
-                  variant="outline"
-                  className="border-red-200 text-danger hover:bg-red-50"
-                  disabled={deleteLoading}
-                >
-                  {deleteLoading ? "Deleting..." : "Permanently delete"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => {
-                    setShowDeleteConfirm(false);
-                    setDeletePassword("");
-                    setDeleteMsg(null);
-                  }}
-                >
-                  Cancel
-                </Button>
+              <div className="space-y-2">
+                <Label htmlFor="newPassword">New Password</Label>
+                <Input
+                  id="newPassword"
+                  type="password"
+                  value={passwordForm.newPassword}
+                  onChange={(e) => setPasswordForm((p) => ({ ...p, newPassword: e.target.value }))}
+                  required
+                  minLength={8}
+                  autoComplete="new-password"
+                />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={passwordForm.confirmPassword}
+                  onChange={(e) => setPasswordForm((p) => ({ ...p, confirmPassword: e.target.value }))}
+                  required
+                  minLength={8}
+                  autoComplete="new-password"
+                />
+              </div>
+              <Button type="submit" variant="glow" disabled={passwordLoading}>
+                {passwordLoading ? "Changing..." : "Change password"}
+              </Button>
             </form>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+        </div>
+
+        {/* Danger zone */}
+        <div className="rounded-xl border border-danger/20 bg-surface shadow-sm">
+          <div className="border-b border-danger/20 px-6 py-4">
+            <h2 className="text-base font-semibold text-danger">Danger Zone</h2>
+            <p className="mt-0.5 text-sm text-muted">
+              Permanently delete your account and all associated data
+            </p>
+          </div>
+          <div className="px-6 py-5">
+            {!showDeleteConfirm ? (
+              <Button
+                variant="outline"
+                className="border-danger/30 text-danger hover:bg-danger-light"
+                onClick={() => setShowDeleteConfirm(true)}
+              >
+                Delete my account
+              </Button>
+            ) : (
+              <form onSubmit={handleDeleteAccount} className="space-y-4">
+                {deleteMsg && (
+                  <div className={`rounded-lg p-3 text-sm ${deleteMsg.type === "error" ? "bg-danger-light text-danger" : "bg-success-light text-success"}`}>
+                    {deleteMsg.text}
+                  </div>
+                )}
+                <p className="text-sm text-danger">
+                  This action is irreversible. Your profile, comments, and ratings will be anonymized.
+                </p>
+                <div className="space-y-2">
+                  <Label htmlFor="deletePassword">Confirm your password</Label>
+                  <Input
+                    id="deletePassword"
+                    type="password"
+                    value={deletePassword}
+                    onChange={(e) => setDeletePassword(e.target.value)}
+                    required
+                    autoComplete="current-password"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    type="submit"
+                    variant="outline"
+                    className="border-danger/30 text-danger hover:bg-danger-light"
+                    disabled={deleteLoading}
+                  >
+                    {deleteLoading ? "Deleting..." : "Permanently delete"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => {
+                      setShowDeleteConfirm(false);
+                      setDeletePassword("");
+                      setDeleteMsg(null);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

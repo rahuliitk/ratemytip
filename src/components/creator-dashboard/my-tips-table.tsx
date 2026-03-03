@@ -64,10 +64,10 @@ export function MyTipsTable({ initialTips }: MyTipsTableProps): React.ReactEleme
             <button
               key={status}
               onClick={() => { setFilter(status); setPage(1); }}
-              className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
                 filter === status
                   ? "bg-accent text-white"
-                  : "bg-bg text-muted hover:bg-gray-200"
+                  : "bg-bg-alt text-muted hover:text-text hover:bg-bg-alt/80"
               }`}
             >
               {status === "all" ? "All" : status.replace(/_/g, " ")}
@@ -79,44 +79,61 @@ export function MyTipsTable({ initialTips }: MyTipsTableProps): React.ReactEleme
       {loading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-16 animate-pulse rounded-lg bg-bg" />
+            <div key={i} className="h-16 animate-pulse rounded-xl bg-bg-alt" />
           ))}
         </div>
       ) : tips.length === 0 ? (
-        <div className="rounded-lg border border-gray-200 bg-surface p-8 text-center">
+        <div className="rounded-xl border border-border/60 bg-surface p-8 text-center shadow-sm">
           <p className="text-sm text-muted">No tips found</p>
           <Link href="/creator-dashboard/new-tip">
-            <Button size="sm" className="mt-3">Post your first tip</Button>
+            <Button variant="glow" size="sm" className="mt-3">Post your first tip</Button>
           </Link>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="rounded-xl border border-border/60 bg-surface shadow-sm overflow-hidden">
+          {/* Table Header */}
+          <div className="hidden sm:grid sm:grid-cols-12 gap-3 bg-bg-alt/80 px-4 py-2.5">
+            <span className="col-span-1 text-xs font-semibold uppercase tracking-wider text-muted">Dir</span>
+            <span className="col-span-2 text-xs font-semibold uppercase tracking-wider text-muted">Stock</span>
+            <span className="col-span-2 text-xs font-semibold uppercase tracking-wider text-muted">Entry</span>
+            <span className="col-span-2 text-xs font-semibold uppercase tracking-wider text-muted">Target</span>
+            <span className="col-span-2 text-xs font-semibold uppercase tracking-wider text-muted">Timeframe</span>
+            <span className="col-span-1 text-xs font-semibold uppercase tracking-wider text-muted text-right">Return</span>
+            <span className="col-span-2 text-xs font-semibold uppercase tracking-wider text-muted text-right">Status</span>
+          </div>
+
+          {/* Table Rows */}
           {tips.map((tip) => (
             <Link
               key={tip.id}
               href={`/creator-dashboard/my-tips/${tip.id}`}
-              className="flex items-center justify-between rounded-lg border border-gray-200 bg-surface p-3 transition-colors hover:bg-bg"
+              className="flex flex-col sm:grid sm:grid-cols-12 gap-2 sm:gap-3 items-start sm:items-center px-4 py-3 text-sm transition-colors hover:bg-bg-alt/50 border-t border-border/40"
             >
-              <div className="flex items-center gap-3">
+              <div className="col-span-1">
                 <span
-                  className={`rounded px-1.5 py-0.5 text-xs font-bold ${
+                  className={`rounded-md px-1.5 py-0.5 text-xs font-bold ${
                     tip.direction === "BUY"
-                      ? "bg-green-100 text-green-800"
+                      ? "bg-emerald-100 text-emerald-800"
                       : "bg-red-100 text-red-800"
                   }`}
                 >
                   {tip.direction}
                 </span>
-                <div>
-                  <p className="text-sm font-semibold text-text">{tip.stockSymbol}</p>
-                  <p className="text-xs text-muted">
-                    {formatPrice(tip.entryPrice)} &rarr; {formatPrice(tip.target1)} &middot;{" "}
-                    {tip.timeframe}
-                  </p>
-                </div>
               </div>
-              <div className="flex items-center gap-3">
-                {tip.returnPct !== null && (
+              <div className="col-span-2">
+                <p className="font-semibold text-text">{tip.stockSymbol}</p>
+              </div>
+              <div className="col-span-2">
+                <p className="tabular-nums text-text">{formatPrice(tip.entryPrice)}</p>
+              </div>
+              <div className="col-span-2">
+                <p className="tabular-nums text-text">{formatPrice(tip.target1)}</p>
+              </div>
+              <div className="col-span-2">
+                <p className="text-muted">{tip.timeframe}</p>
+              </div>
+              <div className="col-span-1 text-right">
+                {tip.returnPct !== null ? (
                   <span
                     className={`text-sm font-semibold tabular-nums ${
                       tip.returnPct >= 0 ? "text-success" : "text-danger"
@@ -125,7 +142,11 @@ export function MyTipsTable({ initialTips }: MyTipsTableProps): React.ReactEleme
                     {tip.returnPct >= 0 ? "+" : ""}
                     {tip.returnPct.toFixed(2)}%
                   </span>
+                ) : (
+                  <span className="text-xs text-muted">--</span>
                 )}
+              </div>
+              <div className="col-span-2 flex justify-end">
                 <TipStatusBadge status={tip.status} />
               </div>
             </Link>
@@ -135,7 +156,7 @@ export function MyTipsTable({ initialTips }: MyTipsTableProps): React.ReactEleme
 
       {/* Pagination */}
       {!loading && tips.length > 0 && (
-        <div className="mt-4 flex justify-between">
+        <div className="mt-4 flex items-center justify-between">
           <Button
             variant="outline"
             size="sm"

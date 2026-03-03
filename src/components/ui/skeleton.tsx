@@ -5,7 +5,7 @@ type SkeletonProps = React.HTMLAttributes<HTMLDivElement>;
 function Skeleton({ className, ...props }: SkeletonProps): React.ReactElement {
   return (
     <div
-      className={cn("animate-pulse rounded-lg bg-gray-100", className)}
+      className={cn("animate-pulse rounded-lg bg-bg-alt", className)}
       {...props}
     />
   );

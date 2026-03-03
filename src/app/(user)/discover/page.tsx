@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { SubscriptionGate } from "@/components/shared/subscription-gate";
 import { RecommendationCard } from "@/components/recommendations/recommendation-card";
 import { RecommendedCreators } from "@/components/recommendations/recommended-creators";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sparkles, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -45,14 +44,14 @@ interface CreatorRec {
 
 export default function DiscoverPage(): React.ReactElement {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-6 flex items-center justify-between">
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold text-gradient-primary">
+          <h1 className="flex items-center gap-2 text-2xl font-bold text-text">
             <Sparkles className="h-6 w-6 text-accent" />
             Discover
           </h1>
-          <p className="text-sm text-muted">Personalized tip and creator recommendations based on your preferences</p>
+          <p className="mt-1 text-sm text-muted">Personalized tip and creator recommendations based on your preferences</p>
         </div>
         <Button variant="outline" size="sm" asChild>
           <Link href="/settings">
@@ -87,35 +86,36 @@ function DiscoverContent(): React.ReactElement {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="h-40 rounded-2xl shimmer" />
+        <div className="h-40 rounded-xl shimmer" />
         <div className="grid gap-4 md:grid-cols-2">
-          {[1, 2, 3, 4].map((i) => <div key={i} className="h-32 rounded-2xl shimmer" />)}
+          {[1, 2, 3, 4].map((i) => <div key={i} className="h-32 rounded-xl shimmer" />)}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {/* Recommended Creators */}
       {creators.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Recommended Creators</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <section>
+          <h2 className="mb-4 text-lg font-semibold text-text">Recommended Creators</h2>
+          <div className="rounded-xl border border-border/60 bg-surface p-5 shadow-sm">
             <RecommendedCreators creators={creators} />
-          </CardContent>
-        </Card>
+          </div>
+        </section>
       )}
 
       {/* Recommended Tips */}
-      <div>
-        <h2 className="mb-4 text-lg font-bold text-gradient-primary">Recommended Tips</h2>
+      <section>
+        <h2 className="mb-4 text-lg font-semibold text-text">Recommended Tips</h2>
         {tips.length === 0 ? (
-          <p className="py-8 text-center text-muted">
-            No recommendations yet. Set your preferences to get personalized tips.
-          </p>
+          <div className="rounded-xl border border-dashed border-border bg-surface py-12 text-center">
+            <Sparkles className="mx-auto h-8 w-8 text-muted-light" />
+            <p className="mt-3 text-sm text-muted">
+              No recommendations yet. Set your preferences to get personalized tips.
+            </p>
+          </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
             {tips.map((rec) =>
@@ -125,7 +125,7 @@ function DiscoverContent(): React.ReactElement {
             )}
           </div>
         )}
-      </div>
+      </section>
     </div>
   );
 }
