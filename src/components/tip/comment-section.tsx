@@ -21,9 +21,9 @@ export function CommentSection({ tipId }: CommentSectionProps): React.ReactEleme
   const [posting, setPosting] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
     let cancelled = false;
     async function load() {
+      if (!cancelled) setLoading(true);
       try {
         const res = await fetch(`/api/v1/tips/${tipId}/comments?sort=${sortBy}`);
         if (res.ok && !cancelled) {
@@ -32,8 +32,9 @@ export function CommentSection({ tipId }: CommentSectionProps): React.ReactEleme
         }
       } catch {
         // keep existing comments on error
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-      if (!cancelled) setLoading(false);
     }
     void load();
     return () => { cancelled = true; };
