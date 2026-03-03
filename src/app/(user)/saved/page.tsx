@@ -31,35 +31,35 @@ export default function SavedPage(): React.ReactElement {
   const { data, isLoading } = useSWR("/api/v1/user/saved", fetcher);
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="flex items-center gap-2">
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mb-8 flex items-center gap-2.5">
         <Bookmark className="h-6 w-6 text-accent" />
-        <h1 className="text-2xl font-bold text-gradient-primary">Saved Tips</h1>
+        <h1 className="text-2xl font-bold text-text">Saved Tips</h1>
       </div>
 
       {isLoading ? (
-        <div className="mt-6 space-y-3">
+        <div className="space-y-3">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-20 rounded-2xl shimmer" />
+            <div key={i} className="h-20 rounded-xl shimmer" />
           ))}
         </div>
       ) : data?.data?.length > 0 ? (
-        <div className="mt-6 space-y-3">
+        <div className="space-y-3">
           {data.data.map((entry: SavedTipEntry) => (
             <div
               key={entry.id}
-              className="flex items-center justify-between rounded-2xl bg-white p-4 shadow-[0_1px_2px_0_rgba(26,54,93,0.04)] card-hover"
+              className="flex items-center justify-between rounded-xl border border-border/60 bg-surface p-4 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
             >
               <Link
                 href={`/tip/${entry.tip.id}`}
-                className="flex-1 hover:underline"
+                className="flex-1"
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5">
                   <span
-                    className={`text-xs font-bold ${
+                    className={`rounded-md px-2 py-0.5 text-xs font-bold ${
                       entry.tip.direction === "BUY"
-                        ? "text-success"
-                        : "text-danger"
+                        ? "bg-success-light text-success"
+                        : "bg-danger-light text-danger"
                     }`}
                   >
                     {entry.tip.direction}
@@ -69,12 +69,12 @@ export default function SavedPage(): React.ReactElement {
                   </span>
                   <TipStatusBadge status={entry.tip.status as TipStatus} />
                 </div>
-                <div className="mt-1 flex items-center gap-3 text-xs text-muted">
+                <div className="mt-1.5 flex items-center gap-3 text-xs text-muted">
                   <span>Entry: {formatPrice(entry.tip.entryPrice)}</span>
                   <span>Target: {formatPrice(entry.tip.target1)}</span>
                   <span>
                     by{" "}
-                    <span className="text-accent">{entry.tip.creator.displayName}</span>
+                    <span className="font-medium text-accent">{entry.tip.creator.displayName}</span>
                   </span>
                 </div>
               </Link>
@@ -83,12 +83,12 @@ export default function SavedPage(): React.ReactElement {
           ))}
         </div>
       ) : (
-        <div className="mt-6 rounded-2xl border border-dashed border-gray-200 p-8 text-center">
-          <Bookmark className="mx-auto h-8 w-8 text-muted" />
-          <p className="mt-2 text-sm text-muted">No saved tips yet.</p>
+        <div className="rounded-xl border border-dashed border-border bg-surface py-12 text-center">
+          <Bookmark className="mx-auto h-8 w-8 text-muted-light" />
+          <p className="mt-3 text-sm text-muted">No saved tips yet.</p>
           <Link
             href="/leaderboard"
-            className="mt-2 inline-block text-sm text-accent hover:underline"
+            className="mt-2 inline-block text-sm font-medium text-accent hover:underline"
           >
             Browse creators to find tips
           </Link>

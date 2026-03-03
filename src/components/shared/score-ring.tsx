@@ -14,12 +14,12 @@ const RING_SIZES = {
 } as const;
 
 function getScoreGradient(score: number): { start: string; end: string } {
-  if (score >= 90) return { start: "#22543D", end: "#38A169" };
-  if (score >= 75) return { start: "#276749", end: "#48BB78" };
-  if (score >= 60) return { start: "#1A365D", end: "#2B6CB0" };
-  if (score >= 45) return { start: "#9C4221", end: "#ED8936" };
-  if (score >= 30) return { start: "#9B2C2C", end: "#E53E3E" };
-  return { start: "#742A2A", end: "#C53030" };
+  if (score >= 90) return { start: "#059669", end: "#10B981" };
+  if (score >= 75) return { start: "#059669", end: "#34D399" };
+  if (score >= 60) return { start: "#2563EB", end: "#3B82F6" };
+  if (score >= 45) return { start: "#D97706", end: "#F59E0B" };
+  if (score >= 30) return { start: "#DC2626", end: "#EF4444" };
+  return { start: "#991B1B", end: "#DC2626" };
 }
 
 let instanceCounter = 0;
@@ -58,16 +58,16 @@ export function ScoreRing({
             <stop offset="100%" stopColor={gradient.end} />
           </linearGradient>
         </defs>
-        {/* Background track circle */}
+        {/* Background track */}
         <circle
           cx={config.svgSize / 2}
           cy={config.svgSize / 2}
           r={radius}
           fill="none"
-          stroke="#EDF2F7"
+          stroke="#F1F5F9"
           strokeWidth={config.strokeWidth - 1}
         />
-        {/* Glow circle behind score arc */}
+        {/* Glow circle */}
         <circle
           cx={config.svgSize / 2}
           cy={config.svgSize / 2}
@@ -78,11 +78,11 @@ export function ScoreRing({
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
-          opacity={0.15}
+          opacity={0.12}
           className="animate-score-ring"
           style={{ "--ring-circumference": circumference, "--ring-offset": offset, filter: "blur(4px)" } as React.CSSProperties}
         />
-        {/* Score arc with gradient */}
+        {/* Score arc */}
         <circle
           cx={config.svgSize / 2}
           cy={config.svgSize / 2}
@@ -100,15 +100,15 @@ export function ScoreRing({
       {/* Center text */}
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span
-          className={cn("font-bold tabular-nums text-gradient-primary", config.fontSize)}
+          className={cn("font-bold tabular-nums text-text", config.fontSize)}
         >
           {clampedScore.toFixed(0)}
         </span>
-        <span className={cn("font-medium text-[#718096]", config.labelSize)}>
+        <span className={cn("font-medium text-muted", config.labelSize)}>
           RMT Score
         </span>
         {confidenceInterval !== undefined && (
-          <span className={cn("text-[#718096]", config.labelSize)}>
+          <span className={cn("text-muted", config.labelSize)}>
             &plusmn;{confidenceInterval.toFixed(1)}
           </span>
         )}

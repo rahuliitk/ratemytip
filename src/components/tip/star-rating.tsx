@@ -63,25 +63,25 @@ export function StarRating({ tipId, avgRating, ratingCount = 0 }: StarRatingProp
             key={star}
             type="button"
             disabled={loading}
-            className="p-0.5 transition-colors disabled:cursor-not-allowed"
+            className="rounded p-0.5 transition-all duration-150 hover:scale-110 disabled:cursor-not-allowed"
             onMouseEnter={() => setHoverRating(star)}
             onMouseLeave={() => setHoverRating(0)}
             onClick={() => handleRate(star)}
             aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
           >
             <Star
-              className={`h-5 w-5 ${
+              className={`h-5 w-5 transition-colors duration-150 ${
                 star <= displayRating
-                  ? "fill-yellow-400 text-yellow-400"
-                  : "text-gray-300"
+                  ? "fill-amber-400 text-amber-400"
+                  : "text-border"
               }`}
             />
           </button>
         ))}
       </div>
-      <span className="text-sm text-muted">
+      <span className="text-sm tabular-nums text-muted">
         {avgRating ? avgRating.toFixed(1) : "—"}{" "}
-        <span className="text-xs">({ratingCount})</span>
+        <span className="text-xs text-muted-light">({ratingCount})</span>
       </span>
     </div>
   );

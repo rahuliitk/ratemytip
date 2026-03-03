@@ -34,7 +34,7 @@ export function TipPriceChart({
 }: TipPriceChartProps): React.ReactElement {
   if (priceHistory.length === 0) {
     return (
-      <div className="flex h-48 items-center justify-center rounded bg-bg text-sm text-muted">
+      <div className="flex h-48 items-center justify-center rounded-lg bg-bg-alt text-sm text-muted">
         No price history available for {symbol}.
       </div>
     );
@@ -62,123 +62,126 @@ export function TipPriceChart({
   const maxPrice = Math.max(...allPrices) * 1.03;
 
   return (
-    <ResponsiveContainer width="100%" height={320}>
-      <AreaChart
-        data={data}
-        margin={{ top: 10, right: 10, left: -10, bottom: 5 }}
-      >
-        <defs>
-          <linearGradient id="tipPriceGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#2B6CB0" stopOpacity={0.15} />
-            <stop offset="95%" stopColor="#2B6CB0" stopOpacity={0} />
-          </linearGradient>
-        </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-        <XAxis
-          dataKey="date"
-          tick={{ fontSize: 11, fill: "#718096" }}
-          tickLine={false}
-          interval="preserveStartEnd"
-        />
-        <YAxis
-          domain={[minPrice, maxPrice]}
-          tick={{ fontSize: 11, fill: "#718096" }}
-          tickLine={false}
-          axisLine={false}
-          tickFormatter={(v: number) => formatPrice(v).replace("₹", "")}
-        />
-        <Tooltip
-          contentStyle={{
-            backgroundColor: "#fff",
-            border: "1px solid #E2E8F0",
-            borderRadius: "8px",
-            fontSize: "12px",
-          }}
-          formatter={(value: number) => [formatPrice(value), "Close"]}
-        />
+    <div className="rounded-xl border border-border/60 bg-surface p-4 shadow-sm">
+      <ResponsiveContainer width="100%" height={320}>
+        <AreaChart
+          data={data}
+          margin={{ top: 10, right: 10, left: -10, bottom: 5 }}
+        >
+          <defs>
+            <linearGradient id="tipPriceGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="var(--color-accent)" stopOpacity={0.12} />
+              <stop offset="95%" stopColor="var(--color-accent)" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+          <XAxis
+            dataKey="date"
+            tick={{ fontSize: 11, fill: "var(--color-muted)" }}
+            tickLine={false}
+            interval="preserveStartEnd"
+          />
+          <YAxis
+            domain={[minPrice, maxPrice]}
+            tick={{ fontSize: 11, fill: "var(--color-muted)" }}
+            tickLine={false}
+            axisLine={false}
+            tickFormatter={(v: number) => formatPrice(v).replace("₹", "")}
+          />
+          <Tooltip
+            contentStyle={{
+              backgroundColor: "var(--color-surface)",
+              border: "1px solid var(--color-border)",
+              borderRadius: "8px",
+              fontSize: "12px",
+              boxShadow: "var(--shadow-md)",
+            }}
+            formatter={(value: number) => [formatPrice(value), "Close"]}
+          />
 
-        {/* Entry Price Line */}
-        <ReferenceLine
-          y={entryPrice}
-          stroke="#2B6CB0"
-          strokeDasharray="6 3"
-          strokeWidth={1.5}
-          label={{
-            value: `Entry ${formatPrice(entryPrice)}`,
-            position: "insideBottomRight",
-            fill: "#2B6CB0",
-            fontSize: 10,
-          }}
-        />
-
-        {/* Target 1 */}
-        <ReferenceLine
-          y={target1}
-          stroke="#276749"
-          strokeDasharray="6 3"
-          strokeWidth={1.5}
-          label={{
-            value: `T1 ${formatPrice(target1)}`,
-            position: "insideTopRight",
-            fill: "#276749",
-            fontSize: 10,
-          }}
-        />
-
-        {/* Target 2 */}
-        {target2 && (
+          {/* Entry Price Line - slate */}
           <ReferenceLine
-            y={target2}
-            stroke="#2F855A"
-            strokeDasharray="4 4"
-            strokeWidth={1}
+            y={entryPrice}
+            stroke="#64748B"
+            strokeDasharray="6 3"
+            strokeWidth={1.5}
             label={{
-              value: `T2 ${formatPrice(target2)}`,
-              position: "insideTopRight",
-              fill: "#2F855A",
+              value: `Entry ${formatPrice(entryPrice)}`,
+              position: "insideBottomRight",
+              fill: "#64748B",
               fontSize: 10,
             }}
           />
-        )}
 
-        {/* Target 3 */}
-        {target3 && (
+          {/* Target 1 - emerald */}
           <ReferenceLine
-            y={target3}
-            stroke="#38A169"
-            strokeDasharray="4 4"
-            strokeWidth={1}
+            y={target1}
+            stroke="#059669"
+            strokeDasharray="6 3"
+            strokeWidth={1.5}
             label={{
-              value: `T3 ${formatPrice(target3)}`,
+              value: `T1 ${formatPrice(target1)}`,
               position: "insideTopRight",
-              fill: "#38A169",
+              fill: "#059669",
               fontSize: 10,
             }}
           />
-        )}
 
-        {/* Stop Loss Line */}
-        <ReferenceLine
-          y={stopLoss}
-          stroke="#C53030"
-          strokeDasharray="6 3"
-          strokeWidth={1.5}
-          label={{
-            value: `SL ${formatPrice(stopLoss)}`,
-            position: "insideBottomRight",
-            fill: "#C53030",
-            fontSize: 10,
-          }}
-        />
+          {/* Target 2 - emerald lighter */}
+          {target2 && (
+            <ReferenceLine
+              y={target2}
+              stroke="#10B981"
+              strokeDasharray="4 4"
+              strokeWidth={1}
+              label={{
+                value: `T2 ${formatPrice(target2)}`,
+                position: "insideTopRight",
+                fill: "#10B981",
+                fontSize: 10,
+              }}
+            />
+          )}
 
-        <Area
-          type="monotone"
-          dataKey="close"
-          stroke="#2B6CB0"
-          strokeWidth={2}
-          fill="url(#tipPriceGradient)"
-        />
-      </AreaChart>
-    </ResponsiveContainer>
+          {/* Target 3 - emerald lightest */}
+          {target3 && (
+            <ReferenceLine
+              y={target3}
+              stroke="#34D399"
+              strokeDasharray="4 4"
+              strokeWidth={1}
+              label={{
+                value: `T3 ${formatPrice(target3)}`,
+                position: "insideTopRight",
+                fill: "#34D399",
+                fontSize: 10,
+              }}
+            />
+          )}
+
+          {/* Stop Loss Line - red */}
+          <ReferenceLine
+            y={stopLoss}
+            stroke="#DC2626"
+            strokeDasharray="6 3"
+            strokeWidth={1.5}
+            label={{
+              value: `SL ${formatPrice(stopLoss)}`,
+              position: "insideBottomRight",
+              fill: "#DC2626",
+              fontSize: 10,
+            }}
+          />
+
+          <Area
+            type="monotone"
+            dataKey="close"
+            stroke="var(--color-accent)"
+            strokeWidth={2}
+            fill="url(#tipPriceGradient)"
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
   );
 }

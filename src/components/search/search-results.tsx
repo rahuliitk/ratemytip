@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { TipCard } from "@/components/tip/tip-card";
+import { EmptyState } from "@/components/shared/empty-state";
 import type { CreatorSummary, StockSummary, TipSummary } from "@/types";
 
 interface SearchResultsProps {
@@ -20,29 +21,30 @@ export function SearchResults({
 
   if (!hasResults) {
     return (
-      <div className="py-16 text-center">
-        <p className="text-lg font-medium text-text">No results found</p>
-        <p className="mt-1 text-sm text-muted">
-          No matches for &quot;{query}&quot;. Try a different search term.
-        </p>
-      </div>
+      <EmptyState
+        title="No results found"
+        description={`No matches for "${query}". Try a different search term.`}
+      />
     );
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {/* Creators */}
       {creators.length > 0 && (
         <section>
-          <h2 className="text-sm font-semibold uppercase text-muted">
-            Creators ({creators.length})
+          <h2 className="text-lg font-semibold text-text">
+            Creators{" "}
+            <span className="text-sm font-normal text-muted">
+              ({creators.length})
+            </span>
           </h2>
-          <div className="mt-3 space-y-2">
+          <div className="mt-4 space-y-2">
             {creators.map((creator) => (
               <Link
                 key={creator.id}
                 href={`/creator/${creator.slug}`}
-                className="flex items-center justify-between rounded-2xl bg-white p-4 shadow-[0_1px_2px_0_rgba(26,54,93,0.04)] card-hover"
+                className="flex items-center justify-between rounded-xl border border-border/60 bg-surface p-4 shadow-sm transition-all duration-200 hover:border-accent/30 hover:shadow-md"
               >
                 <div className="flex items-center gap-3">
                   {creator.profileImageUrl ? (
@@ -68,7 +70,7 @@ export function SearchResults({
                     </p>
                   </div>
                 </div>
-                <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-bold text-muted">
+                <span className="rounded-md bg-bg-alt px-2.5 py-0.5 text-xs font-medium text-text-secondary">
                   {creator.tier}
                 </span>
               </Link>
@@ -80,21 +82,24 @@ export function SearchResults({
       {/* Stocks */}
       {stocks.length > 0 && (
         <section>
-          <h2 className="text-sm font-semibold uppercase text-muted">
-            Stocks ({stocks.length})
+          <h2 className="text-lg font-semibold text-text">
+            Stocks{" "}
+            <span className="text-sm font-normal text-muted">
+              ({stocks.length})
+            </span>
           </h2>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {stocks.map((stock) => (
               <Link
                 key={stock.id}
                 href={`/stock/${stock.symbol}`}
-                className="rounded-2xl bg-white p-4 shadow-[0_1px_2px_0_rgba(26,54,93,0.04)] card-hover"
+                className="rounded-xl border border-border/60 bg-surface p-4 shadow-sm transition-all duration-200 hover:border-accent/30 hover:shadow-md"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold text-primary">
+                  <span className="text-sm font-bold text-text">
                     {stock.symbol}
                   </span>
-                  <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-muted">
+                  <span className="rounded-md bg-bg-alt px-2 py-0.5 text-xs font-medium text-text-secondary">
                     {stock.exchange}
                   </span>
                 </div>
@@ -116,10 +121,13 @@ export function SearchResults({
       {/* Tips */}
       {tips.length > 0 && (
         <section>
-          <h2 className="text-sm font-semibold uppercase text-muted">
-            Tips ({tips.length})
+          <h2 className="text-lg font-semibold text-text">
+            Tips{" "}
+            <span className="text-sm font-normal text-muted">
+              ({tips.length})
+            </span>
           </h2>
-          <div className="mt-3 space-y-3">
+          <div className="mt-4 space-y-3">
             {tips.map((tip) => (
               <TipCard key={tip.id} tip={tip} showCreator />
             ))}

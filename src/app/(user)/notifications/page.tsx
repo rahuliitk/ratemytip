@@ -59,9 +59,14 @@ export default function NotificationsPage(): React.ReactElement {
   }, []);
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gradient-primary">Notifications</h1>
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-text">Notifications</h1>
+          <p className="mt-1 text-sm text-muted">
+            {unreadCount > 0 ? `${unreadCount} unread` : "All caught up"}
+          </p>
+        </div>
         {unreadCount > 0 && (
           <Button variant="outline" size="sm" onClick={markAllRead}>
             Mark all read
@@ -69,75 +74,77 @@ export default function NotificationsPage(): React.ReactElement {
         )}
       </div>
 
-      {!data ? (
-        <div className="mt-6 space-y-3">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-20 rounded-2xl shimmer" />
-          ))}
-        </div>
-      ) : notifications.length === 0 ? (
-        <div className="mt-12 flex flex-col items-center text-center">
-          <Bell className="h-12 w-12 text-muted/40" />
-          <p className="mt-4 text-sm text-muted">No notifications yet</p>
-          <p className="mt-1 text-xs text-muted">
-            Follow creators and save tips to get notified about updates
-          </p>
-        </div>
-      ) : (
-        <>
-          <div className="mt-6 space-y-2">
-            {notifications.map((n) => (
-              <Link
-                key={n.id}
-                href={n.actionUrl ?? "#"}
-                onClick={() => {
-                  if (!n.isRead) markRead([n.id]);
-                }}
-                className={`block rounded-2xl p-4 transition-all duration-200 ${
-                  n.isRead
-                    ? "bg-white shadow-[0_1px_2px_0_rgba(26,54,93,0.04)]"
-                    : "bg-[#2B6CB0]/5 shadow-[0_1px_3px_0_rgba(43,108,176,0.1)]"
-                } hover:shadow-[0_4px_6px_-1px_rgba(26,54,93,0.08)]`}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium text-text">{n.title}</p>
-                      {!n.isRead && (
-                        <span className="h-2 w-2 flex-shrink-0 rounded-full bg-accent" />
-                      )}
-                    </div>
-                    <p className="mt-0.5 text-sm text-muted">{n.body}</p>
-                  </div>
-                  <span className="flex-shrink-0 text-xs text-muted">
-                    {formatTimeAgo(n.createdAt)}
-                  </span>
-                </div>
-              </Link>
+      <div className="max-w-2xl">
+        {!data ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-20 rounded-xl shimmer" />
             ))}
           </div>
-
-          <div className="mt-6 flex justify-between">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page <= 1}
-              onClick={() => setPage((p) => p - 1)}
-            >
-              Previous
-            </Button>
-            <span className="text-xs text-muted">Page {page}</span>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={!hasMore}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              Next
-            </Button>
+        ) : notifications.length === 0 ? (
+          <div className="flex flex-col items-center rounded-xl border border-dashed border-border bg-surface py-16 text-center">
+            <Bell className="h-12 w-12 text-muted-light" />
+            <p className="mt-4 text-sm font-medium text-text">No notifications yet</p>
+            <p className="mt-1 text-xs text-muted">
+              Follow creators and save tips to get notified about updates
+            </p>
           </div>
-        </>
-      )}
+        ) : (
+          <>
+            <div className="space-y-2">
+              {notifications.map((n) => (
+                <Link
+                  key={n.id}
+                  href={n.actionUrl ?? "#"}
+                  onClick={() => {
+                    if (!n.isRead) markRead([n.id]);
+                  }}
+                  className={`block rounded-xl p-4 transition-all duration-200 ${
+                    n.isRead
+                      ? "border border-border/60 bg-surface shadow-sm"
+                      : "border-l-2 border-l-accent bg-accent-subtle shadow-sm"
+                  } hover:shadow-md hover:-translate-y-0.5`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium text-text">{n.title}</p>
+                        {!n.isRead && (
+                          <span className="h-2 w-2 flex-shrink-0 rounded-full bg-accent" />
+                        )}
+                      </div>
+                      <p className="mt-0.5 text-sm text-muted">{n.body}</p>
+                    </div>
+                    <span className="flex-shrink-0 text-xs text-muted-light tabular-nums">
+                      {formatTimeAgo(n.createdAt)}
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            <div className="mt-8 flex items-center justify-between">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page <= 1}
+                onClick={() => setPage((p) => p - 1)}
+              >
+                Previous
+              </Button>
+              <span className="text-xs text-muted tabular-nums">Page {page}</span>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!hasMore}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                Next
+              </Button>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

@@ -7,6 +7,8 @@ import {
   Bot,
   CheckCircle2,
   BarChart3,
+  ArrowUpRight,
+  ArrowDownRight,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -89,18 +91,19 @@ function formatTimeAgo(date: Date): string {
   return `${days}d ago`;
 }
 
-function jobStatusColor(status: string): string {
+
+function jobStatusBg(status: string): string {
   switch (status) {
     case "COMPLETED":
-      return "text-success";
+      return "bg-emerald-50 text-emerald-700";
     case "RUNNING":
-      return "text-accent";
+      return "bg-blue-50 text-blue-700";
     case "FAILED":
-      return "text-danger";
+      return "bg-red-50 text-red-700";
     case "QUEUED":
-      return "text-warning";
+      return "bg-amber-50 text-amber-700";
     default:
-      return "text-muted";
+      return "bg-bg-alt text-muted";
   }
 }
 
@@ -115,49 +118,53 @@ export default async function AdminDashboardPage(): Promise<React.ReactElement> 
       label: "Total Tips",
       value: stats.totalTips.toLocaleString("en-IN"),
       icon: Target,
-      color: "text-accent",
+      color: "text-blue-600",
       bgColor: "bg-blue-50",
     },
     {
       label: "Pending Review",
       value: stats.pendingReview.toLocaleString("en-IN"),
       icon: ClipboardCheck,
-      color: "text-warning",
-      bgColor: "bg-orange-50",
+      color: "text-amber-600",
+      bgColor: "bg-amber-50",
     },
     {
       label: "Active Creators",
       value: stats.activeCreators.toLocaleString("en-IN"),
       icon: Users,
-      color: "text-success",
-      bgColor: "bg-green-50",
+      color: "text-emerald-600",
+      bgColor: "bg-emerald-50",
     },
     {
       label: "Tips Today",
       value: stats.tipsToday.toLocaleString("en-IN"),
       icon: TrendingUp,
-      color: "text-primary",
-      bgColor: "bg-blue-50",
+      color: "text-violet-600",
+      bgColor: "bg-violet-50",
     },
   ];
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-gradient-primary">Dashboard</h1>
-      <p className="mt-1 text-sm text-muted">
-        Overview of platform activity
-      </p>
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div>
+        <h1 className="text-2xl font-bold text-text">Dashboard</h1>
+        <p className="mt-1 text-sm text-muted">
+          Overview of platform activity
+        </p>
+      </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((card) => {
           const Icon = card.icon;
           return (
             <div
               key={card.label}
-              className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-5"
+              className="rounded-xl border border-border/60 bg-surface p-5 shadow-sm"
             >
-              <div className="flex items-center gap-3">
-                <div className={`rounded-lg p-2 ${card.bgColor}`}>
+              <div className="flex items-center gap-4">
+                <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${card.bgColor}`}>
                   <Icon className={`h-5 w-5 ${card.color}`} />
                 </div>
                 <div>
@@ -175,12 +182,14 @@ export default async function AdminDashboardPage(): Promise<React.ReactElement> 
       </div>
 
       {/* Activity Feed */}
-      <div className="mt-8 grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-3">
         {/* Recent Scrape Jobs */}
-        <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-5">
-          <div className="flex items-center gap-2">
-            <Bot className="h-4 w-4 text-accent" />
-            <h2 className="text-sm font-semibold text-primary">
+        <div className="rounded-xl border border-border/60 bg-surface p-5 shadow-sm">
+          <div className="flex items-center gap-2 border-b border-border/40 pb-4">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-50">
+              <Bot className="h-3.5 w-3.5 text-blue-600" />
+            </div>
+            <h2 className="text-sm font-semibold text-text">
               Recent Scrape Jobs
             </h2>
           </div>
@@ -191,35 +200,37 @@ export default async function AdminDashboardPage(): Promise<React.ReactElement> 
                   key={job.id}
                   className="flex items-center justify-between text-xs"
                 >
-                  <div>
+                  <div className="flex items-center gap-2">
                     <span className="font-medium text-text">
                       {job.platform}
                     </span>
-                    <span className="ml-1 text-muted">
+                    <span className="text-muted">
                       {job.jobType.replace(/_/g, " ").toLowerCase()}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className={`font-medium ${jobStatusColor(job.status)}`}>
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${jobStatusBg(job.status)}`}>
                       {job.status}
                     </span>
-                    <span className="text-muted">
+                    <span className="text-muted tabular-nums">
                       {formatTimeAgo(job.createdAt)}
                     </span>
                   </div>
                 </div>
               ))
             ) : (
-              <p className="text-xs text-muted">No scrape jobs yet.</p>
+              <p className="py-4 text-center text-xs text-muted">No scrape jobs yet.</p>
             )}
           </div>
         </div>
 
         {/* Recent Reviews */}
-        <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-5">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="h-4 w-4 text-success" />
-            <h2 className="text-sm font-semibold text-primary">
+        <div className="rounded-xl border border-border/60 bg-surface p-5 shadow-sm">
+          <div className="flex items-center gap-2 border-b border-border/40 pb-4">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-emerald-50">
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+            </div>
+            <h2 className="text-sm font-semibold text-text">
               Recent Reviews
             </h2>
           </div>
@@ -230,35 +241,44 @@ export default async function AdminDashboardPage(): Promise<React.ReactElement> 
                   key={review.id}
                   className="flex items-center justify-between text-xs"
                 >
-                  <div>
-                    <span
-                      className={`font-medium ${review.action === "APPROVED" ? "text-success" : review.action === "REJECTED" ? "text-danger" : "text-text"}`}
-                    >
-                      {review.action}
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1">
+                      {review.action === "APPROVED" ? (
+                        <ArrowUpRight className="h-3 w-3 text-emerald-500" />
+                      ) : review.action === "REJECTED" ? (
+                        <ArrowDownRight className="h-3 w-3 text-red-500" />
+                      ) : null}
+                      <span
+                        className={`font-medium ${review.action === "APPROVED" ? "text-emerald-600" : review.action === "REJECTED" ? "text-red-600" : "text-text"}`}
+                      >
+                        {review.action}
+                      </span>
                     </span>
-                    <span className="ml-1 text-muted">
+                    <span className="text-muted">
                       {review.tip.direction} {review.tip.stock.symbol}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-muted">by {review.admin.name}</span>
-                    <span className="text-muted">
+                    <span className="text-muted tabular-nums">
                       {formatTimeAgo(review.createdAt)}
                     </span>
                   </div>
                 </div>
               ))
             ) : (
-              <p className="text-xs text-muted">No reviews yet.</p>
+              <p className="py-4 text-center text-xs text-muted">No reviews yet.</p>
             )}
           </div>
         </div>
 
         {/* Recent Score Updates */}
-        <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-5">
-          <div className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4 text-warning" />
-            <h2 className="text-sm font-semibold text-primary">
+        <div className="rounded-xl border border-border/60 bg-surface p-5 shadow-sm">
+          <div className="flex items-center gap-2 border-b border-border/40 pb-4">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-amber-50">
+              <BarChart3 className="h-3.5 w-3.5 text-amber-600" />
+            </div>
+            <h2 className="text-sm font-semibold text-text">
               Recent Score Updates
             </h2>
           </div>
@@ -269,16 +289,14 @@ export default async function AdminDashboardPage(): Promise<React.ReactElement> 
                   key={snap.id}
                   className="flex items-center justify-between text-xs"
                 >
-                  <div>
-                    <span className="font-medium text-text">
-                      {snap.creator.displayName}
-                    </span>
-                  </div>
+                  <span className="font-medium text-text">
+                    {snap.creator.displayName}
+                  </span>
                   <div className="flex items-center gap-2">
-                    <span className="font-medium tabular-nums text-accent">
+                    <span className="rounded-md bg-blue-50 px-2 py-0.5 font-semibold tabular-nums text-blue-700">
                       {snap.rmtScore.toFixed(1)}
                     </span>
-                    <span className="text-muted">
+                    <span className="text-muted tabular-nums">
                       {new Date(snap.date).toLocaleDateString("en-IN", {
                         day: "numeric",
                         month: "short",
@@ -288,7 +306,7 @@ export default async function AdminDashboardPage(): Promise<React.ReactElement> 
                 </div>
               ))
             ) : (
-              <p className="text-xs text-muted">No score updates yet.</p>
+              <p className="py-4 text-center text-xs text-muted">No score updates yet.</p>
             )}
           </div>
         </div>

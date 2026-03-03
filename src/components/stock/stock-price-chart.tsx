@@ -23,7 +23,7 @@ export function StockPriceChart({
 }: StockPriceChartProps): React.ReactElement {
   if (priceHistory.length === 0) {
     return (
-      <div className="flex h-48 items-center justify-center rounded bg-bg text-sm text-muted">
+      <div className="flex h-48 items-center justify-center rounded-lg bg-bg-alt text-sm text-muted">
         No price history available for {symbol}.
       </div>
     );
@@ -48,40 +48,41 @@ export function StockPriceChart({
     <ResponsiveContainer width="100%" height={280}>
       <AreaChart data={data} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
         <defs>
-          <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#2B6CB0" stopOpacity={0.15} />
-            <stop offset="95%" stopColor="#2B6CB0" stopOpacity={0} />
+          <linearGradient id="stockPriceGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="var(--color-accent)" stopOpacity={0.12} />
+            <stop offset="95%" stopColor="var(--color-accent)" stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+        <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
         <XAxis
           dataKey="date"
-          tick={{ fontSize: 11, fill: "#718096" }}
+          tick={{ fontSize: 11, fill: "var(--color-muted)" }}
           tickLine={false}
           interval="preserveStartEnd"
         />
         <YAxis
           domain={[minPrice, maxPrice]}
-          tick={{ fontSize: 11, fill: "#718096" }}
+          tick={{ fontSize: 11, fill: "var(--color-muted)" }}
           tickLine={false}
           axisLine={false}
           tickFormatter={(v: number) => formatPrice(v).replace("₹", "")}
         />
         <Tooltip
           contentStyle={{
-            backgroundColor: "#fff",
-            border: "1px solid #E2E8F0",
+            backgroundColor: "var(--color-surface)",
+            border: "1px solid var(--color-border)",
             borderRadius: "8px",
             fontSize: "12px",
+            boxShadow: "var(--shadow-md)",
           }}
           formatter={(value: number) => [formatPrice(value), "Close"]}
         />
         <Area
           type="monotone"
           dataKey="close"
-          stroke="#2B6CB0"
+          stroke="var(--color-accent)"
           strokeWidth={2}
-          fill="url(#priceGradient)"
+          fill="url(#stockPriceGradient)"
         />
       </AreaChart>
     </ResponsiveContainer>

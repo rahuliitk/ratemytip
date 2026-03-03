@@ -60,28 +60,28 @@ export function ShareButton({
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" className={cn("gap-2", className)}>
           {copied ? (
-            <Check className="h-4 w-4 text-[#276749]" />
+            <Check className="h-4 w-4 text-success" />
           ) : (
             <Share2 className="h-4 w-4" />
           )}
           <span>{copied ? "Copied!" : "Share"}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="rounded-xl shadow-lg border-gray-100">
-        <DropdownMenuItem onClick={handleCopyLink}>
+      <DropdownMenuContent align="end" className="rounded-xl border border-border/60 shadow-lg">
+        <DropdownMenuItem onClick={handleCopyLink} className="cursor-pointer gap-2.5 px-3 py-2">
           {copied ? (
-            <Check className="h-4 w-4 text-[#276749]" />
+            <Check className="h-4 w-4 text-success" />
           ) : (
-            <Share2 className="h-4 w-4" />
+            <Share2 className="h-4 w-4 text-muted" />
           )}
           <span>Copy Link</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleShareTwitter}>
-          <Twitter className="h-4 w-4" />
+        <DropdownMenuItem onClick={handleShareTwitter} className="cursor-pointer gap-2.5 px-3 py-2">
+          <Twitter className="h-4 w-4 text-muted" />
           <span>Share on X</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleShareWhatsApp}>
-          <MessageCircle className="h-4 w-4" />
+        <DropdownMenuItem onClick={handleShareWhatsApp} className="cursor-pointer gap-2.5 px-3 py-2">
+          <MessageCircle className="h-4 w-4 text-muted" />
           <span>Share on WhatsApp</span>
         </DropdownMenuItem>
       </DropdownMenuContent>

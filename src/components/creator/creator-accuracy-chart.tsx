@@ -16,7 +16,12 @@ interface CreatorAccuracyChartProps {
   readonly score: CreatorScoreData;
 }
 
-const BAR_COLORS = ["#2B6CB0", "#38A169", "#C05621", "#553C9A"];
+const BAR_COLORS = [
+  "var(--color-accent)",
+  "var(--color-success)",
+  "var(--color-warning)",
+  "#7C3AED",
+];
 
 export function CreatorAccuracyChart({
   score,
@@ -42,7 +47,7 @@ export function CreatorAccuracyChart({
 
   if (data.length === 0) {
     return (
-      <div className="flex h-48 items-center justify-center rounded-2xl bg-gray-50 text-sm text-muted">
+      <div className="flex h-48 items-center justify-center rounded-xl bg-bg-alt text-sm text-muted">
         Not enough data to show accuracy breakdown.
       </div>
     );
@@ -51,26 +56,26 @@ export function CreatorAccuracyChart({
   return (
     <ResponsiveContainer width="100%" height={240}>
       <BarChart data={data} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" strokeOpacity={0.6} vertical={false} />
+        <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-light)" strokeOpacity={0.8} vertical={false} />
         <XAxis
           dataKey="name"
-          tick={{ fontSize: 12, fill: "#718096" }}
+          tick={{ fontSize: 12, fill: "var(--color-muted)" }}
           tickLine={false}
         />
         <YAxis
           domain={[0, 100]}
-          tick={{ fontSize: 11, fill: "#718096" }}
+          tick={{ fontSize: 11, fill: "var(--color-muted)" }}
           tickLine={false}
           axisLine={false}
           tickFormatter={(v: number) => `${v}%`}
         />
         <Tooltip
           contentStyle={{
-            backgroundColor: "#fff",
-            border: "none",
-            borderRadius: "12px",
+            backgroundColor: "var(--color-surface)",
+            border: "1px solid var(--color-border)",
+            borderRadius: "8px",
             fontSize: "12px",
-            boxShadow: "0 10px 15px -3px rgba(26, 54, 93, 0.08), 0 4px 6px -4px rgba(26, 54, 93, 0.06)",
+            boxShadow: "var(--shadow-md)",
           }}
           formatter={(value: number) => [`${value}%`, "Accuracy"]}
         />

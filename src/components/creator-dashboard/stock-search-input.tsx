@@ -79,11 +79,11 @@ export function StockSearchInput({ value, onChange }: StockSearchInputProps): Re
         onChange={(e) => handleSearch(e.target.value)}
         onFocus={() => results.length > 0 && setShowDropdown(true)}
         placeholder="Search stocks (e.g., RELIANCE, TCS)..."
-        className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:border-accent focus:outline-none"
+        className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/30"
       />
 
       {showDropdown && (
-        <div className="absolute z-10 mt-1 w-full rounded-md border border-gray-200 bg-surface shadow-lg">
+        <div className="absolute z-10 mt-1 w-full rounded-lg border border-border/60 bg-surface shadow-lg">
           {loading ? (
             <div className="px-3 py-2 text-xs text-muted">Searching...</div>
           ) : results.length === 0 ? (
@@ -94,7 +94,7 @@ export function StockSearchInput({ value, onChange }: StockSearchInputProps): Re
                 key={stock.symbol}
                 type="button"
                 onClick={() => handleSelect(stock)}
-                className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-bg"
+                className="flex w-full items-center justify-between px-3 py-2 text-left text-sm transition-colors hover:bg-bg-alt"
               >
                 <div>
                   <span className="font-medium text-text">{stock.symbol}</span>

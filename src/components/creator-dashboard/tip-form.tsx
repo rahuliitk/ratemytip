@@ -79,12 +79,12 @@ export function TipForm(): React.ReactElement {
               key={d}
               type="button"
               onClick={() => setDirection(d)}
-              className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+              className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
                 direction === d
                   ? d === "BUY"
-                    ? "bg-green-600 text-white"
+                    ? "bg-emerald-600 text-white"
                     : "bg-red-600 text-white"
-                  : "bg-bg text-muted hover:bg-gray-200"
+                  : "bg-bg-alt text-muted hover:bg-bg-alt/80 hover:text-text"
               }`}
             >
               {d}
@@ -106,7 +106,7 @@ export function TipForm(): React.ReactElement {
             required
             value={entryPrice}
             onChange={(e) => setEntryPrice(e.target.value)}
-            className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm tabular-nums focus:border-accent focus:outline-none"
+            className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm tabular-nums focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/30"
             placeholder="0.00"
           />
         </div>
@@ -121,7 +121,7 @@ export function TipForm(): React.ReactElement {
             required
             value={stopLoss}
             onChange={(e) => setStopLoss(e.target.value)}
-            className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm tabular-nums focus:border-accent focus:outline-none"
+            className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm tabular-nums focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/30"
             placeholder="0.00"
           />
         </div>
@@ -139,7 +139,7 @@ export function TipForm(): React.ReactElement {
             required
             value={target1}
             onChange={(e) => setTarget1(e.target.value)}
-            className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm tabular-nums focus:border-accent focus:outline-none"
+            className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm tabular-nums focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/30"
             placeholder="0.00"
           />
         </div>
@@ -153,7 +153,7 @@ export function TipForm(): React.ReactElement {
             step="0.01"
             value={target2}
             onChange={(e) => setTarget2(e.target.value)}
-            className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm tabular-nums focus:border-accent focus:outline-none"
+            className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm tabular-nums focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/30"
             placeholder="Optional"
           />
         </div>
@@ -167,7 +167,7 @@ export function TipForm(): React.ReactElement {
             step="0.01"
             value={target3}
             onChange={(e) => setTarget3(e.target.value)}
-            className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm tabular-nums focus:border-accent focus:outline-none"
+            className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm tabular-nums focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/30"
             placeholder="Optional"
           />
         </div>
@@ -183,7 +183,7 @@ export function TipForm(): React.ReactElement {
             id="timeframe"
             value={timeframe}
             onChange={(e) => setTimeframe(e.target.value)}
-            className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:border-accent focus:outline-none"
+            className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/30"
           >
             <option value="INTRADAY">Intraday</option>
             <option value="SWING">Swing (2-14 days)</option>
@@ -199,7 +199,7 @@ export function TipForm(): React.ReactElement {
             id="conviction"
             value={conviction}
             onChange={(e) => setConviction(e.target.value)}
-            className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:border-accent focus:outline-none"
+            className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/30"
           >
             <option value="LOW">Low</option>
             <option value="MEDIUM">Medium</option>
@@ -218,7 +218,7 @@ export function TipForm(): React.ReactElement {
           rows={3}
           value={rationale}
           onChange={(e) => setRationale(e.target.value)}
-          className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:border-accent focus:outline-none"
+          className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/30"
           maxLength={2000}
           placeholder="Why are you making this call? Technical analysis, fundamental reasons..."
         />
@@ -228,7 +228,7 @@ export function TipForm(): React.ReactElement {
       {error && <p className="text-sm text-danger">{error}</p>}
 
       <div className="flex gap-3">
-        <Button type="submit" disabled={loading}>
+        <Button type="submit" variant="glow" disabled={loading}>
           {loading ? "Submitting..." : "Submit Tip"}
         </Button>
         <Button

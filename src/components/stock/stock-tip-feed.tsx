@@ -33,18 +33,19 @@ export function StockTipFeed({
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold text-gradient-primary">
-          Tips for {stockSymbol} ({filteredTips.length})
+        <h2 className="text-lg font-semibold text-text">
+          Tips for {stockSymbol}{" "}
+          <span className="text-sm font-normal text-muted">({filteredTips.length})</span>
         </h2>
-        <div className="flex gap-1 rounded-xl bg-gray-100 p-1">
+        <div className="flex gap-1 rounded-lg bg-bg-alt p-1">
           {FILTER_OPTIONS.map((opt) => (
             <button
               key={opt}
               type="button"
               onClick={() => setFilter(opt)}
-              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
+              className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors duration-150 ${
                 filter === opt
-                  ? "bg-white text-[#1A365D] shadow-[0_1px_2px_0_rgba(26,54,93,0.08)]"
+                  ? "bg-accent text-white shadow-sm"
                   : "text-muted hover:text-text"
               }`}
             >

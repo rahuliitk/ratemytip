@@ -14,9 +14,9 @@ export function TipExplanation({
   updatedAt,
 }: TipExplanationProps): React.ReactElement {
   return (
-    <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-6">
+    <div className="rounded-xl border border-border/60 bg-bg-alt/50 p-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-primary">Creator&apos;s Analysis</h3>
+        <h3 className="text-sm font-semibold text-text">Creator&apos;s Analysis</h3>
         <span className="text-xs text-muted">
           {version > 1 && `v${version} · `}
           {new Date(updatedAt).toLocaleDateString("en-IN", {
@@ -30,14 +30,14 @@ export function TipExplanation({
         {content}
       </div>
       {imageUrls.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-4 flex flex-wrap gap-3">
           {imageUrls.map((url, i) => (
             <a
               key={i}
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="overflow-hidden rounded-xl border border-gray-200/60"
+              className="overflow-hidden rounded-lg shadow-sm transition-shadow duration-150 hover:shadow-md"
             >
               <Image
                 src={url}
