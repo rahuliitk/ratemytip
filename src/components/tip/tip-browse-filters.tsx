@@ -52,7 +52,7 @@ function FilterSelect({ label, paramKey, options, currentValue, onSelect }: Filt
     <div className="flex flex-col gap-1.5">
       <span className="text-[11px] font-medium uppercase tracking-wider text-muted">{label}</span>
       <Select value={currentValue} onValueChange={(v) => onSelect(paramKey, v)}>
-        <SelectTrigger className="w-[160px]">
+        <SelectTrigger className="w-[160px]" aria-label={label}>
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

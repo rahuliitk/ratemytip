@@ -152,8 +152,7 @@ export async function scrapeAllCreators(
  */
 async function scrapeTwitterCreator(
   platformUserId: string,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  lastScrapedAt: Date | null
+  _lastScrapedAt: Date | null
 ): Promise<ScrapedPost[]> {
   const bearerToken = process.env.TWITTER_BEARER_TOKEN;
   if (!bearerToken) {
