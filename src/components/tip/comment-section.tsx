@@ -21,6 +21,7 @@ export function CommentSection({ tipId }: CommentSectionProps): React.ReactEleme
   const [posting, setPosting] = useState(false);
 
   useEffect(() => {
+    setLoading(true);
     let cancelled = false;
     async function load() {
       try {
