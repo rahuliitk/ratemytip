@@ -63,7 +63,7 @@ function calculateTipReturn(tip: CompletedTip): TipReturnDetail {
     // Target was hit - calculate return from closed price
     returnPct = calculateTargetReturn(tip);
     // Neutral R:R when entry === stopLoss (zero risk) to avoid division by zero
-    riskRewardRatio = riskPct === 0 ? (returnPct > 0 ? 1.0 : -1.0) : returnPct / riskPct;
+    riskRewardRatio = riskPct === 0 ? (returnPct > 0 ? 1.0 : returnPct < 0 ? -1.0 : 0) : returnPct / riskPct;
   } else {
     // Expired without hitting target or stoploss
     // Use closed price to determine actual return
@@ -72,7 +72,7 @@ function calculateTipReturn(tip: CompletedTip): TipReturnDetail {
       ? ((price - entryPrice) / entryPrice) * 100
       : ((entryPrice - price) / entryPrice) * 100;
     // Neutral R:R when entry === stopLoss (zero risk) to avoid division by zero
-    riskRewardRatio = riskPct === 0 ? (returnPct > 0 ? 1.0 : -1.0) : returnPct / riskPct;
+    riskRewardRatio = riskPct === 0 ? (returnPct > 0 ? 1.0 : returnPct < 0 ? -1.0 : 0) : returnPct / riskPct;
   }
 
   return {

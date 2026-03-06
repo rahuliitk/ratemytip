@@ -376,6 +376,19 @@ describe("calculateRiskAdjustedReturn", () => {
     expect(detail.riskRewardRatio).toBe(-1.0);
   });
 
+  it("returns neutral R:R (0) when entryPrice === stopLoss and tip expired at break-even", () => {
+    const tip = buildExpiredTip({
+      entryPrice: 1000,
+      stopLoss: 1000,
+      closedPrice: 1000,
+    });
+    const result = calculateRiskAdjustedReturn({ tips: [tip] });
+    const detail = result.tipDetails[0]!;
+    expect(detail.riskPct).toBe(0);
+    expect(detail.riskRewardRatio).toBe(0);
+    expect(detail.returnPct).toBe(0);
+  });
+
   it("does not inflate riskPct to 0.01 for zero-risk tips (old behavior)", () => {
     const tip = buildCompletedTip({
       entryPrice: 1000,
