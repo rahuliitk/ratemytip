@@ -2,8 +2,8 @@ import { describe, it, expect } from "vitest";
 import { createTipSchema } from "@/lib/validators/tip";
 
 const validBuyTip = {
-  creatorId: "clx1234567890abcdefghijk",
-  stockId: "clx1234567890abcdefghijk",
+  creatorId: "clx1234567890abcdefghijkl",
+  stockId: "clx1234567890abcdefghijkl",
   direction: "BUY" as const,
   assetClass: "EQUITY" as const,
   entryPrice: 1000,

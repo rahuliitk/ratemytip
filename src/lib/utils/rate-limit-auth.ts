@@ -21,6 +21,10 @@ export async function checkAuthRateLimit(
   const config = AUTH_RATE_LIMITS[action];
   if (!config) return null;
 
+  // Skip rate limiting when IP can't be determined to avoid
+  // funneling all unknown clients into a single Redis bucket.
+  if (ip === "unknown") return null;
+
   const key = `auth-ratelimit:${action}:${ip}`;
 
   try {

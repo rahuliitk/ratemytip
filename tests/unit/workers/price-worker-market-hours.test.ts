@@ -49,8 +49,8 @@ describe("isAnyMarketOpen", () => {
     expect(isAnyMarketOpen(new Date("2025-07-16T19:00:00.000Z"))).toBe(true);
   });
 
-  it("returns false on Saturday when only weekday exchanges exist (except crypto)", () => {
-    // Saturday 12:00 UTC — crypto is 24/7 so isAnyMarketOpen should still be true
+  it("returns true on Saturday because crypto markets are 24/7", () => {
+    // Saturday 12:00 UTC — weekday-only exchanges are closed but crypto is open
     expect(isAnyMarketOpen(new Date("2025-07-19T12:00:00.000Z"))).toBe(true);
   });
 
