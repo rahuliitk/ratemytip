@@ -118,7 +118,7 @@ describe("GET /api/admin/claims", () => {
     vi.mocked(db.creator.findMany).mockResolvedValue([] as never);
 
     const { GET } = await import("@/app/api/admin/claims/route");
-    const req = new NextRequest("http://localhost:3000/api/admin/claims?status=approved");
+    const req = new NextRequest("http://localhost:3000/api/admin/claims?status=APPROVED");
     const res = await GET(req);
 
     expect(res.status).toBe(200);
@@ -348,7 +348,7 @@ describe("GET /api/admin/reports", () => {
     vi.mocked(db.user.findMany).mockResolvedValue([] as never);
 
     const { GET } = await import("@/app/api/admin/reports/route");
-    const req = new NextRequest("http://localhost:3000/api/admin/reports?status=reviewed");
+    const req = new NextRequest("http://localhost:3000/api/admin/reports?status=REVIEWED");
     const res = await GET(req);
 
     expect(res.status).toBe(200);

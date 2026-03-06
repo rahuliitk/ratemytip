@@ -5,7 +5,6 @@ import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, X, Zap, Crown, Sparkles } from "lucide-react";
 
 const TIERS = [
@@ -83,7 +82,7 @@ function PricingContent(): React.ReactElement {
       });
       const data = await res.json();
       if (data.success && data.data.url) {
-        window.location.href = data.data.url;
+        window.location.assign(data.data.url);
       }
     } catch {
       setLoading(null);
@@ -91,72 +90,121 @@ function PricingContent(): React.ReactElement {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
-      <div className="mb-12 text-center">
-        <h1 className="text-4xl font-bold text-gradient-primary">Choose Your Plan</h1>
+    <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+      {/* Header */}
+      <div className="mb-14 text-center">
+        <h1 className="text-3xl font-bold text-text">Choose Your Plan</h1>
         <p className="mt-3 text-lg text-muted">
           Upgrade to unlock AI recommendations, advanced analytics, and more.
         </p>
         {canceled && (
-          <p className="mt-2 text-sm text-warning">Checkout was canceled. No charges were made.</p>
+          <div className="mx-auto mt-4 max-w-md rounded-lg border border-warning/30 bg-warning/5 px-4 py-2.5 text-sm text-warning">
+            Checkout was canceled. No charges were made.
+          </div>
         )}
       </div>
 
+      {/* Pricing Cards */}
       <div className="grid gap-8 md:grid-cols-3">
-        {TIERS.map((tier) => (
-          <Card
-            key={tier.name}
-            className={`relative flex flex-col ${
-              tier.popular
-                ? "border-2 border-accent shadow-lg"
-                : "shadow-[0_1px_2px_0_rgba(26,54,93,0.04)]"
-            }`}
-          >
-            {tier.popular && (
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-accent px-3 py-1 text-xs font-semibold text-white">
-                Most Popular
-              </div>
-            )}
-            <CardHeader className="text-center">
-              <tier.icon className="mx-auto mb-2 h-8 w-8 text-accent" />
-              <CardTitle className="text-xl">{tier.name}</CardTitle>
-              <p className="text-sm text-muted">{tier.description}</p>
-              <div className="mt-4">
-                <span className="text-4xl font-bold text-gradient-primary">{tier.price}</span>
-                <span className="text-muted">{tier.period}</span>
-              </div>
-            </CardHeader>
-            <CardContent className="flex flex-1 flex-col">
-              <ul className="mb-8 flex-1 space-y-3">
-                {tier.features.map((f) => (
-                  <li key={f.text} className="flex items-start gap-2 text-sm">
-                    {f.included ? (
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" />
-                    ) : (
-                      <X className="mt-0.5 h-4 w-4 shrink-0 text-gray-300" />
-                    )}
-                    <span className={f.included ? "text-text" : "text-gray-400"}>
-                      {f.text}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-              {tier.tier === "FREE" ? (
-                <Button variant="outline" className="w-full" disabled>
-                  Current Plan
-                </Button>
-              ) : (
-                <Button
-                  className="w-full"
-                  onClick={() => handleCheckout(tier.tier)}
-                  disabled={loading !== null}
-                >
-                  {loading === tier.tier ? "Redirecting..." : `Upgrade to ${tier.name}`}
-                </Button>
+        {TIERS.map((tier) => {
+          const isPopular = !!tier.popular;
+          const isFree = tier.tier === "FREE";
+
+          return (
+            <div
+              key={tier.name}
+              className={`relative flex flex-col rounded-xl bg-surface ${
+                isPopular
+                  ? "border-2 border-accent shadow-lg"
+                  : "border border-border/60 shadow-sm"
+              }`}
+            >
+              {/* Popular Badge */}
+              {isPopular && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                  <span className="rounded-md bg-accent px-2 py-0.5 text-xs font-semibold text-white">
+                    Most Popular
+                  </span>
+                </div>
               )}
-            </CardContent>
-          </Card>
-        ))}
+
+              {/* Card Header */}
+              <div className="px-6 pb-0 pt-8 text-center">
+                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
+                  <tier.icon className="h-6 w-6 text-accent" />
+                </div>
+                <h3 className="text-xl font-bold text-text">{tier.name}</h3>
+                <p className="mt-1 text-sm text-muted">{tier.description}</p>
+                <div className="mt-5">
+                  <span className="text-4xl font-bold text-text">
+                    {tier.price}
+                  </span>
+                  <span className="text-sm text-muted">{tier.period}</span>
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="mx-6 my-6 border-t border-border/40" />
+
+              {/* Features */}
+              <div className="flex flex-1 flex-col px-6 pb-8">
+                <ul className="mb-8 flex-1 space-y-3">
+                  {tier.features.map((f) => (
+                    <li key={f.text} className="flex items-start gap-2.5">
+                      {f.included ? (
+                        <div className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-success/10">
+                          <Check className="h-2.5 w-2.5 text-success" />
+                        </div>
+                      ) : (
+                        <div className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-bg-alt">
+                          <X className="h-2.5 w-2.5 text-muted" />
+                        </div>
+                      )}
+                      <span
+                        className={`text-sm ${
+                          f.included
+                            ? "text-text-secondary"
+                            : "text-muted"
+                        }`}
+                      >
+                        {f.text}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+
+                {/* CTA Button */}
+                {isFree ? (
+                  <Button variant="outline" className="w-full" disabled>
+                    Current Plan
+                  </Button>
+                ) : isPopular ? (
+                  <Button
+                    variant="glow"
+                    className="w-full"
+                    onClick={() => handleCheckout(tier.tier)}
+                    disabled={loading !== null}
+                  >
+                    {loading === tier.tier
+                      ? "Redirecting..."
+                      : `Upgrade to ${tier.name}`}
+                  </Button>
+                ) : (
+                  <Button
+                    variant="default"
+                    className="w-full"
+                    onClick={() => handleCheckout(tier.tier)}
+                    disabled={loading !== null}
+                  >
+                    {loading === tier.tier
+                      ? "Redirecting..."
+                      : `Upgrade to ${tier.name}`}
+                  </Button>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -164,7 +212,13 @@ function PricingContent(): React.ReactElement {
 
 export default function PricingPage(): React.ReactElement {
   return (
-    <Suspense fallback={<div className="mx-auto max-w-6xl px-4 py-12 text-center text-muted">Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="mx-auto max-w-6xl px-4 py-16 text-center text-muted">
+          Loading...
+        </div>
+      }
+    >
       <PricingContent />
     </Suspense>
   );

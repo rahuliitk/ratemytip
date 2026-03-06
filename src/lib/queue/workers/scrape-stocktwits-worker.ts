@@ -18,7 +18,7 @@ import { db } from "@/lib/db";
 const log = createLogger("worker/stocktwits");
 import { StockTwitsScraper } from "@/lib/scraper/stocktwits";
 import { createStockTwitsRateLimiter } from "@/lib/scraper/rate-limiter";
-import { STOCKTWITS } from "@/lib/constants";
+// STOCKTWITS constants available in @/lib/constants if needed
 import { parseTipQueue } from "@/lib/queue/queues";
 
 // ──── Job payload type ────
@@ -56,12 +56,12 @@ async function findOrCreateStockTwitsUser(
   username: string,
   displayName: string,
   followers: number
-): Promise<{ creatorId: string; platformId: string } | null> {
+): Promise<{ creatorId: string; platformId: string; isNew: boolean } | null> {
   // Only track users with enough followers
   if (!StockTwitsScraper.isTrackableUser(followers)) return null;
 
   const cached = userCache.get(userId);
-  if (cached) return cached;
+  if (cached) return { ...cached, isNew: false };
 
   const slug = `st-${username.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 
@@ -75,7 +75,7 @@ async function findOrCreateStockTwitsUser(
     if (platform) {
       const result = { creatorId: creator.id, platformId: platform.id };
       userCache.set(userId, result);
-      return result;
+      return { ...result, isNew: false };
     }
 
     // Add STOCKTWITS platform
@@ -92,10 +92,10 @@ async function findOrCreateStockTwitsUser(
 
     const result = { creatorId: creator.id, platformId: newPlatform.id };
     userCache.set(userId, result);
-    return result;
+    return { ...result, isNew: false };
   }
 
-  // Create new user
+  // Create new creator
   creator = await db.creator.create({
     data: {
       slug,
@@ -121,7 +121,7 @@ async function findOrCreateStockTwitsUser(
 
   const result = { creatorId: creator.id, platformId: platform.id };
   userCache.set(userId, result);
-  return result;
+  return { ...result, isNew: true };
 }
 
 // ──── Main job processor ────
@@ -190,6 +190,7 @@ async function processStockTwitsScrapeJob(
             );
 
             if (!userResult) continue; // User below follower threshold
+            if (userResult.isNew) creatorsCreated++;
 
             const platformPostId = `st-${msg.messageId}`;
 

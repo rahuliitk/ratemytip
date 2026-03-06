@@ -101,45 +101,55 @@ export default async function AdminAnalyticsPage(): Promise<React.ReactElement> 
       label: "Total Creators",
       value: analytics.totalCreators.toLocaleString("en-IN"),
       icon: Users,
-      color: "text-accent",
+      color: "text-blue-600",
+      bgColor: "bg-blue-50",
     },
     {
       label: "Total Tips",
       value: analytics.totalTips.toLocaleString("en-IN"),
       icon: Target,
-      color: "text-success",
+      color: "text-emerald-600",
+      bgColor: "bg-emerald-50",
     },
     {
       label: "Active Tips",
       value: analytics.activeTips.toLocaleString("en-IN"),
       icon: TrendingUp,
-      color: "text-warning",
+      color: "text-amber-600",
+      bgColor: "bg-amber-50",
     },
     {
       label: "Completed Tips",
       value: analytics.completedTips.toLocaleString("en-IN"),
       icon: BarChart3,
-      color: "text-primary",
+      color: "text-violet-600",
+      bgColor: "bg-violet-50",
     },
   ];
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-gradient-primary">Analytics</h1>
-      <p className="mt-1 text-sm text-muted">
-        Platform-wide performance metrics
-      </p>
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div>
+        <h1 className="text-2xl font-bold text-text">Analytics</h1>
+        <p className="mt-1 text-sm text-muted">
+          Platform-wide performance metrics
+        </p>
+      </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((card) => {
           const Icon = card.icon;
           return (
             <div
               key={card.label}
-              className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-5"
+              className="rounded-xl border border-border/60 bg-surface p-5 shadow-sm"
             >
-              <div className="flex items-center gap-3">
-                <Icon className={`h-5 w-5 ${card.color}`} />
+              <div className="flex items-center gap-4">
+                <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${card.bgColor}`}>
+                  <Icon className={`h-5 w-5 ${card.color}`} />
+                </div>
                 <div>
                   <p className="text-xs font-medium text-muted">
                     {card.label}
@@ -154,22 +164,29 @@ export default async function AdminAnalyticsPage(): Promise<React.ReactElement> 
         })}
       </div>
 
-      <div className="mt-6 rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-5">
-        <h2 className="text-sm font-semibold text-primary">
-          Average RMT Score
-        </h2>
-        <p className="mt-2 text-3xl font-bold tabular-nums text-accent">
+      {/* Average Score Card */}
+      <div className="rounded-xl border border-border/60 bg-surface p-6 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
+            <BarChart3 className="h-5 w-5 text-blue-600" />
+          </div>
+          <div>
+            <h2 className="text-sm font-semibold text-text">
+              Average RMT Score
+            </h2>
+            <p className="text-xs text-muted">across all rated creators</p>
+          </div>
+        </div>
+        <p className="mt-4 text-4xl font-bold tabular-nums text-blue-600">
           {analytics.avgRmtScore.toFixed(1)}
         </p>
-        <p className="text-xs text-muted">across all rated creators</p>
       </div>
 
-      <div className="mt-8">
-        <AnalyticsCharts
-          dailyTips={chartData.dailyTips}
-          scoreDistribution={chartData.scoreDistribution}
-        />
-      </div>
+      {/* Charts */}
+      <AnalyticsCharts
+        dailyTips={chartData.dailyTips}
+        scoreDistribution={chartData.scoreDistribution}
+      />
     </div>
   );
 }

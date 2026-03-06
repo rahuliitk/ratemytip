@@ -71,8 +71,9 @@ export function AddToPortfolioButton({
         onClick={handleClick}
         disabled={state === "loading" || state === "success"}
         className={cn(
-          state === "success" && "border-transparent bg-[#C6F6D5] text-[#276749]",
-          state === "error" && "border-[#C53030] text-[#C53030]"
+          "transition-all duration-200",
+          state === "success" && "border-transparent bg-success-light text-success",
+          state === "error" && "border-danger/30 text-danger"
         )}
       >
         {state === "idle" && (
@@ -101,7 +102,7 @@ export function AddToPortfolioButton({
         )}
       </Button>
       {state === "error" && errorMessage && (
-        <span className="mt-1 text-xs text-[#C53030]">
+        <span className="mt-1 text-xs text-danger">
           {errorMessage}
         </span>
       )}

@@ -6,10 +6,15 @@
 
 import { subDays } from "date-fns";
 
+import { createLogger } from "@/lib/logger";
+import { NseService } from "./nse";
 import { YahooFinanceService } from "./yahoo-finance";
 import { PriceMonitor } from "./price-monitor";
 import type { CurrentPrice, PriceData } from "./types";
 
+const log = createLogger("market-data");
+
+export { NseService } from "./nse";
 export { YahooFinanceService } from "./yahoo-finance";
 export { PriceMonitor } from "./price-monitor";
 export type {
@@ -18,6 +23,16 @@ export type {
   PriceData,
   TipStatusUpdate,
 } from "./types";
+
+/** Shared singleton instance of the NSE service */
+let nseServiceInstance: NseService | undefined;
+
+function getNseService(): NseService {
+  if (!nseServiceInstance) {
+    nseServiceInstance = new NseService();
+  }
+  return nseServiceInstance;
+}
 
 /** Shared singleton instance of the Yahoo Finance service */
 let yahooServiceInstance: YahooFinanceService | undefined;
@@ -41,6 +56,7 @@ export function getPriceMonitor(): PriceMonitor {
 
 /**
  * Fetch the current price for a stock.
+ * Uses NSE as primary source for Indian equities, falling back to Yahoo Finance.
  *
  * @param symbol - Stock symbol (e.g. "AAPL", "RELIANCE", "BTC")
  * @param exchange - Exchange code (e.g. "NYSE", "NSE", "CRYPTO")
@@ -50,6 +66,18 @@ export async function fetchCurrentPrice(
   symbol: string,
   exchange: string
 ): Promise<CurrentPrice | null> {
+  // Try NSE first for Indian equities only (INDEX may include global indices)
+  if (exchange === "NSE") {
+    try {
+      const nsePrice = await getNseService().getCurrentPrice(symbol);
+      if (nsePrice) return nsePrice;
+    } catch {
+      // NSE unavailable — fall through to Yahoo
+    }
+    log.warn({ symbol }, "NSE price unavailable, falling back to Yahoo");
+  }
+
+  // Fallback to Yahoo Finance for all exchanges
   return getYahooService().getCurrentPrice(symbol, exchange);
 }
 

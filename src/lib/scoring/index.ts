@@ -9,6 +9,7 @@
 
 import { db } from "@/lib/db";
 import { SCORING, COMPLETED_TIP_STATUSES } from "@/lib/constants";
+import { invalidateCreatorCache, invalidateLeaderboardCache } from "@/lib/utils/cache-invalidation";
 import { calculateCompositeScore } from "./composite";
 import type { CompletedTip, CompositeScoreOutput, TipStatusType, TipDirectionType, TipTimeframeType } from "./types";
 
@@ -172,67 +173,40 @@ export async function persistCreatorScore(
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-  await db.$transaction([
-    // Upsert the current score (one record per creator)
-    db.creatorScore.upsert({
-      where: { creatorId },
-      create: {
-        creatorId,
-        accuracyScore: score.accuracyScore,
-        riskAdjustedScore: score.riskAdjustedScore,
-        consistencyScore: score.consistencyScore,
-        volumeFactorScore: score.volumeFactorScore,
-        rmtScore: score.rmtScore,
-        confidenceInterval: score.confidenceInterval,
-        accuracyRate: score.accuracyRate,
-        avgReturnPct: score.avgReturnPct,
-        avgRiskRewardRatio: score.avgRiskRewardRatio,
-        winStreak: score.winStreak,
-        lossStreak: score.lossStreak,
-        bestTipReturnPct: score.bestTipReturnPct,
-        worstTipReturnPct: score.worstTipReturnPct,
-        intradayAccuracy: score.timeframeAccuracy.intradayAccuracy,
-        swingAccuracy: score.timeframeAccuracy.swingAccuracy,
-        positionalAccuracy: score.timeframeAccuracy.positionalAccuracy,
-        longTermAccuracy: score.timeframeAccuracy.longTermAccuracy,
-        totalScoredTips: score.totalScoredTips,
-        scorePeriodStart: score.scorePeriodStart,
-        scorePeriodEnd: score.scorePeriodEnd,
-        calculatedAt: now,
-      },
-      update: {
-        accuracyScore: score.accuracyScore,
-        riskAdjustedScore: score.riskAdjustedScore,
-        consistencyScore: score.consistencyScore,
-        volumeFactorScore: score.volumeFactorScore,
-        rmtScore: score.rmtScore,
-        confidenceInterval: score.confidenceInterval,
-        accuracyRate: score.accuracyRate,
-        avgReturnPct: score.avgReturnPct,
-        avgRiskRewardRatio: score.avgRiskRewardRatio,
-        winStreak: score.winStreak,
-        lossStreak: score.lossStreak,
-        bestTipReturnPct: score.bestTipReturnPct,
-        worstTipReturnPct: score.worstTipReturnPct,
-        intradayAccuracy: score.timeframeAccuracy.intradayAccuracy,
-        swingAccuracy: score.timeframeAccuracy.swingAccuracy,
-        positionalAccuracy: score.timeframeAccuracy.positionalAccuracy,
-        longTermAccuracy: score.timeframeAccuracy.longTermAccuracy,
-        totalScoredTips: score.totalScoredTips,
-        scorePeriodStart: score.scorePeriodStart,
-        scorePeriodEnd: score.scorePeriodEnd,
-        calculatedAt: now,
-      },
-    }),
+  const scoreData = {
+    accuracyScore: score.accuracyScore,
+    riskAdjustedScore: score.riskAdjustedScore,
+    consistencyScore: score.consistencyScore,
+    volumeFactorScore: score.volumeFactorScore,
+    rmtScore: score.rmtScore,
+    confidenceInterval: score.confidenceInterval,
+    accuracyRate: score.accuracyRate,
+    avgReturnPct: score.avgReturnPct,
+    avgRiskRewardRatio: score.avgRiskRewardRatio,
+    winStreak: score.winStreak,
+    lossStreak: score.lossStreak,
+    bestTipReturnPct: score.bestTipReturnPct,
+    worstTipReturnPct: score.worstTipReturnPct,
+    intradayAccuracy: score.timeframeAccuracy.intradayAccuracy,
+    swingAccuracy: score.timeframeAccuracy.swingAccuracy,
+    positionalAccuracy: score.timeframeAccuracy.positionalAccuracy,
+    longTermAccuracy: score.timeframeAccuracy.longTermAccuracy,
+    totalScoredTips: score.totalScoredTips,
+    scorePeriodStart: score.scorePeriodStart,
+    scorePeriodEnd: score.scorePeriodEnd,
+    calculatedAt: now,
+  };
 
-    // Upsert a daily snapshot for charting history
-    db.scoreSnapshot.upsert({
-      where: {
-        creatorId_date: {
-          creatorId,
-          date: today,
-        },
-      },
+  // Use interactive transaction to capture slug from the creator update
+  const updatedCreator = await db.$transaction(async (tx) => {
+    await tx.creatorScore.upsert({
+      where: { creatorId },
+      create: { creatorId, ...scoreData },
+      update: scoreData,
+    });
+
+    await tx.scoreSnapshot.upsert({
+      where: { creatorId_date: { creatorId, date: today } },
       create: {
         creatorId,
         date: today,
@@ -245,15 +219,16 @@ export async function persistCreatorScore(
         accuracyRate: score.accuracyRate,
         totalScoredTips: score.totalScoredTips,
       },
-    }),
+    });
 
-    // Update the creator's tier and denormalized counts
-    db.creator.update({
+    return tx.creator.update({
       where: { id: creatorId },
-      data: {
-        tier: score.tier,
-        completedTips: score.totalScoredTips,
-      },
-    }),
-  ]);
+      data: { tier: score.tier, completedTips: score.totalScoredTips },
+      select: { slug: true },
+    });
+  });
+
+  // Invalidate related caches after persisting (both slug and id keys)
+  await invalidateCreatorCache(updatedCreator.slug, creatorId);
+  await invalidateLeaderboardCache();
 }

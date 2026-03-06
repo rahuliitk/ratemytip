@@ -4,9 +4,13 @@ import { hash } from "bcryptjs";
 import { db } from "@/lib/db";
 import { registerSchema } from "@/lib/validators/auth";
 import { sendEmailVerificationEmail } from "@/lib/email";
+import { checkAuthRateLimit, getClientIp } from "@/lib/utils/rate-limit-auth";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    const rateLimited = await checkAuthRateLimit(getClientIp(request), "register");
+    if (rateLimited) return rateLimited;
+
     const body: unknown = await request.json();
     const parsed = registerSchema.safeParse(body);
 

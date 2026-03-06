@@ -2,9 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { createHash } from "crypto";
 import { hash } from "bcryptjs";
 import { db } from "@/lib/db";
+import { checkAuthRateLimit, getClientIp } from "@/lib/utils/rate-limit-auth";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    const rateLimited = await checkAuthRateLimit(getClientIp(request), "reset-password");
+    if (rateLimited) return rateLimited;
+
     const body: unknown = await request.json();
 
     if (

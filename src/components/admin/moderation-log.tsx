@@ -12,42 +12,42 @@ interface ModerationLogProps {
 }
 
 const ACTION_COLORS: Record<string, string> = {
-  ACTIVATED: "bg-green-100 text-green-800",
-  DEACTIVATED: "bg-red-100 text-red-800",
-  FLAGGED: "bg-yellow-100 text-yellow-800",
-  UNFLAGGED: "bg-blue-100 text-blue-800",
-  NOTE_ADDED: "bg-gray-100 text-gray-700",
+  ACTIVATED: "bg-emerald-50 text-emerald-700",
+  DEACTIVATED: "bg-red-50 text-red-700",
+  FLAGGED: "bg-amber-50 text-amber-700",
+  UNFLAGGED: "bg-blue-50 text-blue-700",
+  NOTE_ADDED: "bg-bg-alt text-muted",
 };
 
 export function ModerationLog({
   actions,
 }: ModerationLogProps): React.ReactElement {
   return (
-    <div className="overflow-x-auto rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)]">
+    <div className="overflow-x-auto rounded-xl border border-border/60 bg-surface shadow-sm">
       <table className="w-full min-w-[600px] text-left">
         <thead>
-          <tr className="border-b border-gray-200 bg-bg">
-            <th className="px-4 py-3 text-xs font-semibold uppercase text-muted">
+          <tr className="border-b border-border/60 bg-bg-alt/80">
+            <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted">
               Date
             </th>
-            <th className="px-4 py-3 text-xs font-semibold uppercase text-muted">
+            <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted">
               Action
             </th>
-            <th className="px-4 py-3 text-xs font-semibold uppercase text-muted">
+            <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted">
               Creator
             </th>
-            <th className="px-4 py-3 text-xs font-semibold uppercase text-muted">
+            <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted">
               Admin
             </th>
-            <th className="px-4 py-3 text-xs font-semibold uppercase text-muted">
+            <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted">
               Reason
             </th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-100">
+        <tbody className="divide-y divide-border/40">
           {actions.map((entry) => (
-            <tr key={entry.id} className="hover:bg-[#2B6CB0]/5">
-              <td className="px-4 py-3 text-xs text-muted">
+            <tr key={entry.id} className="transition-colors hover:bg-bg-alt/50">
+              <td className="px-5 py-3 text-xs text-muted tabular-nums">
                 {new Date(entry.createdAt).toLocaleString("en-IN", {
                   day: "numeric",
                   month: "short",
@@ -56,22 +56,22 @@ export function ModerationLog({
                   minute: "2-digit",
                 })}
               </td>
-              <td className="px-4 py-3">
+              <td className="px-5 py-3">
                 <span
-                  className={`rounded px-2 py-0.5 text-xs font-medium ${
-                    ACTION_COLORS[entry.action] ?? "bg-gray-100 text-gray-700"
+                  className={`rounded-md px-2.5 py-0.5 text-xs font-medium ${
+                    ACTION_COLORS[entry.action] ?? "bg-bg-alt text-muted"
                   }`}
                 >
                   {entry.action}
                 </span>
               </td>
-              <td className="px-4 py-3 text-sm text-text">
+              <td className="px-5 py-3 text-sm font-medium text-text">
                 {entry.creator.displayName}
               </td>
-              <td className="px-4 py-3 text-sm text-muted">
+              <td className="px-5 py-3 text-sm text-muted">
                 {entry.admin.name}
               </td>
-              <td className="max-w-[300px] truncate px-4 py-3 text-xs text-muted">
+              <td className="max-w-[300px] truncate px-5 py-3 text-xs text-muted">
                 {entry.reason}
               </td>
             </tr>
@@ -80,7 +80,7 @@ export function ModerationLog({
       </table>
 
       {actions.length === 0 && (
-        <div className="py-12 text-center text-sm text-muted">
+        <div className="py-16 text-center text-sm text-muted">
           No moderation actions recorded yet.
         </div>
       )}

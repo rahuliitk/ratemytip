@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import useSWR from "swr";
 import Link from "next/link";
 import { Bell } from "lucide-react";
@@ -47,8 +47,8 @@ export function NotificationBell(): React.ReactElement {
     mutate();
   }
 
-  function formatTimeAgo(dateStr: string): string {
-    const diff = Date.now() - new Date(dateStr).getTime();
+  const formatTimeAgo = useCallback((dateStr: string): string => {
+    const diff = globalThis.Date.now() - new Date(dateStr).getTime();
     const minutes = Math.floor(diff / 60000);
     if (minutes < 1) return "just now";
     if (minutes < 60) return `${minutes}m ago`;
@@ -56,26 +56,26 @@ export function NotificationBell(): React.ReactElement {
     if (hours < 24) return `${hours}h ago`;
     const days = Math.floor(hours / 24);
     return `${days}d ago`;
-  }
+  }, []);
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <button
-          className="relative flex h-8 w-8 items-center justify-center rounded-full text-muted transition-colors hover:bg-bg hover:text-primary"
+          className="relative flex h-8 w-8 items-center justify-center rounded-full text-muted transition-colors hover:bg-bg-alt hover:text-text"
           aria-label="Notifications"
         >
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-bold text-white">
+            <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80">
-        <DropdownMenuLabel className="flex items-center justify-between">
-          <span>Notifications</span>
+      <DropdownMenuContent align="end" className="w-80 rounded-xl border border-border/60 shadow-lg">
+        <DropdownMenuLabel className="flex items-center justify-between px-3 py-2">
+          <span className="text-sm font-semibold text-text">Notifications</span>
           {unreadCount > 0 && (
             <button
               onClick={markAllRead}
@@ -96,8 +96,8 @@ export function NotificationBell(): React.ReactElement {
               <DropdownMenuItem key={n.id} asChild>
                 <Link
                   href={n.actionUrl ?? "/notifications"}
-                  className={`cursor-pointer flex-col items-start gap-0.5 px-3 py-2 ${
-                    !n.isRead ? "bg-blue-50/50" : ""
+                  className={`cursor-pointer flex-col items-start gap-0.5 px-3 py-2.5 ${
+                    !n.isRead ? "bg-accent-subtle" : ""
                   }`}
                   onClick={() => setOpen(false)}
                 >
@@ -108,7 +108,7 @@ export function NotificationBell(): React.ReactElement {
                     )}
                   </div>
                   <p className="text-xs text-muted line-clamp-2">{n.body}</p>
-                  <p className="text-[10px] text-muted">{formatTimeAgo(n.createdAt)}</p>
+                  <p className="text-[10px] text-muted-light tabular-nums">{formatTimeAgo(n.createdAt)}</p>
                 </Link>
               </DropdownMenuItem>
             ))}
@@ -116,7 +116,7 @@ export function NotificationBell(): React.ReactElement {
             <DropdownMenuItem asChild>
               <Link
                 href="/notifications"
-                className="cursor-pointer justify-center text-center text-sm text-accent"
+                className="cursor-pointer justify-center text-center text-sm font-medium text-accent"
                 onClick={() => setOpen(false)}
               >
                 View all notifications

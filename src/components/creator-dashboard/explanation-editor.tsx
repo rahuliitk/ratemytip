@@ -69,7 +69,7 @@ export function ExplanationEditor({
           required
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:border-accent focus:outline-none"
+          className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/30"
           maxLength={5000}
           placeholder="Explain your reasoning, technical analysis, key levels to watch..."
         />
@@ -85,7 +85,7 @@ export function ExplanationEditor({
           rows={2}
           value={imageUrlsText}
           onChange={(e) => setImageUrlsText(e.target.value)}
-          className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:border-accent focus:outline-none"
+          className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/30"
           placeholder="https://example.com/chart1.png"
         />
       </div>
@@ -96,7 +96,7 @@ export function ExplanationEditor({
         </p>
       )}
 
-      <Button type="submit" size="sm" disabled={loading}>
+      <Button type="submit" variant="glow" size="sm" disabled={loading}>
         {loading ? "Saving..." : isUpdate ? "Update explanation" : "Add explanation"}
       </Button>
     </form>

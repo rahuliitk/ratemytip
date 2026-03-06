@@ -38,6 +38,11 @@ vi.mock("bcryptjs", () => ({
   compare: vi.fn().mockResolvedValue(true),
 }));
 
+vi.mock("@/lib/utils/rate-limit-auth", () => ({
+  checkAuthRateLimit: vi.fn().mockResolvedValue(null),
+  getClientIp: vi.fn().mockReturnValue("127.0.0.1"),
+}));
+
 import { db } from "@/lib/db";
 import { POST as registerPOST } from "@/app/api/auth/register/route";
 import { POST as forgotPasswordPOST } from "@/app/api/auth/forgot-password/route";

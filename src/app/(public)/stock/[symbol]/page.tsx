@@ -145,25 +145,25 @@ export default async function StockPage({
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
           <StockHeader
-        symbol={stock.symbol}
-        name={stock.name}
-        exchange={stock.exchange}
-        sector={stock.sector}
-        marketCap={stock.marketCap}
-        lastPrice={stock.lastPrice}
-      />
+            symbol={stock.symbol}
+            name={stock.name}
+            exchange={stock.exchange}
+            sector={stock.sector}
+            marketCap={stock.marketCap}
+            lastPrice={stock.lastPrice}
+          />
         </div>
         <ShareButton title={`${stock.symbol} Stock Tips | RateMyTip`} />
       </div>
 
       {/* Price Chart */}
       {priceData.length > 0 && (
-        <div className="mt-6 rounded-2xl bg-white p-6 shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)]">
-          <h2 className="text-lg font-bold text-gradient-primary">Price History</h2>
-          <p className="mt-1 text-sm text-muted">Last 90 days</p>
+        <div className="mt-6 rounded-xl border border-border/60 bg-surface p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-text">Price History</h2>
+          <p className="mt-0.5 text-sm text-muted">Last 90 days</p>
           <div className="mt-4">
             <StockPriceChart priceHistory={priceData} symbol={stock.symbol} />
           </div>
@@ -182,8 +182,8 @@ export default async function StockPage({
 
           {/* Top Creators for this stock */}
           {topCreators.length > 0 && (
-            <div className="rounded-2xl bg-white p-4 shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)]">
-              <h3 className="text-sm font-bold text-gradient-primary">
+            <div className="rounded-xl border border-border/60 bg-surface p-4 shadow-sm">
+              <h3 className="text-sm font-semibold text-text">
                 Top Creators for {stock.symbol}
               </h3>
               <div className="mt-3 space-y-1">
@@ -191,7 +191,7 @@ export default async function StockPage({
                   <Link
                     key={creator.id}
                     href={`/creator/${creator.slug}`}
-                    className="flex items-center justify-between rounded-xl px-2.5 py-2 transition-colors duration-200 hover:bg-[#2B6CB0]/5"
+                    className="flex items-center justify-between rounded-lg px-2.5 py-2 transition-colors duration-150 hover:bg-bg-alt"
                   >
                     <span className="text-sm font-medium text-text">
                       {creator.displayName}

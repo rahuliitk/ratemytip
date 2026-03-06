@@ -49,15 +49,16 @@ export function FollowButton({ creatorId, initialFollowing }: FollowButtonProps)
       size="sm"
       onClick={handleToggle}
       disabled={loading}
+      className="gap-1.5"
     >
       {following ? (
         <>
-          <UserCheck className="mr-1 h-4 w-4" />
+          <UserCheck className="h-4 w-4" />
           Following
         </>
       ) : (
         <>
-          <UserPlus className="mr-1 h-4 w-4" />
+          <UserPlus className="h-4 w-4" />
           Follow
         </>
       )}

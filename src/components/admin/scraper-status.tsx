@@ -16,65 +16,68 @@ interface ScraperStatusProps {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  QUEUED: "bg-yellow-100 text-yellow-800",
-  RUNNING: "bg-blue-100 text-blue-800",
-  COMPLETED: "bg-green-100 text-green-800",
-  FAILED: "bg-red-100 text-red-800",
-  CANCELLED: "bg-gray-100 text-gray-600",
+  QUEUED: "bg-amber-50 text-amber-700",
+  RUNNING: "bg-blue-50 text-blue-700",
+  COMPLETED: "bg-emerald-50 text-emerald-700",
+  FAILED: "bg-red-50 text-red-700",
+  CANCELLED: "bg-bg-alt text-muted",
 };
 
 export function ScraperStatus({ jobs }: ScraperStatusProps): React.ReactElement {
   return (
-    <div className="overflow-x-auto rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)]">
+    <div className="overflow-x-auto rounded-xl border border-border/60 bg-surface shadow-sm">
       <table className="w-full min-w-[700px] text-left">
         <thead>
-          <tr className="border-b border-gray-200 bg-bg">
-            <th className="px-4 py-3 text-xs font-semibold uppercase text-muted">
+          <tr className="border-b border-border/60 bg-bg-alt/80">
+            <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted">
               Platform
             </th>
-            <th className="px-4 py-3 text-xs font-semibold uppercase text-muted">
+            <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted">
               Type
             </th>
-            <th className="px-4 py-3 text-xs font-semibold uppercase text-muted">
+            <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted">
               Status
             </th>
-            <th className="px-4 py-3 text-right text-xs font-semibold uppercase text-muted">
+            <th className="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted">
               Posts
             </th>
-            <th className="px-4 py-3 text-right text-xs font-semibold uppercase text-muted">
+            <th className="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted">
               Tips
             </th>
-            <th className="px-4 py-3 text-xs font-semibold uppercase text-muted">
+            <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted">
               Started
             </th>
-            <th className="px-4 py-3 text-xs font-semibold uppercase text-muted">
+            <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted">
               Error
             </th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-100">
+        <tbody className="divide-y divide-border/40">
           {jobs.map((job) => (
-            <tr key={job.id} className="hover:bg-[#2B6CB0]/5">
-              <td className="px-4 py-3 text-sm font-medium text-text">
+            <tr key={job.id} className="transition-colors hover:bg-bg-alt/50">
+              <td className="px-5 py-3 text-sm font-medium text-text">
                 {job.platform}
               </td>
-              <td className="px-4 py-3 text-sm text-muted">{job.jobType}</td>
-              <td className="px-4 py-3">
+              <td className="px-5 py-3 text-sm text-muted">{job.jobType}</td>
+              <td className="px-5 py-3">
                 <span
-                  className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                    STATUS_COLORS[job.status] ?? "bg-gray-100 text-gray-600"
+                  className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                    STATUS_COLORS[job.status] ?? "bg-bg-alt text-muted"
                   }`}
                 >
+                  {job.status === "RUNNING" && (
+                    <span className="mr-1.5 h-1.5 w-1.5 animate-pulse rounded-full bg-blue-500" />
+                  )}
                   {job.status}
                 </span>
               </td>
-              <td className="px-4 py-3 text-right text-sm tabular-nums text-muted">
+              <td className="px-5 py-3 text-right text-sm font-medium tabular-nums text-text">
                 {job.postsFound}
               </td>
-              <td className="px-4 py-3 text-right text-sm tabular-nums text-muted">
+              <td className="px-5 py-3 text-right text-sm font-medium tabular-nums text-text">
                 {job.tipsExtracted}
               </td>
-              <td className="px-4 py-3 text-xs text-muted">
+              <td className="px-5 py-3 text-xs text-muted tabular-nums">
                 {job.startedAt
                   ? new Date(job.startedAt).toLocaleString("en-IN", {
                       day: "numeric",
@@ -84,7 +87,7 @@ export function ScraperStatus({ jobs }: ScraperStatusProps): React.ReactElement 
                     })
                   : "-"}
               </td>
-              <td className="max-w-[200px] truncate px-4 py-3 text-xs text-danger">
+              <td className="max-w-[200px] truncate px-5 py-3 text-xs text-red-600">
                 {job.errorMessage ?? "-"}
               </td>
             </tr>
@@ -93,7 +96,7 @@ export function ScraperStatus({ jobs }: ScraperStatusProps): React.ReactElement 
       </table>
 
       {jobs.length === 0 && (
-        <div className="py-12 text-center text-sm text-muted">
+        <div className="py-16 text-center text-sm text-muted">
           No scrape jobs found.
         </div>
       )}

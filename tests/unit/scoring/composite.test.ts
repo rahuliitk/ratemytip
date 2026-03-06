@@ -15,7 +15,6 @@ import {
 import {
   buildCompletedTip,
   buildLosingTip,
-  buildExpiredTip,
   buildWinningTips,
   buildLosingTips,
   buildMonthlyTips,
@@ -402,5 +401,19 @@ describe("calculateCompositeScore", () => {
     expect(result.rmtScore).toBeGreaterThan(0);
     expect(result.totalScoredTips).toBe(1);
     expect(result.tier).toBe(CREATOR_TIER.UNRATED);
+  });
+
+  it("handles empty tips array (zero streaks, current date for period)", () => {
+    const result = calculateCompositeScore({ tips: [], halfLifeDays: HALF_LIFE });
+
+    expect(result.rmtScore).toBe(0);
+    expect(result.totalScoredTips).toBe(0);
+    expect(result.tier).toBe(CREATOR_TIER.UNRATED);
+    expect(result.winStreak).toBe(0);
+    expect(result.lossStreak).toBe(0);
+    // scorePeriodStart and scorePeriodEnd default to current date when no tips
+    expect(result.scorePeriodStart).toBeInstanceOf(Date);
+    expect(result.scorePeriodEnd).toBeInstanceOf(Date);
+    expect(result.confidenceInterval).toBe(0);
   });
 });

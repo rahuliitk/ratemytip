@@ -3,7 +3,6 @@
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Crown, Lock } from "lucide-react";
 
 const TIER_RANK: Record<string, number> = {
@@ -25,7 +24,7 @@ interface SubscriptionGateProps {
 export function SubscriptionGate({ minTier, feature, children }: SubscriptionGateProps): React.ReactElement {
   const { data: session } = useSession();
 
-  // Type assertion — subscriptionTier is added to session in auth config
+  // Type assertion -- subscriptionTier is added to session in auth config
   const userTier = (session?.user as Record<string, unknown> | undefined)?.subscriptionTier as string | undefined;
   const currentRank = TIER_RANK[userTier ?? "FREE"] ?? 0;
   const requiredRank = TIER_RANK[minTier] ?? 0;
@@ -35,12 +34,12 @@ export function SubscriptionGate({ minTier, feature, children }: SubscriptionGat
   }
 
   return (
-    <Card className="border-dashed border-[#2B6CB0]/20 bg-[#2B6CB0]/5">
-      <CardContent className="flex flex-col items-center py-12 text-center">
-        <div className="mb-4 rounded-full bg-accent/10 p-3">
+    <div className="rounded-xl border border-dashed border-accent/20 bg-accent-subtle shadow-sm">
+      <div className="flex flex-col items-center py-14 text-center">
+        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-accent/10">
           <Lock className="h-6 w-6 text-accent" />
         </div>
-        <h3 className="mb-2 text-lg font-bold text-gradient-primary">
+        <h3 className="mb-2 text-lg font-bold text-text">
           {feature ? `${feature} requires ${minTier}` : `Upgrade to ${minTier}`}
         </h3>
         <p className="mb-6 max-w-md text-sm text-muted">
@@ -54,7 +53,7 @@ export function SubscriptionGate({ minTier, feature, children }: SubscriptionGat
             View Plans
           </Link>
         </Button>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

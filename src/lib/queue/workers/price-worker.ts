@@ -8,10 +8,10 @@ import { Worker, type Job } from "bullmq";
 
 import { createLogger } from "@/lib/logger";
 import { PriceMonitor } from "@/lib/market-data/price-monitor";
+import { isAnyMarketOpen } from "@/lib/utils/market-hours";
+import { calculateScoresQueue, dailySnapshotQueue } from "@/lib/queue/queues";
 
 const log = createLogger("worker/price");
-import { EXCHANGE_MARKET_HOURS } from "@/lib/constants";
-import { calculateScoresQueue, dailySnapshotQueue } from "@/lib/queue/queues";
 
 // ──── Job payload type ────
 
@@ -29,33 +29,6 @@ function getConnection(): { host: string; port: number; password?: string } {
     port: parseInt(parsed.port || "6379", 10),
     password: parsed.password || undefined,
   };
-}
-
-/**
- * Check if any global market is currently open.
- * Returns true if at least one exchange (including crypto which is 24/7)
- * is currently in trading hours.
- */
-function isAnyMarketOpen(): boolean {
-  const now = new Date();
-  const utcMinutes = now.getUTCHours() * 60 + now.getUTCMinutes();
-  const dayOfWeek = now.getUTCDay(); // 0=Sun, 6=Sat
-
-  for (const [, hours] of Object.entries(EXCHANGE_MARKET_HOURS)) {
-    // Skip weekday-only exchanges on weekends
-    if (hours.weekdays && (dayOfWeek === 0 || dayOfWeek === 6)) {
-      continue;
-    }
-
-    const openMinutes = hours.openUTC.hour * 60 + hours.openUTC.minute;
-    const closeMinutes = hours.closeUTC.hour * 60 + hours.closeUTC.minute;
-
-    if (utcMinutes >= openMinutes && utcMinutes <= closeMinutes) {
-      return true;
-    }
-  }
-
-  return false;
 }
 
 // ──── Main job processor ────

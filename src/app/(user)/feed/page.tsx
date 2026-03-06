@@ -43,37 +43,39 @@ export default function FeedPage(): React.ReactElement {
   const hasMore = data?.meta?.hasMore ?? false;
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
-      <h1 className="text-2xl font-bold text-gradient-primary">My Feed</h1>
-      <p className="mt-1 text-sm text-muted">
-        Tips from creators you follow
-      </p>
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-text">My Feed</h1>
+        <p className="mt-1 text-sm text-muted">
+          Tips from creators you follow
+        </p>
+      </div>
 
       {isLoading ? (
-        <div className="mt-6 space-y-3">
+        <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-24 rounded-2xl shimmer" />
+            <div key={i} className="h-24 rounded-xl shimmer" />
           ))}
         </div>
       ) : tips.length === 0 ? (
-        <div className="mt-12 flex flex-col items-center text-center">
-          <Rss className="h-12 w-12 text-muted/40" />
-          <p className="mt-4 text-sm text-muted">Your feed is empty</p>
-          <p className="mt-1 text-xs text-muted">
+        <div className="flex flex-col items-center rounded-xl border border-dashed border-border bg-surface py-16 text-center">
+          <Rss className="h-12 w-12 text-muted-light" />
+          <p className="mt-4 text-sm font-medium text-text">Your feed is empty</p>
+          <p className="mt-1 max-w-sm text-xs text-muted">
             Follow creators on the leaderboard to see their tips here
           </p>
-          <Button asChild size="sm" className="mt-4">
+          <Button asChild size="sm" className="mt-5">
             <Link href="/leaderboard">Browse leaderboard</Link>
           </Button>
         </div>
       ) : (
         <>
-          <div className="mt-6 space-y-3">
+          <div className="space-y-3">
             {tips.map((tip) => (
               <Link
                 key={tip.id}
                 href={`/tip/${tip.id}`}
-                className="block rounded-2xl bg-white p-4 shadow-[0_1px_2px_0_rgba(26,54,93,0.04)] card-hover"
+                className="block rounded-xl border border-border/60 bg-surface p-4 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -90,12 +92,12 @@ export default function FeedPage(): React.ReactElement {
                   </div>
                   <TipStatusBadge status={tip.status} />
                 </div>
-                <div className="mt-2 flex items-center gap-3">
+                <div className="mt-2.5 flex items-center gap-3">
                   <span
-                    className={`rounded-full px-2 py-0.5 text-xs font-bold ${
+                    className={`rounded-md px-2 py-0.5 text-xs font-bold ${
                       tip.direction === "BUY"
-                        ? "bg-[#276749]/10 text-[#276749]"
-                        : "bg-[#C53030]/10 text-[#C53030]"
+                        ? "bg-success-light text-success"
+                        : "bg-danger-light text-danger"
                     }`}
                   >
                     {tip.direction}
@@ -106,11 +108,11 @@ export default function FeedPage(): React.ReactElement {
                   <span className="text-xs text-muted">
                     {formatPrice(tip.entryPrice)} &rarr; {formatPrice(tip.target1)}
                   </span>
-                  <span className="text-xs text-muted">{tip.timeframe}</span>
+                  <span className="rounded-md bg-bg-alt px-1.5 py-0.5 text-xs text-muted">{tip.timeframe}</span>
                   {tip.returnPct !== null && (
                     <span
                       className={`ml-auto text-sm font-semibold tabular-nums ${
-                        tip.returnPct >= 0 ? "text-success" : "text-danger"
+                        tip.returnPct >= 0 ? "text-emerald-600" : "text-red-600"
                       }`}
                     >
                       {tip.returnPct >= 0 ? "+" : ""}
@@ -118,14 +120,14 @@ export default function FeedPage(): React.ReactElement {
                     </span>
                   )}
                 </div>
-                <p className="mt-1 text-[11px] text-muted">
+                <p className="mt-1.5 text-[11px] text-muted-light">
                   {new Date(tip.tipTimestamp).toLocaleDateString()}
                 </p>
               </Link>
             ))}
           </div>
 
-          <div className="mt-6 flex justify-between">
+          <div className="mt-8 flex items-center justify-between">
             <Button
               variant="outline"
               size="sm"
@@ -134,7 +136,7 @@ export default function FeedPage(): React.ReactElement {
             >
               Previous
             </Button>
-            <span className="text-xs text-muted">Page {page}</span>
+            <span className="text-xs text-muted tabular-nums">Page {page}</span>
             <Button
               variant="outline"
               size="sm"

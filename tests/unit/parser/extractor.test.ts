@@ -142,6 +142,50 @@ Timeframe: Swing
     expect(result.entryPrices).toContain(3500);
     expect(result.targets).toContain(3700);
   });
+
+  // ──── Expanded blacklist (Sprint 5) ────
+
+  it("filters out directional words (ABOVE, BELOW, RANGE)", () => {
+    const result = extractRuleBased("RELIANCE ABOVE 2400 RANGE 2400-2500");
+    expect(result.stockSymbols).not.toContain("ABOVE");
+    expect(result.stockSymbols).not.toContain("RANGE");
+    expect(result.stockSymbols).toContain("RELIANCE");
+  });
+
+  it("filters out time-related words (TODAY, TOMORROW, WEEK)", () => {
+    const result = extractRuleBased("RELIANCE buy TODAY target 2500 WEEK high");
+    expect(result.stockSymbols).not.toContain("TODAY");
+    expect(result.stockSymbols).not.toContain("WEEK");
+  });
+
+  it("filters out market words (HIGH, LOW, OPEN, CLOSE)", () => {
+    const result = extractRuleBased("TCS at HIGH of 3800 CLOSE at 3750");
+    expect(result.stockSymbols).not.toContain("HIGH");
+    expect(result.stockSymbols).not.toContain("CLOSE");
+    expect(result.stockSymbols).not.toContain("OPEN");
+  });
+
+  it("filters out financial terms (PROFIT, LOSS, MARGIN)", () => {
+    const result = extractRuleBased("RELIANCE PROFIT booking at 2500 MARGIN call");
+    expect(result.stockSymbols).not.toContain("PROFIT");
+    expect(result.stockSymbols).not.toContain("LOSS");
+    expect(result.stockSymbols).not.toContain("MARGIN");
+  });
+
+  it("filters out Hinglish words (YAAR, BHAI)", () => {
+    const result = extractRuleBased("RELIANCE buy karo BHAI target 2500 YAAR");
+    expect(result.stockSymbols).not.toContain("BHAI");
+    expect(result.stockSymbols).not.toContain("YAAR");
+  });
+
+  it("filters out action words (HOLD, WAIT, BOOK, EXIT, TRAIL)", () => {
+    const result = extractRuleBased("HOLD RELIANCE BOOK profit EXIT at 2500 TRAIL SL");
+    expect(result.stockSymbols).not.toContain("HOLD");
+    expect(result.stockSymbols).not.toContain("BOOK");
+    expect(result.stockSymbols).not.toContain("EXIT");
+    expect(result.stockSymbols).not.toContain("TRAIL");
+    expect(result.stockSymbols).toContain("RELIANCE");
+  });
 });
 
 describe("buildTipFromExtraction", () => {
@@ -306,5 +350,70 @@ describe("buildTipFromExtraction", () => {
     });
 
     expect(result!.direction).toBe("BUY");
+  });
+
+  // ──── Price relationship validation (Sprint 6) ────
+
+  it("reduces confidence when BUY target < entry (invalid relationship)", () => {
+    const result = buildTipFromExtraction({
+      stockSymbols: ["RELIANCE"],
+      prices: [],
+      targets: [2300],        // Below entry — invalid for BUY
+      stopLosses: [2350],     // Above entry — also invalid for BUY
+      entryPrices: [2400],
+      directions: ["buy"],
+      timeframes: ["swing"],
+    });
+
+    // Should still return a result (not null) but with reduced confidence
+    // validatePriceRelationships applies a -0.20 penalty
+    expect(result).not.toBeNull();
+    expect(result!.confidence).toBeLessThan(0.80);
+  });
+
+  it("does not reduce confidence for valid BUY price relationships", () => {
+    const result = buildTipFromExtraction({
+      stockSymbols: ["RELIANCE"],
+      prices: [],
+      targets: [2500],
+      stopLosses: [2350],
+      entryPrices: [2400],
+      directions: ["buy"],
+      timeframes: ["swing"],
+    });
+
+    expect(result!.confidence).toBeGreaterThanOrEqual(0.90);
+  });
+
+  it("reduces confidence for SELL tip with target > entry", () => {
+    const result = buildTipFromExtraction({
+      stockSymbols: ["TATASTEEL"],
+      prices: [],
+      targets: [130],         // Above entry — invalid for SELL
+      stopLosses: [110],      // Below entry — also invalid for SELL
+      entryPrices: [120],
+      directions: ["sell"],
+      timeframes: ["swing"],
+    });
+
+    // validatePriceRelationships applies a -0.20 penalty
+    expect(result).not.toBeNull();
+    expect(result!.confidence).toBeLessThan(0.80);
+  });
+
+  it("validates multi-target ordering (target2 > target1 for BUY)", () => {
+    const result = buildTipFromExtraction({
+      stockSymbols: ["TCS"],
+      prices: [],
+      targets: [3800, 3700],  // target2 < target1 — invalid for BUY
+      stopLosses: [3500],
+      entryPrices: [3600],
+      directions: ["buy"],
+      timeframes: [],
+    });
+
+    // validatePriceRelationships applies a -0.20 penalty
+    expect(result).not.toBeNull();
+    expect(result!.confidence).toBeLessThan(0.80);
   });
 });

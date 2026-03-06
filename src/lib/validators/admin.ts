@@ -20,5 +20,19 @@ export const triggerScrapeSchema = z.object({
   creatorId: z.string().cuid().optional(),
 });
 
+export const claimsQuerySchema = z.object({
+  status: z.enum(["PENDING", "APPROVED", "REJECTED"]).optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(100).default(20),
+});
+
+export const reportsQuerySchema = z.object({
+  status: z.enum(["PENDING_REPORT", "REVIEWED", "ACTIONED", "DISMISSED"]).optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(100).default(20),
+});
+
 export type ReviewTipInput = z.infer<typeof reviewTipSchema>;
 export type TriggerScrapeInput = z.infer<typeof triggerScrapeSchema>;
+export type ClaimsQueryInput = z.infer<typeof claimsQuerySchema>;
+export type ReportsQueryInput = z.infer<typeof reportsQuerySchema>;

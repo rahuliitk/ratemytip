@@ -62,7 +62,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             select: {
               id: true,
               name: true,
-              email: true,
               role: true,
             },
           },
@@ -81,7 +80,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       admin: {
         id: action.admin.id,
         name: action.admin.name,
-        email: action.admin.email,
         role: action.admin.role,
       },
     }));
@@ -91,7 +89,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       data,
       meta: buildPaginationMeta(page, pageSize, total),
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         success: false,
