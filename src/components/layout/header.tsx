@@ -26,6 +26,12 @@ export function Header(): React.ReactElement {
 
   return (
     <header className="sticky top-0 z-50 bg-surface/80 backdrop-blur-xl border-b border-border/60">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-4 focus:left-4 focus:px-4 focus:py-2 focus:bg-white focus:text-accent focus:rounded-lg focus:shadow-lg focus:ring-2 focus:ring-accent"
+      >
+        Skip to main content
+      </a>
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5">

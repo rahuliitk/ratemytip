@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { db } from "@/lib/db";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // 5 minutes
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { ScoreBadge } from "@/components/shared/score-badge";

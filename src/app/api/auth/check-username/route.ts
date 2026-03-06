@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { checkAuthRateLimit, getClientIp } from "@/lib/utils/rate-limit-auth";
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
+  const rateLimited = await checkAuthRateLimit(getClientIp(request), "check-username");
+  if (rateLimited) return rateLimited;
+
   const username = request.nextUrl.searchParams.get("username");
 
   if (!username || username.length < 3 || username.length > 30) {

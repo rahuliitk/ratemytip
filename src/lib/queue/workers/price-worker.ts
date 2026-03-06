@@ -5,12 +5,15 @@
 // Runs periodically; skips checking when no global markets are open.
 
 import { Worker, type Job } from "bullmq";
+import { toZonedTime } from "date-fns-tz";
 
 import { createLogger } from "@/lib/logger";
 import { PriceMonitor } from "@/lib/market-data/price-monitor";
 
 const log = createLogger("worker/price");
 import { EXCHANGE_MARKET_HOURS } from "@/lib/constants";
+
+const IST_TIMEZONE = "Asia/Kolkata";
 import { calculateScoresQueue, dailySnapshotQueue } from "@/lib/queue/queues";
 
 // ──── Job payload type ────
@@ -32,16 +35,42 @@ function getConnection(): { host: string; port: number; password?: string } {
 }
 
 /**
+ * Check if NSE market is currently open (9:15 AM - 3:30 PM IST, Mon-Fri).
+ * Uses proper IST timezone conversion instead of static UTC offsets.
+ */
+function isNseMarketOpen(): boolean {
+  const nowIST = toZonedTime(new Date(), IST_TIMEZONE);
+  const day = nowIST.getDay(); // 0=Sun, 6=Sat
+
+  if (day === 0 || day === 6) return false;
+
+  const hours = nowIST.getHours();
+  const minutes = nowIST.getMinutes();
+  const timeInMinutes = hours * 60 + minutes;
+
+  const marketOpen = 9 * 60 + 15;   // 9:15 AM IST
+  const marketClose = 15 * 60 + 30;  // 3:30 PM IST
+
+  return timeInMinutes >= marketOpen && timeInMinutes <= marketClose;
+}
+
+/**
  * Check if any global market is currently open.
- * Returns true if at least one exchange (including crypto which is 24/7)
- * is currently in trading hours.
+ * Uses IST-aware check for NSE/BSE, UTC-based for other exchanges.
+ * Returns true if at least one exchange is currently in trading hours.
  */
 function isAnyMarketOpen(): boolean {
+  // Check NSE/BSE with proper IST timezone handling
+  if (isNseMarketOpen()) return true;
+
   const now = new Date();
   const utcMinutes = now.getUTCHours() * 60 + now.getUTCMinutes();
   const dayOfWeek = now.getUTCDay(); // 0=Sun, 6=Sat
 
-  for (const [, hours] of Object.entries(EXCHANGE_MARKET_HOURS)) {
+  for (const [exchange, hours] of Object.entries(EXCHANGE_MARKET_HOURS)) {
+    // Skip NSE/BSE — already checked with IST-aware function above
+    if (exchange === "NSE" || exchange === "BSE") continue;
+
     // Skip weekday-only exchanges on weekends
     if (hours.weekdays && (dayOfWeek === 0 || dayOfWeek === 6)) {
       continue;

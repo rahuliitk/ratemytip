@@ -9,6 +9,7 @@
 
 import { db } from "@/lib/db";
 import { SCORING, COMPLETED_TIP_STATUSES } from "@/lib/constants";
+import { invalidateCreatorCache, invalidateLeaderboardCache } from "@/lib/utils/cache-invalidation";
 import { calculateCompositeScore } from "./composite";
 import type { CompletedTip, CompositeScoreOutput, TipStatusType, TipDirectionType, TipTimeframeType } from "./types";
 
@@ -256,4 +257,11 @@ export async function persistCreatorScore(
       },
     }),
   ]);
+
+  // Invalidate related caches after persisting
+  const creator = await db.creator.findUnique({ where: { id: creatorId }, select: { slug: true } });
+  if (creator) {
+    await invalidateCreatorCache(creator.slug);
+  }
+  await invalidateLeaderboardCache();
 }

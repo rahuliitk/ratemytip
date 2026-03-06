@@ -48,7 +48,8 @@ export function SearchBar({
             )}
           />
           <input
-            type="text"
+            type="search"
+            aria-label="Search creators, stocks, and tips"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={placeholder}
@@ -80,7 +81,7 @@ export function SearchBar({
           results.tips.length === 0 ? (
             <p className="px-4 py-3 text-sm text-muted">No results found</p>
           ) : (
-            <div className="max-h-80 overflow-y-auto py-1.5">
+            <div role="listbox" aria-label="Search suggestions" className="max-h-80 overflow-y-auto py-1.5">
               {results.creators.length > 0 && (
                 <div>
                   <p className="px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted">

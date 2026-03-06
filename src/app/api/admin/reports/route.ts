@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAdmin, isAuthError } from "@/lib/auth-helpers";
+import { reportsQuerySchema } from "@/lib/validators/admin";
 
 /**
  * GET /api/admin/reports
@@ -10,16 +11,20 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const adminResult = await requireAdmin();
   if (isAuthError(adminResult)) return adminResult;
 
-  const { searchParams } = request.nextUrl;
-  const status = searchParams.get("status")?.toUpperCase();
-  const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
-  const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get("pageSize") ?? "20", 10)));
+  const searchParams = Object.fromEntries(request.nextUrl.searchParams);
+  const parsed = reportsQuerySchema.safeParse(searchParams);
+
+  if (!parsed.success) {
+    return NextResponse.json(
+      { success: false, error: { code: "VALIDATION_ERROR", message: "Invalid query parameters", details: parsed.error.flatten() } },
+      { status: 400 }
+    );
+  }
+
+  const { status, page, pageSize } = parsed.data;
 
   try {
-    const validStatuses = ["PENDING_REPORT", "REVIEWED", "ACTIONED", "DISMISSED"];
-    const where = status && validStatuses.includes(status)
-      ? { status: status as "PENDING_REPORT" | "REVIEWED" | "ACTIONED" | "DISMISSED" }
-      : {};
+    const where = status ? { status } : {};
 
     const [reports, total] = await Promise.all([
       db.commentReport.findMany({

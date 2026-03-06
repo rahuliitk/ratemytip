@@ -3,9 +3,13 @@ import { createHash, randomBytes } from "crypto";
 import { db } from "@/lib/db";
 import { sendPasswordResetEmail } from "@/lib/email";
 import { NOTIFICATION } from "@/lib/constants";
+import { checkAuthRateLimit, getClientIp } from "@/lib/utils/rate-limit-auth";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    const rateLimited = await checkAuthRateLimit(getClientIp(request), "forgot-password");
+    if (rateLimited) return rateLimited;
+
     const body: unknown = await request.json();
     const email = typeof body === "object" && body !== null && "email" in body
       ? String((body as { email: unknown }).email)

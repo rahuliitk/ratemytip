@@ -202,6 +202,20 @@ describe("calculateAccuracy", () => {
     expect(result.weightedAccuracyRate).toBeCloseTo(result.accuracyRate, 3);
   });
 
+  it("returns 0 weighted accuracy when all tip weights underflow to zero", () => {
+    // With halfLifeDays=1, lambda=ln(2). A tip from 1100 days ago:
+    // weight = exp(-ln(2) * 1100) = exp(-762) ≈ 0 (underflows to 0)
+    const ancientTip = buildCompletedTip({
+      closedAt: new Date(BASE_DATE.getTime() - 1100 * 24 * 60 * 60 * 1000),
+    });
+    const result = calculateAccuracy({ tips: [ancientTip], halfLifeDays: 1 });
+
+    // weightedTotal underflows to 0, triggering the else branch
+    expect(result.accuracyRate).toBe(1); // 1 hit / 1 total
+    expect(result.weightedAccuracyRate).toBe(0);
+    expect(result.accuracyScore).toBe(0);
+  });
+
   it("tip closed half-life days ago has approximately half weight", () => {
     // 5 wins today, 5 losses from exactly HALF_LIFE days ago
     const recentWins = buildWinningTips(5).map((t) => ({

@@ -5,23 +5,18 @@
 //   - "recalculate-creator": Recalculate a single creator's score
 //   - "recalculate-all": Recalculate scores for all active creators (daily job)
 //
-// Uses the scoring algorithm components (accuracy, risk-adjusted, consistency,
-// volume factor) to produce the composite RMT Score.
+// Delegates all scoring logic to the shared scoring module
+// (src/lib/scoring/) to avoid duplication.
 
 import { Worker, type Job } from "bullmq";
 
 import { createLogger } from "@/lib/logger";
 import { db } from "@/lib/db";
+import { SCORING, COMPLETED_TIP_STATUSES } from "@/lib/constants";
+import { calculateCompositeScore } from "@/lib/scoring/composite";
+import type { CompletedTip, TipStatusType } from "@/lib/scoring/types";
 
 const log = createLogger("worker/score");
-import {
-  SCORING,
-  COMPLETED_TIP_STATUSES,
-  TARGET_HIT_STATUSES,
-  TIP_TIMEFRAME,
-} from "@/lib/constants";
-import { calculateAccuracy, calculateFilteredAccuracy } from "@/lib/scoring/accuracy";
-import type { CompletedTip, TipStatusType } from "@/lib/scoring/types";
 
 // ──── Job payload types ────
 
@@ -45,215 +40,6 @@ function getConnection(): { host: string; port: number; password?: string } {
     port: parseInt(parsed.port || "6379", 10),
     password: parsed.password || undefined,
   };
-}
-
-// ──── Helper: Risk-adjusted return for a single tip ────
-
-function calculateTipReturn(tip: CompletedTip): {
-  returnPct: number;
-  riskPct: number;
-  riskRewardRatio: number;
-} {
-  const isBuy = tip.direction === "BUY";
-  let returnPct: number;
-
-  if (tip.returnPct !== null) {
-    returnPct = tip.returnPct;
-  } else if (tip.closedPrice !== null) {
-    returnPct = isBuy
-      ? ((tip.closedPrice - tip.entryPrice) / tip.entryPrice) * 100
-      : ((tip.entryPrice - tip.closedPrice) / tip.entryPrice) * 100;
-  } else {
-    returnPct = 0;
-  }
-
-  const riskPct = Math.abs(tip.entryPrice - tip.stopLoss) / tip.entryPrice * 100;
-  const riskRewardRatio = riskPct > 0 ? returnPct / riskPct : 0;
-
-  return { returnPct, riskPct, riskRewardRatio };
-}
-
-// ──── Helper: Risk-adjusted return score ────
-
-function calculateRiskAdjustedScore(tips: readonly CompletedTip[]): {
-  avgReturnPct: number;
-  avgRiskRewardRatio: number;
-  riskAdjustedScore: number;
-  bestTipReturnPct: number | null;
-  worstTipReturnPct: number | null;
-} {
-  if (tips.length === 0) {
-    return {
-      avgReturnPct: 0,
-      avgRiskRewardRatio: 0,
-      riskAdjustedScore: 0,
-      bestTipReturnPct: null,
-      worstTipReturnPct: null,
-    };
-  }
-
-  let totalReturn = 0;
-  let totalRR = 0;
-  let best = -Infinity;
-  let worst = Infinity;
-
-  for (const tip of tips) {
-    const { returnPct, riskRewardRatio } = calculateTipReturn(tip);
-    totalReturn += returnPct;
-    totalRR += riskRewardRatio;
-    if (returnPct > best) best = returnPct;
-    if (returnPct < worst) worst = returnPct;
-  }
-
-  const avgReturnPct = totalReturn / tips.length;
-  const avgRiskRewardRatio = totalRR / tips.length;
-
-  // Normalize: avg_rr of -2 -> 0, avg_rr of +5 -> 100
-  const floor = SCORING.RISK_ADJUSTED_FLOOR;
-  const ceiling = SCORING.RISK_ADJUSTED_CEILING;
-  const range = ceiling - floor;
-  const riskAdjustedScore = Math.max(
-    0,
-    Math.min(100, ((avgRiskRewardRatio - floor) / range) * 100)
-  );
-
-  return {
-    avgReturnPct,
-    avgRiskRewardRatio,
-    riskAdjustedScore,
-    bestTipReturnPct: best === -Infinity ? null : best,
-    worstTipReturnPct: worst === Infinity ? null : worst,
-  };
-}
-
-// ──── Helper: Consistency score ────
-
-function calculateConsistencyScore(tips: readonly CompletedTip[]): {
-  consistencyScore: number;
-  coefficientOfVariation: number;
-  monthsWithData: number;
-} {
-  // Group tips by month
-  const monthlyMap = new Map<string, { hits: number; total: number }>();
-
-  for (const tip of tips) {
-    const month = `${tip.closedAt.getFullYear()}-${String(tip.closedAt.getMonth() + 1).padStart(2, "0")}`;
-    const entry = monthlyMap.get(month) ?? { hits: 0, total: 0 };
-    entry.total++;
-    if ((TARGET_HIT_STATUSES as readonly string[]).includes(tip.status)) {
-      entry.hits++;
-    }
-    monthlyMap.set(month, entry);
-  }
-
-  const monthsWithData = monthlyMap.size;
-
-  // Need at least 3 months of data for meaningful consistency
-  if (monthsWithData < 3) {
-    return { consistencyScore: 50, coefficientOfVariation: 0, monthsWithData };
-  }
-
-  // Calculate monthly accuracy rates
-  const monthlyAccuracies: number[] = [];
-  for (const [, stats] of monthlyMap) {
-    monthlyAccuracies.push(stats.total > 0 ? stats.hits / stats.total : 0);
-  }
-
-  // Mean accuracy
-  const mean =
-    monthlyAccuracies.reduce((sum, val) => sum + val, 0) /
-    monthlyAccuracies.length;
-
-  if (mean === 0) {
-    return { consistencyScore: 0, coefficientOfVariation: Infinity, monthsWithData };
-  }
-
-  // Standard deviation
-  const variance =
-    monthlyAccuracies.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
-    monthlyAccuracies.length;
-  const stdDev = Math.sqrt(variance);
-
-  // Coefficient of variation
-  const cv = stdDev / mean;
-
-  // Lower CV = more consistent = higher score
-  const consistencyScore = Math.max(0, Math.min(100, (1 - cv) * 100));
-
-  return { consistencyScore, coefficientOfVariation: cv, monthsWithData };
-}
-
-// ──── Helper: Volume factor score ────
-
-function calculateVolumeFactorScore(totalScoredTips: number): number {
-  if (totalScoredTips <= 0) return 0;
-
-  const maxExpected = SCORING.MAX_EXPECTED_TIPS;
-  const volumeFactor = Math.log10(totalScoredTips) / Math.log10(maxExpected);
-  return Math.max(0, Math.min(100, volumeFactor * 100));
-}
-
-// ──── Helper: Streak calculation ────
-
-function calculateStreaks(tips: readonly CompletedTip[]): {
-  winStreak: number;
-  lossStreak: number;
-} {
-  // Sort tips by closed date descending to find current streaks
-  const sorted = [...tips].sort(
-    (a, b) => b.closedAt.getTime() - a.closedAt.getTime()
-  );
-
-  let winStreak = 0;
-  let lossStreak = 0;
-
-  // Count current win streak (from most recent)
-  for (const tip of sorted) {
-    if ((TARGET_HIT_STATUSES as readonly string[]).includes(tip.status)) {
-      winStreak++;
-    } else {
-      break;
-    }
-  }
-
-  // If no current win streak, count current loss streak
-  if (winStreak === 0) {
-    for (const tip of sorted) {
-      if (!(TARGET_HIT_STATUSES as readonly string[]).includes(tip.status)) {
-        lossStreak++;
-      } else {
-        break;
-      }
-    }
-  }
-
-  return { winStreak, lossStreak };
-}
-
-// ──── Helper: Creator tier ────
-
-function calculateTier(
-  totalScoredTips: number
-): "UNRATED" | "BRONZE" | "SILVER" | "GOLD" | "PLATINUM" | "DIAMOND" {
-  if (totalScoredTips < 20) return "UNRATED";
-  if (totalScoredTips < 50) return "BRONZE";
-  if (totalScoredTips < 200) return "SILVER";
-  if (totalScoredTips < 500) return "GOLD";
-  if (totalScoredTips < 1000) return "PLATINUM";
-  return "DIAMOND";
-}
-
-// ──── Helper: Confidence interval ────
-
-function calculateConfidenceInterval(
-  accuracyRate: number,
-  totalScoredTips: number
-): number {
-  if (totalScoredTips <= 0) return 0;
-  const standardError = Math.sqrt(
-    (accuracyRate * (1 - accuracyRate)) / totalScoredTips
-  );
-  return SCORING.CONFIDENCE_Z_SCORE * standardError * 100;
 }
 
 // ──── Core: Recalculate score for a single creator ────
@@ -308,140 +94,56 @@ async function recalculateCreatorScore(creatorId: string): Promise<void> {
       riskRewardRatio: t.riskRewardRatio,
     }));
 
-  const totalScoredTips = tips.length;
-
-  // Creators below minimum threshold get tier updated but no score
-  if (totalScoredTips < SCORING.MIN_TIPS_FOR_RATING) {
-    const tier = calculateTier(totalScoredTips);
-    await db.creator.update({
-      where: { id: creatorId },
-      data: {
-        tier,
-        completedTips: totalScoredTips,
-      },
-    });
-    log.info({ creatorId, totalScoredTips, tier }, "Creator below minimum tip threshold");
-    return;
-  }
-
-  // 1. Accuracy Score (40%)
-  const accuracyResult = calculateAccuracy({
+  // Use the shared scoring module for all calculations
+  const score = calculateCompositeScore({
     tips,
     halfLifeDays: SCORING.RECENCY_DECAY_HALFLIFE_DAYS,
   });
 
-  // 2. Risk-Adjusted Return Score (30%)
-  const riskResult = calculateRiskAdjustedScore(tips);
-
-  // 3. Consistency Score (20%)
-  const consistencyResult = calculateConsistencyScore(tips);
-
-  // 4. Volume Factor Score (10%)
-  const volumeFactorScore = calculateVolumeFactorScore(totalScoredTips);
-
-  // Composite RMT Score
-  const rmtScore =
-    SCORING.WEIGHTS.ACCURACY * accuracyResult.accuracyScore +
-    SCORING.WEIGHTS.RISK_ADJUSTED_RETURN * riskResult.riskAdjustedScore +
-    SCORING.WEIGHTS.CONSISTENCY * consistencyResult.consistencyScore +
-    SCORING.WEIGHTS.VOLUME_FACTOR * volumeFactorScore;
-
-  // Clamp to 0-100
-  const clampedRmtScore = Math.max(
-    SCORING.SCORE_MIN,
-    Math.min(SCORING.SCORE_MAX, rmtScore)
-  );
-
-  // Confidence interval
-  const confidenceInterval = calculateConfidenceInterval(
-    accuracyResult.accuracyRate,
-    totalScoredTips
-  );
-
-  // Streaks
-  const { winStreak, lossStreak } = calculateStreaks(tips);
-
-  // Timeframe accuracy breakdown
-  const intradayAccuracy = calculateFilteredAccuracy(
-    tips,
-    (t) => t.timeframe === TIP_TIMEFRAME.INTRADAY
-  );
-  const swingAccuracy = calculateFilteredAccuracy(
-    tips,
-    (t) => t.timeframe === TIP_TIMEFRAME.SWING
-  );
-  const positionalAccuracy = calculateFilteredAccuracy(
-    tips,
-    (t) => t.timeframe === TIP_TIMEFRAME.POSITIONAL
-  );
-  const longTermAccuracy = calculateFilteredAccuracy(
-    tips,
-    (t) => t.timeframe === TIP_TIMEFRAME.LONG_TERM
-  );
-
-  // Tier
-  const tier = calculateTier(totalScoredTips);
-
-  // Period
-  const sortedByTimestamp = [...tips].sort(
-    (a, b) => a.tipTimestamp.getTime() - b.tipTimestamp.getTime()
-  );
-  const scorePeriodStart = sortedByTimestamp[0]?.tipTimestamp ?? new Date();
-  const scorePeriodEnd =
-    sortedByTimestamp[sortedByTimestamp.length - 1]?.tipTimestamp ?? new Date();
+  // Creators below minimum threshold get tier updated but no score
+  if (score.totalScoredTips < SCORING.MIN_TIPS_FOR_RATING) {
+    await db.creator.update({
+      where: { id: creatorId },
+      data: {
+        tier: score.tier,
+        completedTips: score.totalScoredTips,
+      },
+    });
+    log.info({ creatorId, totalScoredTips: score.totalScoredTips, tier: score.tier }, "Creator below minimum tip threshold");
+    return;
+  }
 
   const now = new Date();
 
   // Upsert the creator score
+  const scoreData = {
+    accuracyScore: score.accuracyScore,
+    riskAdjustedScore: score.riskAdjustedScore,
+    consistencyScore: score.consistencyScore,
+    volumeFactorScore: score.volumeFactorScore,
+    rmtScore: score.rmtScore,
+    confidenceInterval: score.confidenceInterval,
+    accuracyRate: score.accuracyRate,
+    avgReturnPct: score.avgReturnPct,
+    avgRiskRewardRatio: score.avgRiskRewardRatio,
+    winStreak: score.winStreak,
+    lossStreak: score.lossStreak,
+    bestTipReturnPct: score.bestTipReturnPct,
+    worstTipReturnPct: score.worstTipReturnPct,
+    intradayAccuracy: score.timeframeAccuracy.intradayAccuracy,
+    swingAccuracy: score.timeframeAccuracy.swingAccuracy,
+    positionalAccuracy: score.timeframeAccuracy.positionalAccuracy,
+    longTermAccuracy: score.timeframeAccuracy.longTermAccuracy,
+    totalScoredTips: score.totalScoredTips,
+    scorePeriodStart: score.scorePeriodStart,
+    scorePeriodEnd: score.scorePeriodEnd,
+    calculatedAt: now,
+  };
+
   await db.creatorScore.upsert({
     where: { creatorId },
-    create: {
-      creatorId,
-      accuracyScore: accuracyResult.accuracyScore,
-      riskAdjustedScore: riskResult.riskAdjustedScore,
-      consistencyScore: consistencyResult.consistencyScore,
-      volumeFactorScore,
-      rmtScore: clampedRmtScore,
-      confidenceInterval,
-      accuracyRate: accuracyResult.accuracyRate,
-      avgReturnPct: riskResult.avgReturnPct,
-      avgRiskRewardRatio: riskResult.avgRiskRewardRatio,
-      winStreak,
-      lossStreak,
-      bestTipReturnPct: riskResult.bestTipReturnPct,
-      worstTipReturnPct: riskResult.worstTipReturnPct,
-      intradayAccuracy,
-      swingAccuracy,
-      positionalAccuracy,
-      longTermAccuracy,
-      totalScoredTips,
-      scorePeriodStart,
-      scorePeriodEnd,
-      calculatedAt: now,
-    },
-    update: {
-      accuracyScore: accuracyResult.accuracyScore,
-      riskAdjustedScore: riskResult.riskAdjustedScore,
-      consistencyScore: consistencyResult.consistencyScore,
-      volumeFactorScore,
-      rmtScore: clampedRmtScore,
-      confidenceInterval,
-      accuracyRate: accuracyResult.accuracyRate,
-      avgReturnPct: riskResult.avgReturnPct,
-      avgRiskRewardRatio: riskResult.avgRiskRewardRatio,
-      winStreak,
-      lossStreak,
-      bestTipReturnPct: riskResult.bestTipReturnPct,
-      worstTipReturnPct: riskResult.worstTipReturnPct,
-      intradayAccuracy,
-      swingAccuracy,
-      positionalAccuracy,
-      longTermAccuracy,
-      totalScoredTips,
-      scorePeriodStart,
-      scorePeriodEnd,
-      calculatedAt: now,
-    },
+    create: { creatorId, ...scoreData },
+    update: scoreData,
   });
 
   // Update creator record
@@ -452,21 +154,21 @@ async function recalculateCreatorScore(creatorId: string): Promise<void> {
   await db.creator.update({
     where: { id: creatorId },
     data: {
-      tier,
-      completedTips: totalScoredTips,
+      tier: score.tier,
+      completedTips: score.totalScoredTips,
       activeTips: activeTipCount,
     },
   });
 
   log.info({
     creatorId,
-    rmtScore: clampedRmtScore,
-    accuracyScore: accuracyResult.accuracyScore,
-    riskAdjustedScore: riskResult.riskAdjustedScore,
-    consistencyScore: consistencyResult.consistencyScore,
-    volumeFactorScore,
-    tier,
-    totalScoredTips,
+    rmtScore: score.rmtScore,
+    accuracyScore: score.accuracyScore,
+    riskAdjustedScore: score.riskAdjustedScore,
+    consistencyScore: score.consistencyScore,
+    volumeFactorScore: score.volumeFactorScore,
+    tier: score.tier,
+    totalScoredTips: score.totalScoredTips,
   }, "Creator score recalculated");
 }
 
