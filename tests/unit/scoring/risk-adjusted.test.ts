@@ -358,8 +358,9 @@ describe("calculateRiskAdjustedReturn", () => {
       status: TIP_STATUS.TARGET_1_HIT,
     });
     const result = calculateRiskAdjustedReturn({ tips: [tip] });
-    expect(result.tipDetails[0].riskPct).toBe(0);
-    expect(result.tipDetails[0].riskRewardRatio).toBe(1.0);
+    const detail = result.tipDetails[0]!;
+    expect(detail.riskPct).toBe(0);
+    expect(detail.riskRewardRatio).toBe(1.0);
     expect(result.avgReturnPct).toBeCloseTo(10, 2);
   });
 
@@ -370,8 +371,9 @@ describe("calculateRiskAdjustedReturn", () => {
       closedPrice: 980,
     });
     const result = calculateRiskAdjustedReturn({ tips: [tip] });
-    expect(result.tipDetails[0].riskPct).toBe(0);
-    expect(result.tipDetails[0].riskRewardRatio).toBe(-1.0);
+    const detail = result.tipDetails[0]!;
+    expect(detail.riskPct).toBe(0);
+    expect(detail.riskRewardRatio).toBe(-1.0);
   });
 
   it("does not inflate riskPct to 0.01 for zero-risk tips (old behavior)", () => {
@@ -383,7 +385,7 @@ describe("calculateRiskAdjustedReturn", () => {
       status: TIP_STATUS.TARGET_1_HIT,
     });
     const result = calculateRiskAdjustedReturn({ tips: [tip] });
-    expect(result.tipDetails[0].riskPct).toBe(0);
+    expect(result.tipDetails[0]!.riskPct).toBe(0);
   });
 
   // ────────────────────────────────────────
