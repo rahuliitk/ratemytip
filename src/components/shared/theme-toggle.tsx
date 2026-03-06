@@ -28,11 +28,11 @@ export function ThemeToggle(): React.ReactElement {
           aria-label="Toggle theme"
         >
           {theme === "dark" ? (
-            <Moon className="h-4.5 w-4.5" />
+            <Moon className="h-[18px] w-[18px]" />
           ) : theme === "light" ? (
-            <Sun className="h-4.5 w-4.5" />
+            <Sun className="h-[18px] w-[18px]" />
           ) : (
-            <Monitor className="h-4.5 w-4.5" />
+            <Monitor className="h-[18px] w-[18px]" />
           )}
         </button>
       </DropdownMenuTrigger>

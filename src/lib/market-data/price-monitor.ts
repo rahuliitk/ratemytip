@@ -412,8 +412,8 @@ export class PriceMonitor {
     for (const [symbol, stock] of stocks) {
       let price: CurrentPrice | null = null;
 
-      // Try NSE first for Indian equities and indices
-      if (stock.exchange === "NSE" || stock.exchange === "INDEX") {
+      // Try NSE first for Indian equities only (INDEX may include global indices)
+      if (stock.exchange === "NSE") {
         try {
           price = await this.nse.getCurrentPrice(stock.symbol);
         } catch {

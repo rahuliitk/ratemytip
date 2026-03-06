@@ -2,10 +2,16 @@ import { invalidateCachePattern } from "@/lib/cache";
 
 /**
  * Invalidate all cached data for a creator after score update.
+ * Invalidates both slug-keyed and id-keyed entries since the API
+ * caches under whichever identifier the endpoint was hit with.
  */
-export async function invalidateCreatorCache(creatorSlug: string): Promise<void> {
+export async function invalidateCreatorCache(creatorSlug: string, creatorId?: string): Promise<void> {
   await invalidateCachePattern(`creator:${creatorSlug}`);
   await invalidateCachePattern(`creator:${creatorSlug}:*`);
+  if (creatorId) {
+    await invalidateCachePattern(`creator:${creatorId}`);
+    await invalidateCachePattern(`creator:${creatorId}:*`);
+  }
 }
 
 /**

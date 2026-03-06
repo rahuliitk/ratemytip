@@ -36,7 +36,7 @@ export function Header(): React.ReactElement {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent shadow-sm">
-            <BarChart3 className="h-4.5 w-4.5 text-white" />
+            <BarChart3 className="h-[18px] w-[18px] text-white" />
           </div>
           <span className="text-xl font-bold text-text">
             RateMyTip

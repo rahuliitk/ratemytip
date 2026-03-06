@@ -51,10 +51,11 @@ export default function RegisterPage(): React.ReactElement {
   }, [debouncedUsername]);
 
   const passwordChecks = {
-    minLength: form.password.length >= 8,
+    minLength: form.password.length >= 10,
     hasUppercase: /[A-Z]/.test(form.password),
     hasLowercase: /[a-z]/.test(form.password),
     hasNumber: /\d/.test(form.password),
+    hasSpecial: /[^a-zA-Z0-9]/.test(form.password),
   };
   const isPasswordValid = Object.values(passwordChecks).every(Boolean);
 
@@ -189,14 +190,14 @@ export default function RegisterPage(): React.ReactElement {
             value={form.password}
             onChange={(e) => updateField("password", e.target.value)}
             required
-            minLength={8}
+            minLength={10}
             maxLength={128}
             autoComplete="new-password"
           />
           {passwordTouched && !isPasswordValid && (
             <ul className="mt-1.5 space-y-0.5 text-xs">
               <li className={passwordChecks.minLength ? "text-success" : "text-danger"}>
-                {passwordChecks.minLength ? "\u2713" : "\u2717"} At least 8 characters
+                {passwordChecks.minLength ? "\u2713" : "\u2717"} At least 10 characters
               </li>
               <li className={passwordChecks.hasUppercase ? "text-success" : "text-danger"}>
                 {passwordChecks.hasUppercase ? "\u2713" : "\u2717"} One uppercase letter
@@ -207,11 +208,14 @@ export default function RegisterPage(): React.ReactElement {
               <li className={passwordChecks.hasNumber ? "text-success" : "text-danger"}>
                 {passwordChecks.hasNumber ? "\u2713" : "\u2717"} One number
               </li>
+              <li className={passwordChecks.hasSpecial ? "text-success" : "text-danger"}>
+                {passwordChecks.hasSpecial ? "\u2713" : "\u2717"} One special character
+              </li>
             </ul>
           )}
           {(!passwordTouched || isPasswordValid) && (
             <p className="text-xs text-muted">
-              Must contain uppercase, lowercase, and a number
+              Must contain uppercase, lowercase, a number, and a special character
             </p>
           )}
         </div>

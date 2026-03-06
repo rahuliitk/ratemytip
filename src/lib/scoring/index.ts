@@ -228,7 +228,7 @@ export async function persistCreatorScore(
     });
   });
 
-  // Invalidate related caches after persisting
-  await invalidateCreatorCache(updatedCreator.slug);
+  // Invalidate related caches after persisting (both slug and id keys)
+  await invalidateCreatorCache(updatedCreator.slug, creatorId);
   await invalidateLeaderboardCache();
 }

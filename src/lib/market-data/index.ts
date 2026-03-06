@@ -66,8 +66,8 @@ export async function fetchCurrentPrice(
   symbol: string,
   exchange: string
 ): Promise<CurrentPrice | null> {
-  // Try NSE first for Indian equities and indices
-  if (exchange === "NSE" || exchange === "INDEX") {
+  // Try NSE first for Indian equities only (INDEX may include global indices)
+  if (exchange === "NSE") {
     try {
       const nsePrice = await getNseService().getCurrentPrice(symbol);
       if (nsePrice) return nsePrice;
