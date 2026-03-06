@@ -9,9 +9,9 @@ import { Worker, type Job } from "bullmq";
 import { createLogger } from "@/lib/logger";
 import { PriceMonitor } from "@/lib/market-data/price-monitor";
 import { isAnyMarketOpen } from "@/lib/utils/market-hours";
+import { calculateScoresQueue, dailySnapshotQueue } from "@/lib/queue/queues";
 
 const log = createLogger("worker/price");
-import { calculateScoresQueue, dailySnapshotQueue } from "@/lib/queue/queues";
 
 // ──── Job payload type ────
 
