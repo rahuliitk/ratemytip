@@ -2,7 +2,13 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
-import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const TIME_RANGE_OPTIONS = [
   { value: "all", label: "All Time" },
@@ -25,33 +31,29 @@ const MIN_TIPS_OPTIONS = [
   { value: "100", label: "100+" },
 ] as const;
 
-interface PillGroupProps {
+interface FilterSelectProps {
   readonly label: string;
   readonly options: readonly { readonly value: string; readonly label: string }[];
   readonly currentValue: string;
   readonly onSelect: (value: string) => void;
 }
 
-function PillGroup({ label, options, currentValue, onSelect }: PillGroupProps): React.ReactElement {
+function FilterSelect({ label, options, currentValue, onSelect }: FilterSelectProps): React.ReactElement {
   return (
     <div className="flex flex-col gap-1.5">
       <span className="text-[11px] font-medium uppercase tracking-wider text-muted">{label}</span>
-      <div className="inline-flex rounded-xl bg-gray-50 p-0.5 gap-0.5">
-        {options.map((opt) => (
-          <button
-            key={opt.value}
-            onClick={() => onSelect(opt.value)}
-            className={cn(
-              "whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-200",
-              currentValue === opt.value
-                ? "bg-white text-primary shadow-sm ring-1 ring-gray-200/50"
-                : "text-muted hover:text-text"
-            )}
-          >
-            {opt.label}
-          </button>
-        ))}
-      </div>
+      <Select value={currentValue} onValueChange={onSelect}>
+        <SelectTrigger className="w-[140px]" aria-label={label}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((opt) => (
+            <SelectItem key={opt.value} value={opt.value}>
+              {opt.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }
@@ -76,19 +78,19 @@ export function LeaderboardFilters(): React.ReactElement {
 
   return (
     <div className="flex flex-wrap items-end gap-4">
-      <PillGroup
+      <FilterSelect
         label="Time Range"
         options={TIME_RANGE_OPTIONS}
         currentValue={currentTimeRange}
         onSelect={(v) => updateParam("timeRange", v)}
       />
-      <PillGroup
+      <FilterSelect
         label="Sort By"
         options={SORT_OPTIONS}
         currentValue={currentSortBy}
         onSelect={(v) => updateParam("sortBy", v)}
       />
-      <PillGroup
+      <FilterSelect
         label="Min Tips"
         options={MIN_TIPS_OPTIONS}
         currentValue={currentMinTips}

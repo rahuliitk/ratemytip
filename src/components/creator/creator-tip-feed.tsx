@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { TipCard } from "@/components/tip/tip-card";
-import type { TipSummary, TipStatus } from "@/types";
+import type { TipSummary } from "@/types";
 
 interface CreatorTipFeedProps {
   readonly initialTips: readonly TipSummary[];
@@ -19,7 +19,6 @@ const STATUS_FILTERS: { value: string; label: string }[] = [
 
 export function CreatorTipFeed({
   initialTips,
-  creatorSlug,
 }: CreatorTipFeedProps): React.ReactElement {
   const [statusFilter, setStatusFilter] = useState("all");
 
@@ -40,17 +39,17 @@ export function CreatorTipFeed({
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold text-gradient-primary">Tip History</h2>
+        <h2 className="text-base font-semibold text-text">Tip History</h2>
         <div className="flex gap-1">
           {STATUS_FILTERS.map((filter) => (
             <button
               key={filter.value}
               type="button"
               onClick={() => setStatusFilter(filter.value)}
-              className={`rounded-xl px-3 py-1 text-xs font-medium transition-colors ${
+              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
                 statusFilter === filter.value
-                  ? "bg-[#1A365D] text-white"
-                  : "bg-[#F7FAFC] text-muted hover:bg-gray-200"
+                  ? "bg-primary text-white"
+                  : "bg-bg-alt text-muted hover:bg-border hover:text-text"
               }`}
             >
               {filter.label}
@@ -65,9 +64,11 @@ export function CreatorTipFeed({
             <TipCard key={tip.id} tip={tip} showCreator={false} />
           ))
         ) : (
-          <p className="py-8 text-center text-sm text-muted">
-            No tips match the selected filter.
-          </p>
+          <div className="rounded-xl border border-border/60 bg-surface py-12 text-center shadow-sm">
+            <p className="text-sm text-muted">
+              No tips match the selected filter.
+            </p>
+          </div>
         )}
       </div>
     </div>

@@ -14,21 +14,21 @@ export function TipCard({ tip, showCreator = false }: TipCardProps): React.React
   return (
     <Link
       href={`/tip/${tip.id}`}
-      className={`block rounded-2xl border border-gray-100 bg-white p-4 shadow-[0_1px_2px_0_rgba(26,54,93,0.04)] card-hover gradient-border-hover ${
-        isBuy ? "border-l-4 border-l-green-400" : "border-l-4 border-l-red-400"
+      className={`block rounded-xl border border-border/60 bg-surface p-4 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ${
+        isBuy ? "border-l-4 border-l-emerald-400" : "border-l-4 border-l-red-400"
       }`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-primary">
+            <span className="text-sm font-bold text-text">
               {tip.stockSymbol}
             </span>
             <span
-              className={`rounded-full px-2 py-0.5 text-[10px] font-bold text-white ${
+              className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold text-white ${
                 isBuy
-                  ? "bg-gradient-to-r from-green-500 to-emerald-400"
-                  : "bg-gradient-to-r from-red-500 to-rose-400"
+                  ? "bg-emerald-500"
+                  : "bg-red-500"
               }`}
             >
               {tip.direction}
@@ -52,7 +52,7 @@ export function TipCard({ tip, showCreator = false }: TipCardProps): React.React
           </div>
 
           <div className="mt-2 flex items-center gap-3 text-xs text-muted">
-            <span className="rounded-full bg-gray-100 px-2 py-0.5">{tip.timeframe}</span>
+            <span className="rounded-md bg-bg-alt px-2 py-0.5 font-medium">{tip.timeframe}</span>
             <span>{new Date(tip.tipTimestamp).toLocaleDateString("en-IN")}</span>
           </div>
         </div>
@@ -60,10 +60,10 @@ export function TipCard({ tip, showCreator = false }: TipCardProps): React.React
         {tip.returnPct !== null && (
           <div className="text-right">
             <span
-              className={`inline-block rounded-xl px-2.5 py-1 text-lg font-bold tabular-nums ${
+              className={`inline-block rounded-lg px-2.5 py-1 text-lg font-bold tabular-nums ${
                 tip.returnPct >= 0
-                  ? "bg-green-50 text-success"
-                  : "bg-red-50 text-danger"
+                  ? "bg-emerald-50 text-emerald-600"
+                  : "bg-red-50 text-red-600"
               }`}
             >
               {formatPercent(tip.returnPct)}

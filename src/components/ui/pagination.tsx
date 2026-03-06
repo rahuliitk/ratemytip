@@ -55,7 +55,7 @@ const PaginationLink = ({
         variant: isActive ? "outline" : "ghost",
         size,
       }),
-      isActive && "border-[#2B6CB0] text-[#2B6CB0]",
+      isActive && "border-accent text-accent",
       "cursor-pointer",
       className
     )}

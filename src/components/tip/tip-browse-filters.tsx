@@ -2,6 +2,13 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const STATUS_OPTIONS = [
   { value: "all", label: "All Statuses" },
@@ -32,12 +39,7 @@ const DATE_RANGE_OPTIONS = [
   { value: "month", label: "This Month" },
 ] as const;
 
-const activePillClass =
-  "whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-medium bg-white text-primary shadow-sm ring-1 ring-gray-200/50";
-const inactivePillClass =
-  "whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-medium text-muted hover:text-text";
-
-interface PillGroupProps {
+interface FilterSelectProps {
   readonly label: string;
   readonly paramKey: string;
   readonly options: ReadonlyArray<{ readonly value: string; readonly label: string }>;
@@ -45,22 +47,22 @@ interface PillGroupProps {
   readonly onSelect: (key: string, value: string) => void;
 }
 
-function PillGroup({ label, paramKey, options, currentValue, onSelect }: PillGroupProps): React.ReactElement {
+function FilterSelect({ label, paramKey, options, currentValue, onSelect }: FilterSelectProps): React.ReactElement {
   return (
     <div className="flex flex-col gap-1.5">
       <span className="text-[11px] font-medium uppercase tracking-wider text-muted">{label}</span>
-      <div className="inline-flex rounded-xl bg-gray-50 p-0.5 gap-0.5">
-        {options.map((opt) => (
-          <button
-            key={opt.value}
-            type="button"
-            onClick={() => onSelect(paramKey, opt.value)}
-            className={currentValue === opt.value ? activePillClass : inactivePillClass}
-          >
-            {opt.label}
-          </button>
-        ))}
-      </div>
+      <Select value={currentValue} onValueChange={(v) => onSelect(paramKey, v)}>
+        <SelectTrigger className="w-[160px]" aria-label={label}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((opt) => (
+            <SelectItem key={opt.value} value={opt.value}>
+              {opt.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }
@@ -89,38 +91,40 @@ export function TipBrowseFilters(): React.ReactElement {
   );
 
   return (
-    <div className="flex flex-wrap items-start gap-4">
-      <PillGroup
-        label="Status"
-        paramKey="status"
-        options={STATUS_OPTIONS}
-        currentValue={currentStatus}
-        onSelect={updateParam}
-      />
+    <div className="rounded-xl border border-border/60 bg-surface p-4 shadow-sm">
+      <div className="flex flex-wrap items-start gap-5">
+        <FilterSelect
+          label="Status"
+          paramKey="status"
+          options={STATUS_OPTIONS}
+          currentValue={currentStatus}
+          onSelect={updateParam}
+        />
 
-      <PillGroup
-        label="Timeframe"
-        paramKey="timeframe"
-        options={TIMEFRAME_OPTIONS}
-        currentValue={currentTimeframe}
-        onSelect={updateParam}
-      />
+        <FilterSelect
+          label="Timeframe"
+          paramKey="timeframe"
+          options={TIMEFRAME_OPTIONS}
+          currentValue={currentTimeframe}
+          onSelect={updateParam}
+        />
 
-      <PillGroup
-        label="Direction"
-        paramKey="direction"
-        options={DIRECTION_OPTIONS}
-        currentValue={currentDirection}
-        onSelect={updateParam}
-      />
+        <FilterSelect
+          label="Direction"
+          paramKey="direction"
+          options={DIRECTION_OPTIONS}
+          currentValue={currentDirection}
+          onSelect={updateParam}
+        />
 
-      <PillGroup
-        label="Date Range"
-        paramKey="dateRange"
-        options={DATE_RANGE_OPTIONS}
-        currentValue={currentDateRange}
-        onSelect={updateParam}
-      />
+        <FilterSelect
+          label="Date Range"
+          paramKey="dateRange"
+          options={DATE_RANGE_OPTIONS}
+          currentValue={currentDateRange}
+          onSelect={updateParam}
+        />
+      </div>
     </div>
   );
 }

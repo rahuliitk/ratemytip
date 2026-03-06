@@ -14,22 +14,22 @@ interface PortfolioAllocationProps {
 }
 
 const SECTOR_COLORS = [
-  "bg-[#2B6CB0]",
-  "bg-[#276749]",
-  "bg-[#C05621]",
-  "bg-[#1A365D]",
-  "bg-[#9B2C2C]",
-  "bg-[#6B46C1]",
-  "bg-[#2C7A7B]",
-  "bg-[#975A16]",
-  "bg-[#4A5568]",
-  "bg-[#702459]",
+  "bg-accent",
+  "bg-success",
+  "bg-warning",
+  "bg-primary",
+  "bg-danger",
+  "bg-violet-600",
+  "bg-teal-600",
+  "bg-amber-600",
+  "bg-muted",
+  "bg-pink-700",
 ] as const;
 
 export function PortfolioAllocation({ sectors }: PortfolioAllocationProps): React.ReactElement {
   if (sectors.length === 0) {
     return (
-      <div className="flex h-48 items-center justify-center rounded-2xl bg-white shadow-[0_1px_2px_0_rgba(26,54,93,0.04)] text-sm text-[#718096]">
+      <div className="flex h-48 items-center justify-center text-sm text-muted">
         No allocation data available.
       </div>
     );
@@ -40,44 +40,41 @@ export function PortfolioAllocation({ sectors }: PortfolioAllocationProps): Reac
   const sorted = [...sectors].sort((a, b) => b.value - a.value);
 
   return (
-    <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-4">
-      <h3 className="mb-4 text-sm font-semibold text-[#1A202C]">Sector Allocation</h3>
-      <div className="space-y-3">
-        {sorted.map((sector, index) => {
-          const pct = totalValue > 0 ? (sector.value / totalValue) * 100 : 0;
-          const colorClass = SECTOR_COLORS[index % SECTOR_COLORS.length];
+    <div className="space-y-3">
+      {sorted.map((sector, index) => {
+        const pct = totalValue > 0 ? (sector.value / totalValue) * 100 : 0;
+        const colorClass = SECTOR_COLORS[index % SECTOR_COLORS.length];
 
-          return (
-            <div key={sector.sector}>
-              <div className="mb-1 flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <div className={cn("h-3 w-3 rounded-sm", colorClass)} />
-                  <span className="font-medium text-[#1A202C]">
-                    {sector.sector || "Unknown"}
-                  </span>
-                  <span className="text-xs text-[#718096]">
-                    {sector.count} {sector.count === 1 ? "position" : "positions"}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 tabular-nums">
-                  <span className="text-xs text-[#718096]">
-                    {pct.toFixed(1)}%
-                  </span>
-                  <span className="text-sm font-medium text-[#1A202C]">
-                    {formatPrice(sector.value)}
-                  </span>
-                </div>
+        return (
+          <div key={sector.sector}>
+            <div className="mb-1.5 flex items-center justify-between text-sm">
+              <div className="flex items-center gap-2">
+                <div className={cn("h-3 w-3 rounded-sm", colorClass)} />
+                <span className="font-medium text-text">
+                  {sector.sector || "Unknown"}
+                </span>
+                <span className="text-xs text-muted">
+                  {sector.count} {sector.count === 1 ? "position" : "positions"}
+                </span>
               </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-[#F7FAFC]">
-                <div
-                  className={cn("h-full rounded-full transition-all", colorClass)}
-                  style={{ width: `${pct}%` }}
-                />
+              <div className="flex items-center gap-3 tabular-nums">
+                <span className="text-xs text-muted">
+                  {pct.toFixed(1)}%
+                </span>
+                <span className="text-sm font-medium text-text">
+                  {formatPrice(sector.value)}
+                </span>
               </div>
             </div>
-          );
-        })}
-      </div>
+            <div className="h-2 w-full overflow-hidden rounded-full bg-bg-alt">
+              <div
+                className={cn("h-full rounded-full transition-all duration-500", colorClass)}
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

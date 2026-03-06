@@ -1,5 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -36,48 +34,144 @@ const ENDPOINTS = [
 ] as const;
 
 const METHOD_COLORS: Record<string, string> = {
-  GET: "bg-blue-100 text-blue-800",
-  POST: "bg-green-100 text-green-800",
-  PATCH: "bg-yellow-100 text-yellow-800",
-  DELETE: "bg-red-100 text-red-800",
+  GET: "bg-emerald-100 text-emerald-700",
+  POST: "bg-blue-100 text-blue-700",
+  PATCH: "bg-amber-100 text-amber-700",
+  DELETE: "bg-red-100 text-red-700",
 };
 
-const AUTH_COLORS: Record<string, string> = {
-  Public: "bg-gray-100 text-gray-700",
-  User: "bg-blue-50 text-blue-700",
-  "PRO+": "bg-purple-50 text-purple-700",
+const AUTH_BADGE_STYLES: Record<string, string> = {
+  Public: "bg-bg-alt text-text-secondary",
+  User: "bg-accent/10 text-accent",
+  "PRO+": "bg-purple-100 text-purple-700",
 };
 
 export default function ApiDocsPage(): React.ReactElement {
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
-      <h1 className="mb-2 text-3xl font-bold text-primary">API Reference</h1>
-      <p className="mb-8 text-muted">
-        All responses use the envelope format: <code className="rounded bg-gray-100 px-1.5 py-0.5 text-xs">{"{ success, data, error? }"}</code>.
-        Rate limit: 60 req/min for public endpoints, 10 req/min for search.
-      </p>
+      {/* Page Header */}
+      <div className="mb-10">
+        <h1 className="text-3xl font-bold text-text">API Reference</h1>
+        <p className="mt-3 text-muted">
+          All responses use the envelope format:{" "}
+          <code className="rounded-lg bg-primary px-2 py-0.5 text-xs font-mono text-white/90">
+            {"{ success, data, error? }"}
+          </code>
+        </p>
+        <p className="mt-2 text-sm text-muted">
+          Rate limit: 60 req/min for public endpoints, 10 req/min for search.
+        </p>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Endpoints</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="divide-y">
-            {ENDPOINTS.map((ep) => (
-              <div key={`${ep.method}-${ep.path}`} className="flex items-center gap-3 py-3">
-                <span className={`inline-block w-16 rounded px-2 py-0.5 text-center text-xs font-bold ${METHOD_COLORS[ep.method] ?? ""}`}>
+      {/* Base URL */}
+      <div className="mb-8 rounded-xl border border-border/60 bg-surface p-5 shadow-sm">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted">
+          Base URL
+        </h2>
+        <div className="rounded-lg bg-primary p-4 font-mono text-sm text-white/90">
+          https://ratemytip.com
+        </div>
+      </div>
+
+      {/* Authentication Info */}
+      <div className="mb-8 rounded-xl border border-border/60 bg-surface p-5 shadow-sm">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted">
+          Authentication
+        </h2>
+        <p className="text-sm text-text-secondary">
+          Public endpoints require no authentication. User and PRO+ endpoints
+          require a valid session token passed via cookies (NextAuth). Include
+          credentials in your requests when calling protected endpoints.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-md bg-bg-alt px-2.5 py-1 text-xs font-medium text-text-secondary">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            Public -- No auth required
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-md bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent">
+            <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+            User -- Session required
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-md bg-purple-100 px-2.5 py-1 text-xs font-medium text-purple-700">
+            <span className="h-1.5 w-1.5 rounded-full bg-purple-500" />
+            PRO+ -- Pro or Premium subscription
+          </span>
+        </div>
+      </div>
+
+      {/* Endpoints */}
+      <div className="rounded-xl border border-border/60 bg-surface shadow-sm">
+        <div className="border-b border-border/40 px-5 py-4">
+          <h2 className="text-lg font-semibold text-text">Endpoints</h2>
+          <p className="mt-0.5 text-sm text-muted">
+            {ENDPOINTS.length} endpoints available
+          </p>
+        </div>
+        <div className="divide-y divide-border/40">
+          {ENDPOINTS.map((ep) => (
+            <div
+              key={`${ep.method}-${ep.path}`}
+              className="flex flex-col gap-2 px-5 py-3.5 sm:flex-row sm:items-center sm:gap-3"
+            >
+              <div className="flex items-center gap-3">
+                <span
+                  className={`inline-block w-[4.5rem] rounded-md px-2 py-0.5 text-center text-xs font-mono font-bold ${
+                    METHOD_COLORS[ep.method] ?? ""
+                  }`}
+                >
                   {ep.method}
                 </span>
-                <code className="min-w-0 flex-1 truncate text-sm">{ep.path}</code>
-                <Badge variant="outline" className={`shrink-0 text-[10px] ${AUTH_COLORS[ep.auth] ?? ""}`}>
-                  {ep.auth}
-                </Badge>
-                <span className="hidden text-xs text-muted sm:block">{ep.description}</span>
+                <code className="min-w-0 flex-1 truncate text-sm font-mono text-text">
+                  {ep.path}
+                </code>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              <div className="flex items-center gap-3 sm:ml-auto">
+                <span
+                  className={`shrink-0 rounded-md px-2 py-0.5 text-[11px] font-medium ${
+                    AUTH_BADGE_STYLES[ep.auth] ?? ""
+                  }`}
+                >
+                  {ep.auth}
+                </span>
+                <span className="hidden text-xs text-muted lg:block">
+                  {ep.description}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Response Format Example */}
+      <div className="mt-8 rounded-xl border border-border/60 bg-surface p-5 shadow-sm">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted">
+          Response Format
+        </h2>
+        <div className="rounded-lg bg-primary p-4 font-mono text-sm text-white/90">
+          <pre className="overflow-x-auto">
+{`// Success
+{
+  "success": true,
+  "data": { ... },
+  "meta": {
+    "page": 1,
+    "pageSize": 20,
+    "total": 150,
+    "hasMore": true
+  }
+}
+
+// Error
+{
+  "success": false,
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Resource not found"
+  }
+}`}
+          </pre>
+        </div>
+      </div>
     </div>
   );
 }

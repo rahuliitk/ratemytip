@@ -38,9 +38,9 @@ export function FormattedPercent({
     <span
       className={cn(
         "tabular-nums",
-        colorCoded && value > 0 && "text-[#276749]",
-        colorCoded && value < 0 && "text-[#C53030]",
-        colorCoded && value === 0 && "text-[#718096]",
+        colorCoded && value > 0 && "text-emerald-600",
+        colorCoded && value < 0 && "text-red-600",
+        colorCoded && value === 0 && "text-muted",
         className
       )}
     >

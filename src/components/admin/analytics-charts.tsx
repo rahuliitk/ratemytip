@@ -33,40 +33,97 @@ export function AnalyticsCharts({
 }: AnalyticsChartsProps): React.ReactElement {
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-      <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-6">
-        <h2 className="text-sm font-semibold text-primary">Tips Over Time</h2>
+      {/* Tips Over Time */}
+      <div className="rounded-xl border border-border/60 bg-surface p-6 shadow-sm">
+        <h2 className="text-sm font-semibold text-text">Tips Over Time</h2>
+        <p className="mt-0.5 text-xs text-muted">Last 30 days</p>
         {dailyTips.length > 0 ? (
           <div className="mt-4">
-            <ResponsiveContainer width="100%" height={220}>
+            <ResponsiveContainer width="100%" height={240}>
               <LineChart data={[...dailyTips]} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                <XAxis dataKey="date" tick={{ fontSize: 10, fill: "#718096" }} tickLine={false} interval="preserveStartEnd" />
-                <YAxis tick={{ fontSize: 11, fill: "#718096" }} tickLine={false} axisLine={false} />
-                <Tooltip contentStyle={{ backgroundColor: "#fff", border: "1px solid #E2E8F0", borderRadius: "8px", fontSize: "12px" }} />
-                <Line type="monotone" dataKey="count" stroke="#2B6CB0" strokeWidth={2} dot={false} name="Tips" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fontSize: 10, fill: "#94a3b8" }}
+                  tickLine={false}
+                  axisLine={{ stroke: "#e2e8f0" }}
+                  interval="preserveStartEnd"
+                />
+                <YAxis
+                  tick={{ fontSize: 11, fill: "#94a3b8" }}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#fff",
+                    border: "1px solid #e2e8f0",
+                    borderRadius: "8px",
+                    fontSize: "12px",
+                    boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="count"
+                  stroke="#3b82f6"
+                  strokeWidth={2}
+                  dot={false}
+                  activeDot={{ r: 4, fill: "#3b82f6", stroke: "#fff", strokeWidth: 2 }}
+                  name="Tips"
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
         ) : (
-          <div className="mt-4 flex h-48 items-center justify-center rounded bg-bg text-sm text-muted">No tip data available yet.</div>
+          <div className="mt-4 flex h-60 items-center justify-center rounded-lg border border-dashed border-border/60 text-sm text-muted">
+            No tip data available yet.
+          </div>
         )}
       </div>
-      <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-6">
-        <h2 className="text-sm font-semibold text-primary">Score Distribution</h2>
+
+      {/* Score Distribution */}
+      <div className="rounded-xl border border-border/60 bg-surface p-6 shadow-sm">
+        <h2 className="text-sm font-semibold text-text">Score Distribution</h2>
+        <p className="mt-0.5 text-xs text-muted">RMT Score ranges across creators</p>
         {scoreDistribution.length > 0 ? (
           <div className="mt-4">
-            <ResponsiveContainer width="100%" height={220}>
+            <ResponsiveContainer width="100%" height={240}>
               <BarChart data={[...scoreDistribution]} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
-                <XAxis dataKey="range" tick={{ fontSize: 10, fill: "#718096" }} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: "#718096" }} tickLine={false} axisLine={false} />
-                <Tooltip contentStyle={{ backgroundColor: "#fff", border: "1px solid #E2E8F0", borderRadius: "8px", fontSize: "12px" }} />
-                <Bar dataKey="count" fill="#2B6CB0" radius={[4, 4, 0, 0]} name="Creators" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                <XAxis
+                  dataKey="range"
+                  tick={{ fontSize: 10, fill: "#94a3b8" }}
+                  tickLine={false}
+                  axisLine={{ stroke: "#e2e8f0" }}
+                />
+                <YAxis
+                  tick={{ fontSize: 11, fill: "#94a3b8" }}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#fff",
+                    border: "1px solid #e2e8f0",
+                    borderRadius: "8px",
+                    fontSize: "12px",
+                    boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
+                  }}
+                />
+                <Bar
+                  dataKey="count"
+                  fill="#3b82f6"
+                  radius={[6, 6, 0, 0]}
+                  name="Creators"
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
         ) : (
-          <div className="mt-4 flex h-48 items-center justify-center rounded bg-bg text-sm text-muted">No score data available yet.</div>
+          <div className="mt-4 flex h-60 items-center justify-center rounded-lg border border-dashed border-border/60 text-sm text-muted">
+            No score data available yet.
+          </div>
         )}
       </div>
     </div>

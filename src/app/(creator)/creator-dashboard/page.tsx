@@ -47,11 +47,11 @@ export default async function CreatorDashboardPage(): Promise<React.ReactElement
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gradient-primary">Welcome back, {creator.displayName}</h1>
+          <h1 className="text-xl font-bold text-text">Welcome back, {creator.displayName}</h1>
           <p className="text-sm text-muted">{creator.tier} Tier</p>
         </div>
         <Link href="/creator-dashboard/new-tip">
-          <Button size="sm" className="gap-1.5">
+          <Button variant="glow" size="sm" className="gap-1.5">
             <PlusCircle className="h-4 w-4" />
             New Tip
           </Button>
@@ -68,8 +68,8 @@ export default async function CreatorDashboardPage(): Promise<React.ReactElement
 
       {/* Score History Chart */}
       {scoreHistory.length > 0 && (
-        <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-6">
-          <h2 className="text-lg font-bold text-gradient-primary">Performance Trend</h2>
+        <div className="rounded-xl border border-border/60 bg-surface p-6 shadow-sm">
+          <h2 className="text-lg font-bold text-text">Performance Trend</h2>
           <p className="mt-1 text-xs text-muted">
             Score and accuracy over the last {scoreHistory.length} days
           </p>
@@ -86,9 +86,9 @@ export default async function CreatorDashboardPage(): Promise<React.ReactElement
       )}
 
       {/* Recent Tips */}
-      <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-6">
+      <div className="rounded-xl border border-border/60 bg-surface p-6 shadow-sm">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-gradient-primary">Recent Tips</h2>
+          <h2 className="text-lg font-bold text-text">Recent Tips</h2>
           <Link href="/creator-dashboard/my-tips" className="text-xs text-accent hover:underline">
             View all
           </Link>
@@ -101,13 +101,13 @@ export default async function CreatorDashboardPage(): Promise<React.ReactElement
               <Link
                 key={tip.id}
                 href={`/tip/${tip.id}`}
-                className="flex items-center justify-between rounded-md bg-bg p-3 text-sm transition-colors hover:bg-gray-100"
+                className="flex items-center justify-between rounded-lg bg-bg-alt/50 p-3 text-sm transition-colors hover:bg-bg-alt"
               >
                 <div className="flex items-center gap-2">
                   <span
-                    className={`rounded px-1.5 py-0.5 text-xs font-bold ${
+                    className={`rounded-md px-1.5 py-0.5 text-xs font-bold ${
                       tip.direction === "BUY"
-                        ? "bg-green-100 text-green-800"
+                        ? "bg-emerald-100 text-emerald-800"
                         : "bg-red-100 text-red-800"
                     }`}
                   >

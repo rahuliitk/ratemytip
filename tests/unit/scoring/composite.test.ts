@@ -15,7 +15,6 @@ import {
 import {
   buildCompletedTip,
   buildLosingTip,
-  buildExpiredTip,
   buildWinningTips,
   buildLosingTips,
   buildMonthlyTips,

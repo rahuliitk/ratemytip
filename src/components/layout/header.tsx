@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { Menu, X, Search, BarChart3, Github, LogOut, Settings, Bookmark, LayoutDashboard, PenLine, Rss, Crown, Briefcase, Sparkles } from "lucide-react";
+import { Menu, X, Search, BarChart3, Github, LogOut, Settings, Bookmark, LayoutDashboard, PenLine, Rss, Briefcase, Sparkles } from "lucide-react";
 import { NotificationBell } from "@/components/shared/notification-bell";
 import {
   DropdownMenu,
@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 
 export function Header(): React.ReactElement {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -24,14 +25,14 @@ export function Header(): React.ReactElement {
   const subTier = (session?.user as Record<string, unknown> | undefined)?.subscriptionTier as string | undefined;
 
   return (
-    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-white/20 shadow-sm">
+    <header className="sticky top-0 z-50 bg-surface/80 backdrop-blur-xl border-b border-border/60">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#1A365D] to-[#2B6CB0] shadow-sm">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent shadow-sm">
             <BarChart3 className="h-4.5 w-4.5 text-white" />
           </div>
-          <span className="text-xl font-bold text-gradient-primary">
+          <span className="text-xl font-bold text-text">
             RateMyTip
           </span>
         </Link>
@@ -40,26 +41,26 @@ export function Header(): React.ReactElement {
         <nav className="hidden items-center gap-1 md:flex">
           <Link
             href="/leaderboard"
-            className="rounded-lg px-3 py-2 text-sm font-medium text-muted transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:text-primary"
+            className="rounded-lg px-3 py-2 text-sm font-medium text-muted transition-all duration-200 hover:bg-bg-alt hover:text-text"
           >
             Leaderboard
           </Link>
           <Link
             href="/tips"
-            className="rounded-lg px-3 py-2 text-sm font-medium text-muted transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:text-primary"
+            className="rounded-lg px-3 py-2 text-sm font-medium text-muted transition-all duration-200 hover:bg-bg-alt hover:text-text"
           >
             Tips
           </Link>
           <Link
             href="/search"
-            className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-muted transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:text-primary"
+            className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-muted transition-all duration-200 hover:bg-bg-alt hover:text-text"
           >
             <Search className="h-4 w-4" />
             Search
           </Link>
           <Link
             href="/pricing"
-            className="rounded-lg px-3 py-2 text-sm font-medium text-muted transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:text-primary"
+            className="rounded-lg px-3 py-2 text-sm font-medium text-muted transition-all duration-200 hover:bg-bg-alt hover:text-text"
           >
             Pricing
           </Link>
@@ -67,32 +68,34 @@ export function Header(): React.ReactElement {
             href="https://github.com/rahuliitk/ratemytip"
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-lg px-2 py-2 text-muted transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:text-primary"
+            className="rounded-lg px-2 py-2 text-muted transition-all duration-200 hover:bg-bg-alt hover:text-text"
             aria-label="GitHub repository"
           >
             <Github className="h-5 w-5" />
           </a>
 
+          <ThemeToggle />
+
           {/* Auth section */}
           {status === "loading" ? (
-            <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200" />
+            <div className="h-8 w-8 animate-pulse rounded-full bg-bg-alt" />
           ) : isUser ? (
             <div className="flex items-center gap-2 ml-2">
             <NotificationBell />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/10 text-sm font-bold text-accent ring-2 ring-[#2B6CB0]/20 transition-all duration-200 hover:bg-accent/20 hover:ring-[#2B6CB0]/40"
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/10 text-sm font-bold text-accent ring-2 ring-accent/20 transition-all duration-200 hover:bg-accent/20 hover:ring-accent/40"
                   aria-label="User menu"
                 >
                   {session.user.name?.charAt(0).toUpperCase() ?? "U"}
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 rounded-xl shadow-lg border-gray-100">
+              <DropdownMenuContent align="end" className="w-56 rounded-xl shadow-lg border-border/60">
                 <DropdownMenuLabel>
                   <div className="flex items-center gap-2">
                     <div>
-                      <p className="text-sm font-medium">{session.user.name}</p>
+                      <p className="text-sm font-medium text-text">{session.user.name}</p>
                       <p className="text-xs text-muted">@{session.user.username}</p>
                     </div>
                     {subTier === "PRO" && (
@@ -174,7 +177,7 @@ export function Header(): React.ReactElement {
         {/* Mobile menu button */}
         <button
           type="button"
-          className="inline-flex items-center justify-center rounded-lg p-2 text-muted transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:text-primary md:hidden"
+          className="inline-flex items-center justify-center rounded-lg p-2 text-muted transition-all duration-200 hover:bg-bg-alt hover:text-text md:hidden"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
         >
@@ -192,32 +195,32 @@ export function Header(): React.ReactElement {
           mobileMenuOpen ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
         }`}
       >
-        <div className="bg-white/95 backdrop-blur-lg border-t border-gray-100">
+        <div className="bg-surface border-t border-border/60">
           <nav className="flex flex-col gap-1 px-4 py-3">
             <Link
               href="/leaderboard"
-              className="rounded-lg px-3 py-2.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:text-primary"
+              className="rounded-lg px-3 py-2.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-bg-alt hover:text-text"
               onClick={() => setMobileMenuOpen(false)}
             >
               Leaderboard
             </Link>
             <Link
               href="/tips"
-              className="rounded-lg px-3 py-2.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:text-primary"
+              className="rounded-lg px-3 py-2.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-bg-alt hover:text-text"
               onClick={() => setMobileMenuOpen(false)}
             >
               Tips
             </Link>
             <Link
               href="/search"
-              className="rounded-lg px-3 py-2.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:text-primary"
+              className="rounded-lg px-3 py-2.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-bg-alt hover:text-text"
               onClick={() => setMobileMenuOpen(false)}
             >
               Search
             </Link>
             <Link
               href="/pricing"
-              className="rounded-lg px-3 py-2.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:text-primary"
+              className="rounded-lg px-3 py-2.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-bg-alt hover:text-text"
               onClick={() => setMobileMenuOpen(false)}
             >
               Pricing
@@ -226,18 +229,22 @@ export function Header(): React.ReactElement {
               href="https://github.com/rahuliitk/ratemytip"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:text-primary"
+              className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-bg-alt hover:text-text"
               onClick={() => setMobileMenuOpen(false)}
             >
               <Github className="h-4 w-4" />
               GitHub
             </a>
+            <div className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-muted">
+              <span>Theme</span>
+              <ThemeToggle />
+            </div>
             {/* Mobile auth links */}
             {isUser ? (
               <>
                 <Link
                   href="/dashboard"
-                  className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:text-primary"
+                  className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-bg-alt hover:text-text"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <LayoutDashboard className="h-4 w-4" />
@@ -246,7 +253,7 @@ export function Header(): React.ReactElement {
                 {isCreator && (
                   <Link
                     href="/creator-dashboard"
-                    className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:text-primary"
+                    className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-bg-alt hover:text-text"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <PenLine className="h-4 w-4" />
@@ -255,7 +262,7 @@ export function Header(): React.ReactElement {
                 )}
                 <Link
                   href="/saved"
-                  className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:text-primary"
+                  className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-bg-alt hover:text-text"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <Bookmark className="h-4 w-4" />
@@ -263,14 +270,14 @@ export function Header(): React.ReactElement {
                 </Link>
                 <Link
                   href="/settings"
-                  className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-[#2B6CB0]/5 hover:text-primary"
+                  className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-bg-alt hover:text-text"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <Settings className="h-4 w-4" />
                   Settings
                 </Link>
                 <button
-                  className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-danger transition-all duration-200 hover:bg-red-50"
+                  className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-danger transition-all duration-200 hover:bg-danger/10"
                   onClick={() => {
                     setMobileMenuOpen(false);
                     signOut({ callbackUrl: "/" });
@@ -284,14 +291,14 @@ export function Header(): React.ReactElement {
               <div className="flex gap-2 px-3 pt-2">
                 <Link
                   href="/login"
-                  className="flex-1 rounded-xl border border-gray-200 px-3 py-2 text-center text-sm font-medium text-muted transition-all duration-200 hover:bg-gray-50"
+                  className="flex-1 rounded-xl border border-border px-3 py-2 text-center text-sm font-medium text-muted transition-all duration-200 hover:bg-bg-alt"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Sign in
                 </Link>
                 <Link
                   href="/register"
-                  className="flex-1 rounded-xl bg-gradient-to-r from-[#1A365D] to-[#2B6CB0] px-3 py-2 text-center text-sm font-medium text-white shadow-md transition-all duration-200 hover:shadow-lg"
+                  className="flex-1 rounded-xl bg-accent px-3 py-2 text-center text-sm font-medium text-white shadow-md transition-all duration-200 hover:shadow-lg"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Sign up

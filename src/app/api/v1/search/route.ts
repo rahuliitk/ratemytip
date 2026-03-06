@@ -153,7 +153,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }); // end cached()
 
     return NextResponse.json({ success: true, data });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         success: false,

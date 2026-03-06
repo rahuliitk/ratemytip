@@ -64,22 +64,22 @@ export function DataTable<T>({
   };
 
   return (
-    <div className="overflow-x-auto rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)]">
+    <div className="overflow-x-auto rounded-xl border border-border/60 bg-surface shadow-sm">
       <table className="w-full text-left">
         <thead>
-          <tr className="border-b border-gray-100 bg-[#F7FAFC]">
+          <tr className="border-b border-border/60 bg-bg-alt">
             {columns.map((col) => (
               <th
                 key={col.key}
-                className={`px-4 py-3 text-xs font-semibold uppercase text-muted ${alignClass(col.align)} ${
-                  col.sortable ? "cursor-pointer select-none hover:text-text" : ""
+                className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted ${alignClass(col.align)} ${
+                  col.sortable ? "cursor-pointer select-none transition-colors hover:text-text" : ""
                 }`}
                 onClick={col.sortable ? () => handleSort(col.key) : undefined}
               >
                 <span className="inline-flex items-center gap-1">
                   {col.header}
                   {col.sortable && (
-                    <span className="text-gray-400">
+                    <span className="text-muted-light">
                       {sortKey === col.key ? (
                         sortDir === "asc" ? (
                           <ChevronUp className="h-3 w-3" />
@@ -96,11 +96,11 @@ export function DataTable<T>({
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-100">
+        <tbody className="divide-y divide-border/40">
           {sortedData.map((row) => (
             <tr
               key={String(row[keyField])}
-              className={`hover:bg-[#F7FAFC] transition-colors ${onRowClick ? "cursor-pointer" : ""}`}
+              className={`transition-colors hover:bg-bg ${onRowClick ? "cursor-pointer" : ""}`}
               onClick={onRowClick ? () => onRowClick(row) : undefined}
             >
               {columns.map((col) => (

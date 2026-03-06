@@ -27,12 +27,12 @@ export function ReviewCard({ review }: ReviewCardProps): React.ReactElement {
   return (
     <div className="py-4">
       <div className="flex items-center gap-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#6B46C1]/10 text-sm font-semibold text-[#6B46C1]">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-subtle text-sm font-semibold text-accent">
           {displayName.charAt(0).toUpperCase()}
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-primary">{displayName}</span>
+            <span className="text-sm font-medium text-text">{displayName}</span>
             <TimeAgo date={review.createdAt} className="text-xs" />
           </div>
           <div className="mt-0.5 flex items-center gap-0.5">
@@ -42,7 +42,7 @@ export function ReviewCard({ review }: ReviewCardProps): React.ReactElement {
                 className={`h-3.5 w-3.5 ${
                   star <= review.rating
                     ? "fill-yellow-400 text-yellow-400"
-                    : "text-gray-300"
+                    : "text-border"
                 }`}
               />
             ))}
@@ -50,7 +50,7 @@ export function ReviewCard({ review }: ReviewCardProps): React.ReactElement {
         </div>
       </div>
       {review.content && (
-        <p className="mt-2 pl-11 text-sm text-primary whitespace-pre-wrap">
+        <p className="mt-2 pl-11 text-sm leading-relaxed text-text-secondary whitespace-pre-wrap">
           {review.content}
         </p>
       )}

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 
@@ -61,21 +60,21 @@ export function PreferenceForm(): React.ReactElement {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Recommendation Preferences</CardTitle>
-        <CardDescription>Customize what tips and creators are recommended to you</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
+    <div className="rounded-xl border border-border/60 bg-surface shadow-sm">
+      <div className="border-b border-border/60 px-6 py-4">
+        <h2 className="text-base font-semibold text-text">Recommendation Preferences</h2>
+        <p className="mt-0.5 text-sm text-muted">Customize what tips and creators are recommended to you</p>
+      </div>
+      <div className="space-y-6 px-6 py-5">
         {/* Timeframes */}
         <div>
-          <Label className="mb-2 block text-sm font-medium">Preferred Timeframes</Label>
+          <Label className="mb-2.5 block text-sm font-medium text-text">Preferred Timeframes</Label>
           <div className="flex flex-wrap gap-2">
             {TIMEFRAMES.map((tf) => (
               <Badge
                 key={tf}
                 variant={prefs.preferredTimeframes.includes(tf) ? "default" : "outline"}
-                className="cursor-pointer"
+                className="cursor-pointer transition-all duration-150 hover:shadow-sm"
                 onClick={() => setPrefs({ ...prefs, preferredTimeframes: toggleItem(prefs.preferredTimeframes, tf) })}
               >
                 {tf.replace("_", " ")}
@@ -86,13 +85,13 @@ export function PreferenceForm(): React.ReactElement {
 
         {/* Asset Classes */}
         <div>
-          <Label className="mb-2 block text-sm font-medium">Preferred Asset Classes</Label>
+          <Label className="mb-2.5 block text-sm font-medium text-text">Preferred Asset Classes</Label>
           <div className="flex flex-wrap gap-2">
             {ASSET_CLASSES.map((ac) => (
               <Badge
                 key={ac}
                 variant={prefs.preferredAssetClasses.includes(ac) ? "default" : "outline"}
-                className="cursor-pointer"
+                className="cursor-pointer transition-all duration-150 hover:shadow-sm"
                 onClick={() => setPrefs({ ...prefs, preferredAssetClasses: toggleItem(prefs.preferredAssetClasses, ac) })}
               >
                 {ac}
@@ -103,13 +102,13 @@ export function PreferenceForm(): React.ReactElement {
 
         {/* Risk Tolerance */}
         <div>
-          <Label className="mb-2 block text-sm font-medium">Risk Tolerance</Label>
+          <Label className="mb-2.5 block text-sm font-medium text-text">Risk Tolerance</Label>
           <div className="flex gap-2">
             {RISK_LEVELS.map((level) => (
               <Badge
                 key={level}
                 variant={prefs.riskTolerance === level ? "default" : "outline"}
-                className="cursor-pointer"
+                className="cursor-pointer transition-all duration-150 hover:shadow-sm"
                 onClick={() => setPrefs({ ...prefs, riskTolerance: level })}
               >
                 {level}
@@ -120,10 +119,10 @@ export function PreferenceForm(): React.ReactElement {
 
         {/* Min Creator Score */}
         <div>
-          <Label className="mb-2 block text-sm font-medium">
+          <Label className="mb-2.5 block text-sm font-medium text-text">
             Minimum Creator RMT Score
             {prefs.minCreatorScore !== null && (
-              <span className="ml-2 text-accent">{prefs.minCreatorScore}</span>
+              <span className="ml-2 font-bold text-accent tabular-nums">{prefs.minCreatorScore}</span>
             )}
           </Label>
           <input
@@ -136,7 +135,7 @@ export function PreferenceForm(): React.ReactElement {
               const val = parseInt(e.target.value, 10);
               setPrefs({ ...prefs, minCreatorScore: val === 0 ? null : val });
             }}
-            className="w-full"
+            className="w-full accent-accent"
           />
           <div className="flex justify-between text-xs text-muted">
             <span>Any</span>
@@ -145,15 +144,15 @@ export function PreferenceForm(): React.ReactElement {
         </div>
 
         {msg && (
-          <p className={`text-sm ${msg.type === "success" ? "text-success" : "text-danger"}`}>
+          <div className={`rounded-lg p-3 text-sm ${msg.type === "success" ? "bg-success-light text-success" : "bg-danger-light text-danger"}`}>
             {msg.text}
-          </p>
+          </div>
         )}
 
-        <Button onClick={handleSave} disabled={saving}>
+        <Button variant="glow" onClick={handleSave} disabled={saving}>
           {saving ? "Saving..." : "Save Preferences"}
         </Button>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

@@ -181,31 +181,31 @@ export default async function CreatorPage({
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <CreatorHeader creator={creator} />
-        </div>
-        <div className="flex items-center gap-2">
-          {!creator.isClaimed && (
-            <ClaimButton creatorId={creator.id} creatorName={creator.displayName} />
-          )}
-          <FollowButton creatorId={creator.id} initialFollowing={isFollowing} />
-          <ShareButton
-            title={`${creator.displayName} — ${creator.score ? `RMT Score: ${creator.score.rmtScore.toFixed(1)}/100` : "Unrated"} | RateMyTip`}
-          />
-        </div>
+    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+      {/* Creator Header Card */}
+      <CreatorHeader creator={creator} />
+
+      {/* Action buttons row */}
+      <div className="mt-4 flex items-center justify-end gap-2">
+        {!creator.isClaimed && (
+          <ClaimButton creatorId={creator.id} creatorName={creator.displayName} />
+        )}
+        <FollowButton creatorId={creator.id} initialFollowing={isFollowing} />
+        <ShareButton
+          title={`${creator.displayName} — ${creator.score ? `RMT Score: ${creator.score.rmtScore.toFixed(1)}/100` : "Unrated"} | RateMyTip`}
+        />
       </div>
 
+      {/* Stats Cards */}
       <div className="mt-8">
         <CreatorStats stats={creator.stats} score={creator.score} />
       </div>
 
       {/* Score History Chart */}
       {creator.scoreHistory.length > 0 && (
-        <div className="mt-8 rounded-2xl bg-white p-6 shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)]">
-          <h2 className="text-lg font-bold text-gradient-primary">Score History</h2>
-          <p className="mt-1 text-sm text-muted">
+        <div className="mt-8 rounded-xl border border-border/60 bg-surface p-6 shadow-sm">
+          <h2 className="text-base font-semibold text-text">Score History</h2>
+          <p className="mt-1 text-xs text-muted">
             RMT Score trend over the last {creator.scoreHistory.length} days
           </p>
           <div className="mt-4">
@@ -217,18 +217,18 @@ export default async function CreatorPage({
       {/* Score Breakdown + Accuracy by Timeframe */}
       {creator.score && (
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
-          <div className="rounded-2xl bg-white p-6 shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)]">
-            <h2 className="text-lg font-bold text-gradient-primary">Score Breakdown</h2>
-            <p className="mt-1 text-sm text-muted">
+          <div className="rounded-xl border border-border/60 bg-surface p-6 shadow-sm">
+            <h2 className="text-base font-semibold text-text">Score Breakdown</h2>
+            <p className="mt-1 text-xs text-muted">
               Component scores that make up the RMT Score
             </p>
             <div className="mt-4">
               <CreatorScoreBreakdown score={creator.score} />
             </div>
           </div>
-          <div className="rounded-2xl bg-white p-6 shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)]">
-            <h2 className="text-lg font-bold text-gradient-primary">Accuracy by Timeframe</h2>
-            <p className="mt-1 text-sm text-muted">
+          <div className="rounded-xl border border-border/60 bg-surface p-6 shadow-sm">
+            <h2 className="text-base font-semibold text-text">Accuracy by Timeframe</h2>
+            <p className="mt-1 text-xs text-muted">
               Performance breakdown by trading style
             </p>
             <div className="mt-4">
@@ -238,6 +238,7 @@ export default async function CreatorPage({
         </div>
       )}
 
+      {/* Tip Feed */}
       <div className="mt-8">
         <CreatorTipFeed
           initialTips={creator.recentTips}

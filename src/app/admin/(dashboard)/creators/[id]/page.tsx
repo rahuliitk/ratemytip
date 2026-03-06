@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { ScoreBadge } from "@/components/shared/score-badge";
 import { TipStatusBadge } from "@/components/tip/tip-status-badge";
 import { formatPrice, formatPercent } from "@/lib/utils/format";
@@ -178,65 +179,73 @@ export default function AdminCreatorDetailPage(): React.ReactElement {
       {/* Back link */}
       <Link
         href="/admin/creators"
-        className="inline-flex items-center gap-1 text-sm text-muted hover:text-text"
+        className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-text"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to Creators
       </Link>
 
       {/* Header */}
-      <div className="flex items-start justify-between rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-6">
-        <div className="flex items-center gap-4">
-          {creator.profileImageUrl ? (
-            <img
-              src={creator.profileImageUrl}
-              alt={creator.displayName}
-              className="h-16 w-16 rounded-full object-cover"
-            />
-          ) : (
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent/10 text-2xl font-bold text-accent">
-              {creator.displayName.charAt(0).toUpperCase()}
-            </div>
-          )}
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-gradient-primary">
-                {creator.displayName}
-              </h1>
-              <span
-                className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                  creator.isActive
-                    ? "bg-green-100 text-green-700"
-                    : "bg-red-100 text-red-700"
-                }`}
-              >
-                {creator.isActive ? "Active" : "Inactive"}
-              </span>
-              <span className="rounded bg-gray-100 px-2 py-0.5 text-xs font-medium text-muted">
-                {creator.tier}
-              </span>
-            </div>
-            <p className="mt-1 text-sm text-muted">/{creator.slug}</p>
-            {creator.bio && (
-              <p className="mt-2 max-w-lg text-sm text-text">{creator.bio}</p>
+      <div className="rounded-xl border border-border/60 bg-surface p-6 shadow-sm">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-4">
+            {creator.profileImageUrl ? (
+              <Image
+                src={creator.profileImageUrl}
+                alt={creator.displayName}
+                width={64}
+                height={64}
+                className="h-16 w-16 rounded-full object-cover ring-2 ring-border/40"
+                unoptimized
+              />
+            ) : (
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-2xl font-bold text-white ring-2 ring-border/40">
+                {creator.displayName.charAt(0).toUpperCase()}
+              </div>
             )}
+            <div>
+              <div className="flex items-center gap-2.5">
+                <h1 className="text-2xl font-bold text-text">
+                  {creator.displayName}
+                </h1>
+                <span
+                  className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                    creator.isActive
+                      ? "bg-emerald-50 text-emerald-700"
+                      : "bg-red-50 text-red-700"
+                  }`}
+                >
+                  <span className={`mr-1.5 h-1.5 w-1.5 rounded-full ${
+                    creator.isActive ? "bg-emerald-500" : "bg-red-500"
+                  }`} />
+                  {creator.isActive ? "Active" : "Inactive"}
+                </span>
+                <span className="rounded-md bg-bg-alt px-2 py-0.5 text-xs font-medium text-muted">
+                  {creator.tier}
+                </span>
+              </div>
+              <p className="mt-1 text-sm text-muted">/{creator.slug}</p>
+              {creator.bio && (
+                <p className="mt-2 max-w-lg text-sm text-text/80">{creator.bio}</p>
+              )}
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-3">
-          {creator.currentScore && (
-            <ScoreBadge score={creator.currentScore.rmtScore} size="lg" />
-          )}
-          <Link
-            href={`/creator/${creator.slug}`}
-            className="inline-flex items-center gap-1 text-xs text-accent hover:underline"
-          >
-            <ExternalLink className="h-3 w-3" />
-            Public Profile
-          </Link>
+          <div className="flex items-center gap-4">
+            {creator.currentScore && (
+              <ScoreBadge score={creator.currentScore.rmtScore} size="lg" />
+            )}
+            <Link
+              href={`/creator/${creator.slug}`}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border/60 px-3 py-1.5 text-xs font-medium text-muted transition-colors hover:bg-bg-alt hover:text-text"
+            >
+              <ExternalLink className="h-3 w-3" />
+              Public Profile
+            </Link>
+          </div>
         </div>
       </div>
 
-      {/* Stats + Score Grid */}
+      {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-6">
         {[
           { label: "Total Tips", value: creator.totalTips },
@@ -258,9 +267,9 @@ export default function AdminCreatorDetailPage(): React.ReactElement {
         ].map((stat) => (
           <div
             key={stat.label}
-            className="rounded-2xl bg-white shadow-[0_1px_2px_0_rgba(26,54,93,0.04)] p-4"
+            className="rounded-xl border border-border/60 bg-surface p-4 shadow-sm"
           >
-            <p className="text-xs text-muted">{stat.label}</p>
+            <p className="text-xs font-medium text-muted">{stat.label}</p>
             <p className="mt-1 text-lg font-bold tabular-nums text-text">
               {stat.value}
             </p>
@@ -270,25 +279,25 @@ export default function AdminCreatorDetailPage(): React.ReactElement {
 
       {/* Score Breakdown */}
       {creator.currentScore && (
-        <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-6">
-          <h2 className="text-sm font-semibold text-primary">Score Breakdown</h2>
-          <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div className="rounded-xl border border-border/60 bg-surface p-6 shadow-sm">
+          <h2 className="text-sm font-semibold text-text">Score Breakdown</h2>
+          <div className="mt-4 grid grid-cols-2 gap-6 sm:grid-cols-4">
             {[
-              { label: "Accuracy (40%)", value: creator.currentScore.accuracyScore },
-              { label: "Risk-Adjusted (30%)", value: creator.currentScore.riskAdjustedScore },
-              { label: "Consistency (20%)", value: creator.currentScore.consistencyScore },
-              { label: "Volume (10%)", value: creator.currentScore.volumeFactorScore },
+              { label: "Accuracy (40%)", value: creator.currentScore.accuracyScore, color: "bg-blue-500" },
+              { label: "Risk-Adjusted (30%)", value: creator.currentScore.riskAdjustedScore, color: "bg-emerald-500" },
+              { label: "Consistency (20%)", value: creator.currentScore.consistencyScore, color: "bg-violet-500" },
+              { label: "Volume (10%)", value: creator.currentScore.volumeFactorScore, color: "bg-amber-500" },
             ].map((comp) => (
               <div key={comp.label}>
-                <p className="text-xs text-muted">{comp.label}</p>
-                <div className="mt-1 flex items-center gap-2">
-                  <div className="h-2 flex-1 rounded-full bg-gray-100">
+                <p className="text-xs font-medium text-muted">{comp.label}</p>
+                <div className="mt-2 flex items-center gap-3">
+                  <div className="h-2 flex-1 rounded-full bg-bg-alt">
                     <div
-                      className="h-2 rounded-full bg-accent"
+                      className={`h-2 rounded-full ${comp.color}`}
                       style={{ width: `${Math.min(comp.value, 100)}%` }}
                     />
                   </div>
-                  <span className="text-xs font-medium tabular-nums text-text">
+                  <span className="text-xs font-semibold tabular-nums text-text">
                     {comp.value.toFixed(1)}
                   </span>
                 </div>
@@ -300,29 +309,29 @@ export default function AdminCreatorDetailPage(): React.ReactElement {
 
       {/* Platforms */}
       {creator.platforms.length > 0 && (
-        <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-6">
-          <h2 className="text-sm font-semibold text-primary">Platforms</h2>
+        <div className="rounded-xl border border-border/60 bg-surface p-6 shadow-sm">
+          <h2 className="text-sm font-semibold text-text">Platforms</h2>
           <div className="mt-3 space-y-2">
             {creator.platforms.map((p) => (
               <div
                 key={p.id}
-                className="flex items-center justify-between rounded bg-bg p-3"
+                className="flex items-center justify-between rounded-lg border border-border/40 bg-bg-alt/50 p-3"
               >
                 <div className="flex items-center gap-3">
-                  <span className="rounded bg-gray-200 px-2 py-0.5 text-xs font-medium">
+                  <span className="rounded-md bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700">
                     {p.platform}
                   </span>
                   <a
                     href={p.platformUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-accent hover:underline"
+                    className="text-sm font-medium text-accent hover:underline"
                   >
                     @{p.platformHandle}
                   </a>
                 </div>
                 <div className="flex items-center gap-4 text-xs text-muted">
-                  <span>{p.followerCount.toLocaleString()} followers</span>
+                  <span className="tabular-nums">{p.followerCount.toLocaleString()} followers</span>
                   <span>
                     Last scraped:{" "}
                     {p.lastScrapedAt
@@ -337,27 +346,27 @@ export default function AdminCreatorDetailPage(): React.ReactElement {
       )}
 
       {/* Moderation Actions */}
-      <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-6">
-        <h2 className="text-sm font-semibold text-primary">Moderation</h2>
+      <div className="rounded-xl border border-border/60 bg-surface p-6 shadow-sm">
+        <h2 className="text-sm font-semibold text-text">Moderation</h2>
         <div className="mt-4 flex flex-col gap-3 sm:flex-row">
           <input
             type="text"
             value={moderationReason}
             onChange={(e) => setModerationReason(e.target.value)}
             placeholder="Reason for moderation action..."
-            className="flex-1 rounded-md border border-gray-200 px-3 py-2 text-sm focus:border-accent focus:outline-none"
+            className="flex-1 rounded-lg border border-border bg-surface px-3.5 py-2.5 text-sm text-text placeholder:text-muted/60 focus:border-border focus:outline-none focus:ring-2 focus:ring-primary/10"
           />
           <div className="flex gap-2">
             <button
               type="button"
               onClick={handleToggleActive}
               disabled={actionLoading}
-              className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-3 py-2 text-sm font-medium text-text hover:bg-gray-200 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-3.5 py-2.5 text-sm font-medium text-text transition-colors hover:bg-bg-alt disabled:opacity-50"
             >
               {creator.isActive ? (
-                <ShieldOff className="h-4 w-4" />
+                <ShieldOff className="h-4 w-4 text-red-500" />
               ) : (
-                <ShieldCheck className="h-4 w-4" />
+                <ShieldCheck className="h-4 w-4 text-emerald-500" />
               )}
               {creator.isActive ? "Deactivate" : "Activate"}
             </button>
@@ -365,7 +374,7 @@ export default function AdminCreatorDetailPage(): React.ReactElement {
               type="button"
               onClick={() => handleModeration("FLAGGED")}
               disabled={actionLoading || !moderationReason.trim()}
-              className="inline-flex items-center gap-1 rounded-md bg-warning/10 px-3 py-2 text-sm font-medium text-warning hover:bg-warning/20 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-50 px-3.5 py-2.5 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-100 disabled:opacity-50"
             >
               <Flag className="h-4 w-4" />
               Flag
@@ -375,34 +384,41 @@ export default function AdminCreatorDetailPage(): React.ReactElement {
 
         {/* Moderation History */}
         {creator.moderationActions.length > 0 && (
-          <div className="mt-4 space-y-2">
-            <p className="text-xs font-medium text-muted">History</p>
-            {creator.moderationActions.map((action) => (
-              <div
-                key={action.id}
-                className="flex items-center justify-between rounded bg-bg p-2 text-xs"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="rounded bg-gray-200 px-1.5 py-0.5 font-medium">
-                    {action.action}
-                  </span>
-                  <span className="text-muted">{action.reason}</span>
+          <div className="mt-5">
+            <p className="text-xs font-semibold text-muted">History</p>
+            <div className="mt-2 space-y-2">
+              {creator.moderationActions.map((action) => (
+                <div
+                  key={action.id}
+                  className="flex items-center justify-between rounded-lg border border-border/40 bg-bg-alt/50 p-2.5 text-xs"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className={`rounded-md px-2 py-0.5 font-medium ${
+                      action.action === "ACTIVATED" ? "bg-emerald-50 text-emerald-700" :
+                      action.action === "DEACTIVATED" ? "bg-red-50 text-red-700" :
+                      action.action === "FLAGGED" ? "bg-amber-50 text-amber-700" :
+                      "bg-bg-alt text-muted"
+                    }`}>
+                      {action.action}
+                    </span>
+                    <span className="text-muted">{action.reason}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted">
+                    <span>{action.admin.name}</span>
+                    <span className="tabular-nums">
+                      {new Date(action.createdAt).toLocaleDateString("en-IN")}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 text-muted">
-                  <span>{action.admin.name}</span>
-                  <span>
-                    {new Date(action.createdAt).toLocaleDateString("en-IN")}
-                  </span>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
       </div>
 
       {/* Recent Tips */}
-      <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-6">
-        <h2 className="text-sm font-semibold text-primary">
+      <div className="rounded-xl border border-border/60 bg-surface p-6 shadow-sm">
+        <h2 className="text-sm font-semibold text-text">
           Recent Tips ({creator.recentTips.length})
         </h2>
         {creator.recentTips.length === 0 ? (
@@ -411,73 +427,73 @@ export default function AdminCreatorDetailPage(): React.ReactElement {
           <div className="mt-4 overflow-x-auto">
             <table className="w-full min-w-[700px] text-left">
               <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="pb-2 text-xs font-semibold uppercase text-muted">
+                <tr className="border-b border-border/60">
+                  <th className="pb-2.5 text-xs font-semibold uppercase tracking-wider text-muted">
                     Stock
                   </th>
-                  <th className="pb-2 text-xs font-semibold uppercase text-muted">
+                  <th className="pb-2.5 text-xs font-semibold uppercase tracking-wider text-muted">
                     Direction
                   </th>
-                  <th className="pb-2 text-right text-xs font-semibold uppercase text-muted">
+                  <th className="pb-2.5 text-right text-xs font-semibold uppercase tracking-wider text-muted">
                     Entry
                   </th>
-                  <th className="pb-2 text-right text-xs font-semibold uppercase text-muted">
+                  <th className="pb-2.5 text-right text-xs font-semibold uppercase tracking-wider text-muted">
                     Target
                   </th>
-                  <th className="pb-2 text-right text-xs font-semibold uppercase text-muted">
+                  <th className="pb-2.5 text-right text-xs font-semibold uppercase tracking-wider text-muted">
                     SL
                   </th>
-                  <th className="pb-2 text-xs font-semibold uppercase text-muted">
+                  <th className="pb-2.5 text-xs font-semibold uppercase tracking-wider text-muted">
                     Status
                   </th>
-                  <th className="pb-2 text-right text-xs font-semibold uppercase text-muted">
+                  <th className="pb-2.5 text-right text-xs font-semibold uppercase tracking-wider text-muted">
                     Return
                   </th>
-                  <th className="pb-2 text-xs font-semibold uppercase text-muted">
+                  <th className="pb-2.5 text-xs font-semibold uppercase tracking-wider text-muted">
                     Date
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-border/40">
                 {creator.recentTips.map((tip) => (
-                  <tr key={tip.id} className="hover:bg-[#2B6CB0]/5">
-                    <td className="py-2 text-sm font-medium text-text">
+                  <tr key={tip.id} className="transition-colors hover:bg-bg-alt/50">
+                    <td className="py-2.5 text-sm font-medium text-text">
                       <Link
                         href={`/tip/${tip.id}`}
-                        className="hover:underline"
+                        className="hover:text-accent hover:underline"
                       >
                         {tip.stock.symbol}
                       </Link>
                     </td>
-                    <td className="py-2">
+                    <td className="py-2.5">
                       <span
-                        className={`rounded px-1.5 py-0.5 text-xs font-semibold ${
+                        className={`rounded-md px-2 py-0.5 text-xs font-semibold ${
                           tip.direction === "BUY"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
+                            ? "bg-emerald-50 text-emerald-700"
+                            : "bg-red-50 text-red-700"
                         }`}
                       >
                         {tip.direction}
                       </span>
                     </td>
-                    <td className="py-2 text-right text-sm tabular-nums text-muted">
+                    <td className="py-2.5 text-right text-sm tabular-nums text-text">
                       {formatPrice(tip.entryPrice)}
                     </td>
-                    <td className="py-2 text-right text-sm tabular-nums text-success">
+                    <td className="py-2.5 text-right text-sm tabular-nums text-emerald-600">
                       {formatPrice(tip.target1)}
                     </td>
-                    <td className="py-2 text-right text-sm tabular-nums text-danger">
+                    <td className="py-2.5 text-right text-sm tabular-nums text-red-600">
                       {formatPrice(tip.stopLoss)}
                     </td>
-                    <td className="py-2">
+                    <td className="py-2.5">
                       <TipStatusBadge status={tip.status} />
                     </td>
-                    <td className="py-2 text-right text-sm tabular-nums">
+                    <td className="py-2.5 text-right text-sm tabular-nums">
                       {tip.returnPct !== null ? (
                         <span
-                          className={
-                            tip.returnPct >= 0 ? "text-success" : "text-danger"
-                          }
+                          className={`font-medium ${
+                            tip.returnPct >= 0 ? "text-emerald-600" : "text-red-600"
+                          }`}
                         >
                           {formatPercent(tip.returnPct)}
                         </span>
@@ -485,7 +501,7 @@ export default function AdminCreatorDetailPage(): React.ReactElement {
                         <span className="text-muted">-</span>
                       )}
                     </td>
-                    <td className="py-2 text-xs text-muted">
+                    <td className="py-2.5 text-xs text-muted tabular-nums">
                       {new Date(tip.tipTimestamp).toLocaleDateString("en-IN", {
                         day: "numeric",
                         month: "short",

@@ -1,22 +1,14 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 
 function ResetPasswordForm(): React.ReactElement {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
@@ -28,37 +20,40 @@ function ResetPasswordForm(): React.ReactElement {
 
   if (!token) {
     return (
-      <Card>
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Invalid link</CardTitle>
-          <CardDescription>
-            This password reset link is invalid or has expired.
-          </CardDescription>
-        </CardHeader>
-        <CardFooter className="justify-center">
-          <Link href="/forgot-password" className="text-sm text-accent hover:underline">
+      <div className="text-center">
+        <h1 className="text-2xl font-bold text-text">Invalid link</h1>
+        <p className="mt-2 text-sm text-muted">
+          This password reset link is invalid or has expired.
+        </p>
+        <div className="mt-8">
+          <Link
+            href="/forgot-password"
+            className="text-sm text-accent hover:text-accent-hover hover:underline"
+          >
             Request a new reset link
           </Link>
-        </CardFooter>
-      </Card>
+        </div>
+      </div>
     );
   }
 
   if (success) {
     return (
-      <Card>
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Password reset!</CardTitle>
-          <CardDescription>
-            Your password has been updated. You can now sign in with your new password.
-          </CardDescription>
-        </CardHeader>
-        <CardFooter className="justify-center">
-          <Button asChild>
+      <div className="text-center">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-50">
+          <CheckCircle2 className="h-6 w-6 text-success" />
+        </div>
+        <h1 className="text-2xl font-bold text-text">Password reset!</h1>
+        <p className="mt-2 text-sm text-muted">
+          Your password has been updated. You can now sign in with your new
+          password.
+        </p>
+        <div className="mt-8">
+          <Button variant="glow" asChild>
             <Link href="/login">Sign in</Link>
           </Button>
-        </CardFooter>
-      </Card>
+        </div>
+      </div>
     );
   }
 
@@ -100,55 +95,68 @@ function ResetPasswordForm(): React.ReactElement {
   }
 
   return (
-    <Card>
-      <CardHeader className="text-center">
-        <CardTitle className="text-2xl">Reset password</CardTitle>
-        <CardDescription>Enter your new password below</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="rounded-xl bg-[#C53030]/10 p-3 text-sm text-[#C53030]">
-              {error}
-            </div>
-          )}
-          <div className="space-y-2">
-            <Label htmlFor="password">New Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="At least 8 characters"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={8}
-              autoComplete="new-password"
-            />
+    <div>
+      <div className="mb-8 text-center">
+        <h1 className="text-2xl font-bold text-text">Reset password</h1>
+        <p className="mt-2 text-sm text-muted">
+          Enter your new password below
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {error && (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            {error}
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              placeholder="Confirm your new password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              minLength={8}
-              autoComplete="new-password"
-            />
-          </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Resetting..." : "Reset password"}
-          </Button>
-        </form>
-      </CardContent>
-      <CardFooter className="justify-center">
-        <Link href="/login" className="text-sm text-muted hover:underline">
+        )}
+
+        <div className="space-y-2">
+          <Label htmlFor="password">New Password</Label>
+          <Input
+            id="password"
+            type="password"
+            placeholder="At least 8 characters"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={8}
+            autoComplete="new-password"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="confirmPassword">Confirm Password</Label>
+          <Input
+            id="confirmPassword"
+            type="password"
+            placeholder="Confirm your new password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            minLength={8}
+            autoComplete="new-password"
+          />
+        </div>
+
+        <Button
+          type="submit"
+          variant="glow"
+          className="w-full"
+          disabled={loading}
+        >
+          {loading ? "Resetting..." : "Reset password"}
+        </Button>
+      </form>
+
+      <p className="mt-8 text-center text-sm text-muted">
+        <Link
+          href="/login"
+          className="text-accent hover:text-accent-hover hover:underline"
+        >
           Back to sign in
         </Link>
-      </CardFooter>
-    </Card>
+      </p>
+    </div>
   );
 }
 
