@@ -79,7 +79,7 @@
     "stripe": "^20.3.1",
     "swr": "^2.2.0",
     "tailwind-merge": "^2.3.0",
-    "zod": "^3.23.0"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@playwright/test": "^1.48.0",
