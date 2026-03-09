@@ -69,7 +69,7 @@
     "lucide-react": "^0.460.0",
     "next": "16.1.6",
     "next-auth": "^5.0.0-beta.25",
-    "pino": "^9.0.0",
+    "pino": "^10.3.1",
     "pino-pretty": "^11.0.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
