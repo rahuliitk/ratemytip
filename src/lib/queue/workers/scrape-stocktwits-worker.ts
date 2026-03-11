@@ -18,7 +18,7 @@ import { db } from "@/lib/db";
 const log = createLogger("worker/stocktwits");
 import { StockTwitsScraper } from "@/lib/scraper/stocktwits";
 import { createStockTwitsRateLimiter } from "@/lib/scraper/rate-limiter";
-import { STOCKTWITS } from "@/lib/constants";
+// STOCKTWITS constants available in @/lib/constants if needed
 import { parseTipQueue } from "@/lib/queue/queues";
 
 // ──── Job payload type ────
@@ -146,7 +146,7 @@ async function processStockTwitsScrapeJob(
 
   let postsStored = 0;
   let parsedEnqueued = 0;
-  let creatorsCreated = 0;
+  const creatorsCreated = 0;
   let errors = 0;
 
   try {

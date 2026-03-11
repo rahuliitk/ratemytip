@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import useSWR from "swr";
 import Link from "next/link";
 import { Bell } from "lucide-react";
@@ -47,8 +47,8 @@ export function NotificationBell(): React.ReactElement {
     mutate();
   }
 
-  function formatTimeAgo(dateStr: string): string {
-    const diff = Date.now() - new Date(dateStr).getTime();
+  const formatTimeAgo = useCallback((dateStr: string): string => {
+    const diff = globalThis.Date.now() - new Date(dateStr).getTime();
     const minutes = Math.floor(diff / 60000);
     if (minutes < 1) return "just now";
     if (minutes < 60) return `${minutes}m ago`;
@@ -56,7 +56,7 @@ export function NotificationBell(): React.ReactElement {
     if (hours < 24) return `${hours}h ago`;
     const days = Math.floor(hours / 24);
     return `${days}d ago`;
-  }
+  }, []);
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>

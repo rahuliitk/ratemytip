@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { Menu, X, Search, BarChart3, Github, LogOut, Settings, Bookmark, LayoutDashboard, PenLine, Rss, Crown, Briefcase, Sparkles } from "lucide-react";
+import { Menu, X, Search, BarChart3, Github, LogOut, Settings, Bookmark, LayoutDashboard, PenLine, Rss, Briefcase, Sparkles } from "lucide-react";
 import { NotificationBell } from "@/components/shared/notification-bell";
 import {
   DropdownMenu,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -20,22 +20,23 @@ export function CommentSection({ tipId }: CommentSectionProps): React.ReactEleme
   const [newComment, setNewComment] = useState("");
   const [posting, setPosting] = useState(false);
 
-  const fetchComments = useCallback(async () => {
-    try {
-      const res = await fetch(`/api/v1/tips/${tipId}/comments?sort=${sortBy}`);
-      if (res.ok) {
-        const json = await res.json();
-        setComments(json.data);
-      }
-    } catch {
-      // keep existing comments on error
-    }
-    setLoading(false);
-  }, [tipId, sortBy]);
-
   useEffect(() => {
-    fetchComments();
-  }, [fetchComments]);
+    let cancelled = false;
+    async function load() {
+      try {
+        const res = await fetch(`/api/v1/tips/${tipId}/comments?sort=${sortBy}`);
+        if (res.ok && !cancelled) {
+          const json = await res.json();
+          setComments(json.data);
+        }
+      } catch {
+        // keep existing comments on error
+      }
+      if (!cancelled) setLoading(false);
+    }
+    void load();
+    return () => { cancelled = true; };
+  }, [tipId, sortBy]);
 
   async function handlePost(): Promise<void> {
     if (!session?.user?.userId) {

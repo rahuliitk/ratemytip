@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { ScoreBadge } from "@/components/shared/score-badge";
 import { TipStatusBadge } from "@/components/tip/tip-status-badge";
 import { formatPrice, formatPercent } from "@/lib/utils/format";
@@ -188,10 +189,13 @@ export default function AdminCreatorDetailPage(): React.ReactElement {
       <div className="flex items-start justify-between rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-6">
         <div className="flex items-center gap-4">
           {creator.profileImageUrl ? (
-            <img
+            <Image
               src={creator.profileImageUrl}
               alt={creator.displayName}
+              width={64}
+              height={64}
               className="h-16 w-16 rounded-full object-cover"
+              unoptimized
             />
           ) : (
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent/10 text-2xl font-bold text-accent">

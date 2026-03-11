@@ -209,7 +209,7 @@ async function scrapeMoneyControl(): Promise<number> {
   // ── Source 3: MoneyControl ──
   console.log("\n── Trying MoneyControl... ──");
   const rateLimiter = new SimpleRateLimiter(2, 10_000); // 2 requests per 10s
-  const scraper = new MoneyControlScraper(rateLimiter as any);
+  const scraper = new MoneyControlScraper(rateLimiter as unknown as ConstructorParameters<typeof MoneyControlScraper>[0]);
 
   const { recommendations } = await scraper.scrapeStockIdeas();
 

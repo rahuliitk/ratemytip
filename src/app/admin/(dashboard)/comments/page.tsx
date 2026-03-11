@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { EyeOff, XCircle, CheckCircle, Loader2, ChevronDown, ChevronRight, ExternalLink } from "lucide-react";
+import { EyeOff, XCircle, Loader2, ChevronDown, ChevronRight, ExternalLink } from "lucide-react";
 
 interface ReportAuthor {
   id: string;

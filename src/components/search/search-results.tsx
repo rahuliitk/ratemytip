@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ScoreBadge } from "@/components/shared/score-badge";
+import Image from "next/image";
 import { TipCard } from "@/components/tip/tip-card";
 import type { CreatorSummary, StockSummary, TipSummary } from "@/types";
 
@@ -46,10 +46,13 @@ export function SearchResults({
               >
                 <div className="flex items-center gap-3">
                   {creator.profileImageUrl ? (
-                    <img
+                    <Image
                       src={creator.profileImageUrl}
                       alt={creator.displayName}
+                      width={40}
+                      height={40}
                       className="h-10 w-10 rounded-full object-cover"
+                      unoptimized
                     />
                   ) : (
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10 text-sm font-bold text-accent">
