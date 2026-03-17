@@ -2,6 +2,7 @@
 
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "next-themes";
+import { ExperienceLevelProvider } from "@/components/beginner/beginner-mode-toggle";
 
 export function Providers({
   children,
@@ -10,7 +11,9 @@ export function Providers({
 }): React.ReactElement {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-      <SessionProvider>{children}</SessionProvider>
+      <SessionProvider>
+        <ExperienceLevelProvider>{children}</ExperienceLevelProvider>
+      </SessionProvider>
     </ThemeProvider>
   );
 }

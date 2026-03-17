@@ -1,12 +1,13 @@
 // src/lib/scraper/moneycontrol.ts
 //
-// Web scraper for MoneyControl stock ideas page.
+// Scraper for MoneyControl stock ideas using their JSON API.
 // Fetches brokerage recommendations (buy/sell with targets) from
-// https://www.moneycontrol.com/markets/stock-ideas/
+// https://api.moneycontrol.com/mcapi/v1/broker-research/stock-ideas
 //
-// Uses cheerio for HTML parsing. Runs daily at 8 AM IST.
+// The API returns paginated JSON with real CMP, target prices,
+// recommendation dates, and brokerage names — much richer than
+// HTML scraping.
 
-import * as cheerio from "cheerio";
 import { createLogger } from "@/lib/logger";
 import { RateLimiter } from "./rate-limiter";
 import type { ScrapedPost } from "./types";
@@ -16,32 +17,104 @@ const log = createLogger("scraper/moneycontrol");
 // ──── Types ────
 
 export interface MoneyControlRecommendation {
+  readonly id: string;
   readonly brokerageName: string;
   readonly stockName: string;
+  readonly stockShortName: string;
   readonly stockSymbol: string | null;
-  readonly recommendationType: string; // "Buy", "Sell", "Accumulate", "Reduce", "Hold"
+  readonly scid: string;
+  readonly recommendationType: string; // "BUY", "SELL", "ACCUMULATE", "REDUCE", etc.
   readonly targetPrice: number;
   readonly currentPrice: number;
+  readonly recommendedPrice: number;
   readonly upsidePct: number;
   readonly reportDate: string;
   readonly sourceUrl: string;
+  readonly attachmentUrl: string | null;
+  readonly exchange: string;
+}
+
+/** Stock metadata returned by the MoneyControl price API */
+export interface MoneyControlStockInfo {
+  readonly nseSymbol: string;
+  readonly bseCode: string | null;
+  readonly fullName: string;
+  readonly sector: string | null;
+  readonly industry: string | null;
+  readonly marketCapCrores: number | null;
+  readonly lastPrice: number | null;
+  readonly high52w: number | null;
+  readonly low52w: number | null;
+}
+
+// Shape of each item returned by the stock-ideas API
+interface StockIdeaApiItem {
+  readonly id: string;
+  readonly organization: string;
+  readonly entry_date: string;
+  readonly heading: string;
+  readonly attachment: string | null;
+  readonly recommend_date: string;
+  readonly target_price_date: string;
+  readonly target_price: string;
+  readonly recommended_price: number;
+  readonly scid: string;
+  readonly stkname: string;
+  readonly stockShortName: string;
+  readonly cmp: string;
+  readonly change: string;
+  readonly perChange: string;
+  readonly current_returns: number;
+  readonly potential_returns_per: number;
+  readonly exchange: string;
+  readonly recommend_flag: string;
+  readonly stk_url: string;
+  readonly stock_data: {
+    readonly current: {
+      readonly recommend_flag: string;
+      readonly target_price: string;
+      readonly target_price_date: string;
+      readonly P_ORGANIZATION: string;
+    };
+    readonly previous:
+      | {
+          readonly recommend_flag: string;
+          readonly target_price: string;
+          readonly target_price_date: string;
+          readonly P_ORGANIZATION: string;
+        }
+      | readonly [];
+  };
+}
+
+interface StockIdeaApiResponse {
+  readonly success: number;
+  readonly data: readonly StockIdeaApiItem[];
 }
 
 // ──── Constants ────
 
-const BASE_URL = "https://www.moneycontrol.com/markets/stock-ideas/";
+const API_BASE = "https://api.moneycontrol.com/mcapi/v1/broker-research";
+const STOCK_IDEAS_ENDPOINT = `${API_BASE}/stock-ideas`;
+const PRICE_API_BASE = "https://priceapi.moneycontrol.com/pricefeed/nse/equitycash";
 const DEFAULT_USER_AGENT =
   process.env.MONEYCONTROL_USER_AGENT ??
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+const DEFAULT_REFERER = "https://www.moneycontrol.com/markets/stock-ideas/";
 
-// Common CSS selectors for MoneyControl stock ideas page
-// These may need updating if MoneyControl changes their HTML structure
-const SELECTORS = {
-  // The stock ideas are typically in a table or card-based layout
-  ideaRow: "table tbody tr, .stock-idea-card, .bsr_table tbody tr, .FL table tbody tr",
-  // Fallback: try any table row with enough cells
-  fallbackRow: "table tbody tr",
-} as const;
+// Map recommend_flag to readable recommendation type
+const RECOMMEND_FLAG_MAP: Record<string, string> = {
+  BUY: "Buy",
+  SELL: "Sell",
+  HOLD: "Hold",
+  ACCUMULATE: "Accumulate",
+  REDUCE: "Reduce",
+  OUTPERFORM: "Outperform",
+  UNDERPERFORM: "Underperform",
+  B: "Buy",
+  S: "Sell",
+  H: "Hold",
+};
 
 // ──── Scraper Class ────
 
@@ -53,207 +126,218 @@ export class MoneyControlScraper {
   }
 
   /**
-   * Scrape all stock ideas from MoneyControl.
-   * Returns an array of ScrapedPost objects ready for storage.
+   * Scrape stock ideas from MoneyControl JSON API.
+   *
+   * @param maxPages - Max pages to fetch. Use 0 for unlimited.
+   *   - First crawl (FULL_SCRAPE): 20 pages = ~1000 tips
+   *   - Recurring 3-hour runs (INCREMENTAL): 3 pages = ~150 tips
+   *     (MoneyControl adds ~20-50 new tips per day, so 150 covers 3+ days)
+   *   Default: 3 pages (incremental mode).
+   *
+   * Returns recommendations in the exact order the API returns them,
+   * matching MoneyControl's page display order.
    */
-  async scrapeStockIdeas(): Promise<{
+  async scrapeStockIdeas(maxPages: number = 3): Promise<{
     recommendations: MoneyControlRecommendation[];
     posts: ScrapedPost[];
+    totalApiItems: number;
+    skippedItems: number;
   }> {
-    log.info("Starting MoneyControl stock ideas scrape");
+    const unlimited = maxPages === 0;
+    log.info(
+      { maxPages: unlimited ? "UNLIMITED" : maxPages },
+      "Starting MoneyControl stock-ideas API scrape"
+    );
 
-    const allRecommendations: MoneyControlRecommendation[] = [];
-    const allPosts: ScrapedPost[] = [];
+    const recommendations: MoneyControlRecommendation[] = [];
+    const seen = new Set<string>();
+    const pageSize = 50;
+    let start = 0;
+    let pagesFetched = 0;
+    let totalApiItems = 0;
+    let skippedItems = 0;
 
-    // Scrape main page and up to 10 additional pages
-    const maxPages = 10;
-
-    for (let page = 1; page <= maxPages; page++) {
+    while (unlimited || pagesFetched < maxPages) {
       await this.rateLimiter.waitForSlot();
 
-      const url = page === 1 ? BASE_URL : `${BASE_URL}?page=${page}`;
-      const html = await this.fetchWithRetry(url);
+      const items = await this.fetchStockIdeas(start, pageSize);
+      this.rateLimiter.recordRequest();
+      pagesFetched++;
 
-      if (!html) {
-        log.warn({ page }, "MoneyControl empty response, stopping pagination");
+      if (!items || items.length === 0) {
+        log.info({ start, pagesFetched }, "No more items from API, stopping");
         break;
       }
 
-      const recs = this.parseStockIdeasHtml(html, url);
+      totalApiItems += items.length;
 
-      if (recs.length === 0) {
-        log.info({ page }, "No MoneyControl recommendations found, stopping pagination");
-        break;
-      }
-
-      allRecommendations.push(...recs);
-      log.info({ page, count: recs.length }, "MoneyControl page scraped");
-
-      // Convert to ScrapedPost format
-      for (const rec of recs) {
-        allPosts.push(this.recommendationToScrapedPost(rec));
-      }
-
-      // Polite delay between pages
-      if (page < maxPages) {
-        await new Promise((resolve) => setTimeout(resolve, 3000));
-      }
-    }
-
-    log.info({ totalRecommendations: allRecommendations.length }, "MoneyControl scrape complete");
-
-    return { recommendations: allRecommendations, posts: allPosts };
-  }
-
-  /**
-   * Parse MoneyControl HTML and extract brokerage recommendations.
-   * Handles multiple possible HTML structures with fallback selectors.
-   */
-  private parseStockIdeasHtml(
-    html: string,
-    sourceUrl: string
-  ): MoneyControlRecommendation[] {
-    const $ = cheerio.load(html);
-    const recommendations: MoneyControlRecommendation[] = [];
-
-    // Try primary selectors first, then fallback
-    let rows = $(SELECTORS.ideaRow);
-
-    if (rows.length === 0) {
-      rows = $(SELECTORS.fallbackRow);
-    }
-
-    if (rows.length === 0) {
-      log.warn(
-        { pageTitle: $("title").text().trim() },
-        "MoneyControl no data rows found — HTML structure may have changed"
-      );
-      return [];
-    }
-
-    rows.each((_index, element) => {
-      try {
-        const cells = $(element).find("td");
-
-        // We need at least 4 cells for meaningful data
-        if (cells.length < 4) return;
-
-        const cellTexts = cells
-          .map((_i, cell) => $(cell).text().trim())
-          .get();
-
-        // Try to extract recommendation from cell data
-        const rec = this.extractRecommendationFromCells(cellTexts, sourceUrl);
-        if (rec) {
-          recommendations.push(rec);
+      for (const item of items) {
+        const rec = this.apiItemToRecommendation(item);
+        if (!rec) {
+          skippedItems++;
+          continue;
         }
-      } catch {
-        // Skip malformed rows silently
-      }
-    });
 
-    return recommendations;
+        if (seen.has(rec.id)) continue;
+        seen.add(rec.id);
+        recommendations.push(rec);
+      }
+
+      log.info(
+        { page: pagesFetched, itemsOnPage: items.length, totalSoFar: recommendations.length },
+        "Fetched page of MoneyControl recommendations"
+      );
+
+      start += items.length;
+
+      // If fewer items than requested, we've reached the end
+      if (items.length < pageSize) break;
+    }
+
+    log.info(
+      { totalApiItems, totalRecommendations: recommendations.length, skippedItems, pagesFetched },
+      "MoneyControl API scrape complete"
+    );
+
+    const posts = recommendations.map((rec) =>
+      this.recommendationToScrapedPost(rec)
+    );
+
+    return { recommendations, posts, totalApiItems, skippedItems };
   }
 
   /**
-   * Extract a recommendation from table cell texts.
-   * Handles various column orderings by looking for patterns.
+   * Look up a stock's NSE symbol and metadata from MoneyControl's price API.
+   * Uses the `scid` (MoneyControl internal stock code) to fetch the data.
+   * Returns null if the stock is not found or the API fails.
    */
-  private extractRecommendationFromCells(
-    cells: string[],
-    sourceUrl: string
-  ): MoneyControlRecommendation | null {
-    // Look for recommendation type keywords in any cell
-    const recTypeIndex = cells.findIndex((c) =>
-      /^(buy|sell|hold|accumulate|reduce|outperform|underperform|neutral|overweight|underweight)$/i.test(c)
-    );
+  async lookupStockByScid(scid: string): Promise<MoneyControlStockInfo | null> {
+    if (!scid) return null;
 
-    if (recTypeIndex === -1) return null;
+    const url = `${PRICE_API_BASE}/${encodeURIComponent(scid)}`;
+    await this.rateLimiter.waitForSlot();
+    const json = await this.fetchJsonWithRetry<{
+      code: string;
+      data: Record<string, unknown>;
+    }>(url);
+    this.rateLimiter.recordRequest();
 
-    const recommendationType = cells[recTypeIndex] ?? "";
-
-    // Skip "Hold" / "Neutral" — not actionable tips
-    if (/^(hold|neutral)$/i.test(recommendationType)) return null;
-
-    // Look for price-like numbers
-    const prices: number[] = [];
-    const priceIndices: number[] = [];
-
-    for (let i = 0; i < cells.length; i++) {
-      const cell = cells[i];
-      if (!cell) continue;
-      const cleaned = cell.replace(/[₹,\s]/g, "");
-      const num = parseFloat(cleaned);
-      if (!isNaN(num) && num > 0 && num < 1_000_000) {
-        prices.push(num);
-        priceIndices.push(i);
-      }
+    if (!json || json.code !== "200" || !json.data) {
+      log.warn({ scid }, "MoneyControl price API lookup failed");
+      return null;
     }
 
-    if (prices.length < 2) return null;
+    const d = json.data;
+    const nseSymbol = d.NSEID as string | undefined;
+    if (!nseSymbol) {
+      log.warn({ scid }, "No NSEID in MoneyControl price API response");
+      return null;
+    }
 
-    // Find text cells that are likely stock name and brokerage
-    const textCells = cells.filter(
-      (c, i) =>
-        i !== recTypeIndex &&
-        !priceIndices.includes(i) &&
-        c.length > 1 &&
-        !/^\d/.test(c) &&
-        !/^[₹%]/.test(c)
-    );
-
-    if (textCells.length < 2) return null;
-
-    // Heuristic: first text cell is usually stock name, second is brokerage
-    // (or vice versa — we handle both)
-    const stockName = textCells[0] ?? "";
-    const brokerageName = textCells[1] ?? "";
-
-    // Heuristic: target is usually the largest price, current is the smaller
-    const sortedPrices = [...prices].sort((a, b) => a - b);
-    const currentPrice = sortedPrices[0] ?? 0;
-    const targetPrice = sortedPrices[sortedPrices.length - 1] ?? 0;
-
-    if (currentPrice <= 0 || targetPrice <= 0) return null;
-
-    const upsidePct =
-      currentPrice > 0
-        ? ((targetPrice - currentPrice) / currentPrice) * 100
-        : 0;
-
-    // Look for a date in the cells
-    const dateCell = cells.find((c) => /\d{1,2}[-\/]\w{3}[-\/]\d{2,4}|\d{4}-\d{2}-\d{2}/.test(c));
-    const reportDate = dateCell ?? new Date().toISOString().split("T")[0] ?? "";
+    const mktcap = typeof d.MKTCAP === "number" ? d.MKTCAP : null;
+    const lastPrice = typeof d.pricecurrent === "string" ? parseFloat(d.pricecurrent) : null;
+    const high52w = typeof d["52H"] === "string" ? parseFloat(d["52H"] as string) : null;
+    const low52w = typeof d["52L"] === "string" ? parseFloat(d["52L"] as string) : null;
 
     return {
-      brokerageName,
-      stockName,
-      stockSymbol: null, // Will be resolved via normalizer
-      recommendationType,
-      targetPrice,
-      currentPrice,
-      upsidePct,
-      reportDate,
-      sourceUrl,
+      nseSymbol,
+      bseCode: (d.BSEID as string) || null,
+      fullName: (d.SC_FULLNM as string) || "",
+      sector: (d.main_sector as string) || (d.SC_SUBSEC as string) || null,
+      industry: (d.newSubsector as string) || (d.SC_SUBSEC as string) || null,
+      marketCapCrores: mktcap,
+      lastPrice: lastPrice && !isNaN(lastPrice) ? lastPrice : null,
+      high52w: high52w && !isNaN(high52w) ? high52w : null,
+      low52w: low52w && !isNaN(low52w) ? low52w : null,
     };
   }
 
   /**
-   * Convert a MoneyControl recommendation into a ScrapedPost for storage.
+   * Fetch a page of stock ideas from the API.
    */
-  private recommendationToScrapedPost(rec: MoneyControlRecommendation): ScrapedPost {
-    // Create a unique platform post ID from brokerage + stock + date
-    const platformPostId = `mc-${rec.brokerageName}-${rec.stockName}-${rec.reportDate}`
-      .toLowerCase()
-      .replace(/[^a-z0-9-]/g, "-")
-      .replace(/-+/g, "-");
+  private async fetchStockIdeas(
+    start: number,
+    limit: number
+  ): Promise<readonly StockIdeaApiItem[] | null> {
+    const url = `${STOCK_IDEAS_ENDPOINT}?start=${start}&limit=${limit}&deviceType=W`;
 
-    // Construct content string that represents the recommendation
+    const json = await this.fetchJsonWithRetry<StockIdeaApiResponse>(url);
+    if (!json || json.success !== 1) {
+      log.warn({ start, limit }, "MoneyControl API returned unsuccessful response");
+      return null;
+    }
+
+    return json.data;
+  }
+
+  /**
+   * Convert an API item to our internal recommendation format.
+   * Includes ALL recommendation types (Buy, Sell, Hold, Accumulate, etc.)
+   * to preserve exact MoneyControl page order. The worker decides which
+   * ones to create as actionable Tips.
+   */
+  private apiItemToRecommendation(
+    item: StockIdeaApiItem
+  ): MoneyControlRecommendation | null {
+    const targetPrice = parseFloat(item.target_price);
+    const cmp = parseFloat(item.cmp);
+
+    // Only skip items with truly invalid/missing prices
+    if (isNaN(targetPrice) || isNaN(cmp) || cmp <= 0) {
+      log.warn(
+        { id: item.id, stock: item.stkname, target: item.target_price, cmp: item.cmp },
+        "Skipping item with invalid prices"
+      );
+      return null;
+    }
+
+    const rawFlag = (item.recommend_flag || "").toUpperCase();
+    const recommendationType =
+      RECOMMEND_FLAG_MAP[rawFlag] ?? (rawFlag || "Buy");
+
+    // Do NOT skip Hold/Neutral here — include ALL items to preserve
+    // exact MoneyControl page ordering. The worker will decide which
+    // to create as actionable tips.
+
+    const upsidePct = cmp > 0 ? ((targetPrice - cmp) / cmp) * 100 : 0;
+
+    const sourceUrl = item.stk_url
+      ? `https://www.moneycontrol.com/${item.stk_url}`
+      : DEFAULT_REFERER;
+
+    return {
+      id: item.id,
+      brokerageName: item.organization,
+      stockName: item.stkname,
+      stockShortName: item.stockShortName || item.stkname,
+      stockSymbol: item.scid || null,
+      scid: item.scid,
+      recommendationType,
+      targetPrice: targetPrice > 0 ? targetPrice : cmp, // fallback for Hold with 0 target
+      currentPrice: cmp,
+      recommendedPrice: item.recommended_price || cmp,
+      upsidePct,
+      reportDate: item.entry_date || item.target_price_date || (new Date().toISOString().split("T")[0] ?? ""),
+      sourceUrl,
+      attachmentUrl: item.attachment || null,
+      exchange: item.exchange === "B" ? "BSE" : "NSE",
+    };
+  }
+
+  /**
+   * Convert a recommendation into a ScrapedPost for storage.
+   */
+  private recommendationToScrapedPost(
+    rec: MoneyControlRecommendation
+  ): ScrapedPost {
+    const platformPostId = `mc-${rec.id}`;
+
     const content = [
       `${rec.recommendationType.toUpperCase()} ${rec.stockName}`,
       `Brokerage: ${rec.brokerageName}`,
       `Target: ₹${rec.targetPrice}`,
       `CMP: ₹${rec.currentPrice}`,
+      `Rec Price: ₹${rec.recommendedPrice}`,
       `Upside: ${rec.upsidePct.toFixed(1)}%`,
       `Date: ${rec.reportDate}`,
     ].join("\n");
@@ -275,30 +359,30 @@ export class MoneyControlScraper {
   }
 
   /**
-   * Fetch a URL with retry logic and rate limiting.
+   * Fetch JSON from a URL with retry logic and rate limiting.
    */
-  private async fetchWithRetry(
+  private async fetchJsonWithRetry<T>(
     url: string,
     maxRetries: number = 3
-  ): Promise<string | null> {
+  ): Promise<T | null> {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         const response = await fetch(url, {
           headers: {
             "User-Agent": DEFAULT_USER_AGENT,
-            Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Accept-Language": "en-US,en;q=0.5",
+            Accept: "application/json",
+            Referer: DEFAULT_REFERER,
+            Origin: "https://www.moneycontrol.com",
           },
         });
 
         if (!response.ok) {
           log.warn(
             { status: response.status, url, attempt, maxRetries },
-            "MoneyControl HTTP error"
+            "MoneyControl API HTTP error"
           );
 
           if (response.status === 429) {
-            // Rate limited — wait longer
             const waitMs = 10_000 * attempt;
             log.info({ waitMs }, "MoneyControl rate limited, backing off");
             await new Promise((resolve) => setTimeout(resolve, waitMs));
@@ -306,22 +390,32 @@ export class MoneyControlScraper {
           }
 
           if (attempt < maxRetries) {
-            await new Promise((resolve) => setTimeout(resolve, 5000 * attempt));
+            await new Promise((resolve) =>
+              setTimeout(resolve, 5000 * attempt)
+            );
             continue;
           }
 
           return null;
         }
 
-        return await response.text();
+        return (await response.json()) as T;
       } catch (error) {
         log.error(
-          { err: error instanceof Error ? error : new Error(String(error)), url, attempt, maxRetries },
-          "MoneyControl fetch error"
+          {
+            err:
+              error instanceof Error ? error : new Error(String(error)),
+            url,
+            attempt,
+            maxRetries,
+          },
+          "MoneyControl API fetch error"
         );
 
         if (attempt < maxRetries) {
-          await new Promise((resolve) => setTimeout(resolve, 5000 * attempt));
+          await new Promise((resolve) =>
+            setTimeout(resolve, 5000 * attempt)
+          );
         }
       }
     }

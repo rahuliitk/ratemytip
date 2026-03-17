@@ -14,6 +14,7 @@ export function TipCard({ tip, showCreator = false }: TipCardProps): React.React
   return (
     <Link
       href={`/tip/${tip.id}`}
+      data-tour="tip-card"
       className={`block rounded-xl border border-border/60 bg-surface p-4 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ${
         isBuy ? "border-l-4 border-l-emerald-400" : "border-l-4 border-l-red-400"
       }`}

@@ -48,7 +48,7 @@ export async function GET(
           creatorId: creator.id,
           reviewStatus: { in: ["AUTO_APPROVED", "MANUALLY_APPROVED"] },
         },
-        orderBy: { tipTimestamp: "desc" },
+        orderBy: [{ tipTimestamp: "desc" }, { sourcePosition: "asc" }],
         take: 10,
         include: {
           stock: {

@@ -42,17 +42,16 @@ async function getLeaderboardData(params: {
   try {
     const orderBy =
       params.sortBy === "accuracy"
-        ? { currentScore: { accuracyRate: "desc" as const } }
+        ? [{ currentScore: { accuracyRate: "desc" as const } }, { totalTips: "desc" as const }]
         : params.sortBy === "return"
-          ? { currentScore: { avgReturnPct: "desc" as const } }
+          ? [{ currentScore: { avgReturnPct: "desc" as const } }, { totalTips: "desc" as const }]
           : params.sortBy === "total_tips"
-            ? { totalTips: "desc" as const }
-            : { currentScore: { rmtScore: "desc" as const } };
+            ? [{ totalTips: "desc" as const }]
+            : [{ currentScore: { rmtScore: "desc" as const } }, { totalTips: "desc" as const }];
 
     const where = {
       isActive: true,
       totalTips: { gte: params.minTips },
-      currentScore: { isNot: null },
     };
 
     const [creators, total] = await Promise.all([

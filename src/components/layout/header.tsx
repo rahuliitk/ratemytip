@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { Menu, X, Search, BarChart3, Github, LogOut, Settings, Bookmark, LayoutDashboard, PenLine, Rss, Briefcase, Sparkles } from "lucide-react";
 import { NotificationBell } from "@/components/shared/notification-bell";
+import { BeginnerModeToggle } from "@/components/beginner/beginner-mode-toggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,6 +59,12 @@ export function Header(): React.ReactElement {
             Tips
           </Link>
           <Link
+            href="/stocks"
+            className="rounded-lg px-3 py-2 text-sm font-medium text-muted transition-all duration-200 hover:bg-bg-alt hover:text-text"
+          >
+            Stocks
+          </Link>
+          <Link
             href="/search"
             className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-muted transition-all duration-200 hover:bg-bg-alt hover:text-text"
           >
@@ -81,6 +88,7 @@ export function Header(): React.ReactElement {
           </a>
 
           <ThemeToggle />
+          <BeginnerModeToggle />
 
           {/* Auth section */}
           {status === "loading" ? (
@@ -216,6 +224,13 @@ export function Header(): React.ReactElement {
               onClick={() => setMobileMenuOpen(false)}
             >
               Tips
+            </Link>
+            <Link
+              href="/stocks"
+              className="rounded-lg px-3 py-2.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-bg-alt hover:text-text"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Stocks
             </Link>
             <Link
               href="/search"

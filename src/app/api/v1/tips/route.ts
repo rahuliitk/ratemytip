@@ -75,7 +75,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       db.tip.count({ where }),
       db.tip.findMany({
         where,
-        orderBy: { tipTimestamp: "desc" },
+        orderBy: [{ tipTimestamp: "desc" }, { sourcePosition: "asc" }],
         skip,
         take,
         include: {

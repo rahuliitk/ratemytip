@@ -116,7 +116,7 @@ async function getTipsData(params: {
     const [rows, total] = await Promise.all([
       db.tip.findMany({
         where,
-        orderBy: { tipTimestamp: "desc" },
+        orderBy: [{ tipTimestamp: "desc" }, { sourcePosition: "asc" }],
         include: TIP_INCLUDE,
         skip: (params.page - 1) * params.pageSize,
         take: params.pageSize,

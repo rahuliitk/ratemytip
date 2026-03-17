@@ -49,6 +49,7 @@ export function ScoreBadge({
 
   return (
     <span
+      data-tour="score-badge"
       className={cn(
         "inline-flex items-center gap-1.5 rounded-md font-bold tabular-nums",
         getScoreColor(clampedScore),

@@ -68,6 +68,11 @@ model Creator {
   avgCommunityRating Float? @map("avg_community_rating")
   reviewCount        Int    @default(0) @map("review_count")
 
+  // Phase 1.5A: Red Flag / Transparency fields
+  transparencyScore  Int     @default(100) @map("transparency_score") // 0-100, higher = more transparent
+  redFlagCount       Int     @default(0) @map("red_flag_count")
+  redFlagData        Json?   @map("red_flag_data") // Cached red flag analysis results
+
   firstTipAt DateTime? @map("first_tip_at")
   lastTipAt  DateTime? @map("last_tip_at")
   createdAt  DateTime  @default(now()) @map("created_at")
@@ -345,8 +350,13 @@ model Tip {
   commentCount Int       @default(0) @map("comment_count")
   viewCount    Int       @default(0) @map("view_count")
   saveCount    Int       @default(0) @map("save_count")
-  feedScore    Float?    @map("feed_score")
-  source       TipSource @default(SCRAPED)
+  feedScore       Float?    @map("feed_score")
+  source          TipSource @default(SCRAPED)
+  sourcePosition  Int?      @map("source_position") // Preserves display order from source (e.g. MoneyControl)
+
+  // Phase 1.5A: Risk Assessment (computed when tip is approved)
+  riskLevel       RiskLevel?  @map("risk_level")
+  riskScore       Int?        @map("risk_score")     // 0-100 (higher = riskier)
 
   // Timestamps
   createdAt DateTime @default(now()) @map("created_at")
@@ -373,6 +383,7 @@ model Tip {
   @@index([reviewStatus])
   @@index([expiresAt])
   @@index([tipTimestamp(sort: Desc)])
+  @@index([tipTimestamp(sort: Desc), sourcePosition(sort: Asc)])
   @@index([feedScore(sort: Desc)])
   @@map("tips")
 }
@@ -423,6 +434,13 @@ enum ReviewStatus {
   MANUALLY_APPROVED
   REJECTED
   NEEDS_EDIT
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  VERY_HIGH
 }
 
 // ════════════════════════════════════════

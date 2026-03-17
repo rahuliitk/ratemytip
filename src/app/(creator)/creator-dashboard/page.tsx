@@ -31,7 +31,7 @@ export default async function CreatorDashboardPage(): Promise<React.ReactElement
     db.tip.findMany({
       where: { creatorId: user.claimedCreatorId, status: { not: "REJECTED" } },
       include: { stock: { select: { symbol: true } } },
-      orderBy: { tipTimestamp: "desc" },
+      orderBy: [{ tipTimestamp: "desc" }, { sourcePosition: "asc" }],
       take: 5,
     }),
     db.scoreSnapshot.findMany({

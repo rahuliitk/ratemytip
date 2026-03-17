@@ -27,7 +27,7 @@ async function getStockData(symbol: string) {
             stock: true,
             creator: { include: { currentScore: true } },
           },
-          orderBy: { tipTimestamp: "desc" },
+          orderBy: [{ tipTimestamp: "desc" }, { sourcePosition: "asc" }],
           take: 30,
         },
       },

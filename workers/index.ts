@@ -7,12 +7,13 @@
 // Start with: npx tsx workers/start.ts
 //
 // Cron schedules (IST = UTC+5:30):
-//   scrape-twitter:   Daily at 6 AM IST (0:30 UTC)
-//   scrape-youtube:   Twice daily (2 AM, 2 PM IST = 20:30 UTC prev day, 8:30 UTC)
-//   update-prices:    Twice daily at 10 AM & 2 PM IST (4:30 & 8:30 UTC, Mon-Fri)
-//   calculate-scores: Chained after price updates (no standalone cron)
-//   check-expirations: Every hour
-//   daily-snapshot:   Chained after score calculation (no standalone cron)
+//   scrape-twitter:       Daily at 6 AM IST (0:30 UTC)
+//   scrape-youtube:       Twice daily (2 AM, 2 PM IST = 20:30 UTC prev day, 8:30 UTC)
+//   scrape-moneycontrol:  every 3 hours (8×/day)
+//   update-prices:        Twice daily at 10 AM & 2 PM IST (4:30 & 8:30 UTC, Mon-Fri)
+//   calculate-scores:     Chained after price updates (no standalone cron)
+//   check-expirations:    Every hour
+//   daily-snapshot:       Chained after score calculation (no standalone cron)
 
 import type { Worker } from "bullmq";
 
@@ -191,16 +192,28 @@ async function setupCronSchedules(): Promise<void> {
   } catch { /* ignore */ }
   console.log("[Workers] Cron: calculate-scores — chained after price updates");
 
-  // MoneyControl scraping: daily at 8 AM IST = 2:30 UTC
-  await scrapeMoneycontrolQueue.upsertJobScheduler(
+  // MoneyControl scraping: every 3 hours (8 times daily)
+  // Remove legacy schedulers if they exist
+  for (const oldId of [
     "cron-scrape-moneycontrol",
-    { pattern: "30 2 * * *" },
+    "cron-scrape-moneycontrol-open",
+    "cron-scrape-moneycontrol-midday",
+    "cron-scrape-moneycontrol-close",
+  ]) {
+    try {
+      await scrapeMoneycontrolQueue.removeJobScheduler(oldId);
+    } catch { /* ignore if doesn't exist */ }
+  }
+
+  await scrapeMoneycontrolQueue.upsertJobScheduler(
+    "cron-scrape-moneycontrol-3h",
+    { pattern: "0 */3 * * *" },
     {
       name: "scheduled-moneycontrol-scrape",
       data: { type: "full-scrape", triggeredAt: new Date().toISOString() },
     }
   );
-  console.log("[Workers] Cron: scrape-moneycontrol — daily at 8 AM IST");
+  console.log("[Workers] Cron: scrape-moneycontrol — every 3 hours (8×/day)");
 
   // Finnhub scraping: twice daily at 6 AM and 6 PM UTC
   await scrapeFinnhubQueue.upsertJobScheduler(

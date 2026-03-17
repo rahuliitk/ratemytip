@@ -442,20 +442,58 @@ export class PriceMonitor {
 
   /**
    * Update the lastPrice and lastPriceAt fields on Stock records
-   * with the latest fetched prices.
+   * with the latest fetched prices. Also writes a daily entry
+   * to the StockPrice table for chart history.
    */
   private async updateStockPrices(
     priceMap: Map<string, CurrentPrice>
   ): Promise<void> {
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
     for (const [symbol, price] of priceMap) {
       try {
-        await db.stock.update({
+        const stock = await db.stock.update({
           where: { symbol },
           data: {
             lastPrice: price.price,
             lastPriceAt: price.timestamp,
           },
         });
+
+        // Upsert a daily StockPrice record for chart history
+        await db.stockPrice.upsert({
+          where: {
+            stockId_date: { stockId: stock.id, date: today },
+          },
+          create: {
+            stockId: stock.id,
+            date: today,
+            open: price.price,
+            high: price.price,
+            low: price.price,
+            close: price.price,
+            volume: null,
+            source: "LIVE",
+          },
+          update: {
+            close: price.price,
+            high: { // Keep the highest price seen today
+              set: undefined,
+            },
+            low: { // Keep the lowest price seen today
+              set: undefined,
+            },
+          },
+        });
+
+        // Update high/low separately with raw SQL for min/max logic
+        await db.$executeRaw`
+          UPDATE stock_prices
+          SET high = GREATEST(high, ${price.price}),
+              low  = LEAST(low, ${price.price})
+          WHERE stock_id = ${stock.id} AND date = ${today}
+        `;
       } catch (error) {
         log.error(
           { err: error instanceof Error ? error : new Error(String(error)), symbol },

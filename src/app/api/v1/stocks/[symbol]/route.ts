@@ -105,7 +105,7 @@ export async function GET(
     // Recent tips for this stock
     const recentTips = await db.tip.findMany({
       where: approvedFilter,
-      orderBy: { tipTimestamp: "desc" },
+      orderBy: [{ tipTimestamp: "desc" }, { sourcePosition: "asc" }],
       take: 20,
       include: {
         stock: { select: { symbol: true, name: true } },

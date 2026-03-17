@@ -12,6 +12,12 @@ import { StarRating } from "@/components/tip/star-rating";
 import { BookmarkButton } from "@/components/tip/bookmark-button";
 import { CommentSection } from "@/components/tip/comment-section";
 import { TipExplanation } from "@/components/tip/tip-explanation";
+import { GlossaryTooltip } from "@/components/beginner/glossary-tooltip";
+import { PositionCalculator } from "@/components/beginner/position-calculator";
+import { RiskBadge } from "@/components/beginner/risk-badge";
+import { ExecutionGuide } from "@/components/beginner/execution-guide";
+import { assessTipRisk } from "@/lib/risk/risk-scorer";
+import { buildContextualExplanations } from "@/lib/glossary/context-builder";
 import { formatPrice, formatPercent } from "@/lib/utils/format";
 import { subDays } from "date-fns";
 
@@ -93,6 +99,25 @@ export default async function TipPage({
 
   const isBuy = tip.direction === "BUY";
 
+  // Calculate risk assessment for this tip
+  const riskAssessment = assessTipRisk({
+    entryPrice: tip.entryPrice,
+    stopLoss: tip.stopLoss,
+    direction: tip.direction,
+    timeframe: tip.timeframe,
+    marketCap: tip.stock.marketCap ?? undefined,
+  });
+
+  // Build contextual explanations for beginners
+  const contextExplanations = buildContextualExplanations({
+    entryPrice: tip.entryPrice,
+    target1: tip.target1,
+    target2: tip.target2,
+    target3: tip.target3,
+    stopLoss: tip.stopLoss,
+    direction: tip.direction,
+  });
+
   // Check if current user saved this tip
   const session = await auth();
   let isSaved = false;
@@ -134,6 +159,7 @@ export default async function TipPage({
                 {tip.direction}
               </span>
               <TipStatusBadge status={tip.status} />
+              <RiskBadge riskLevel={riskAssessment.riskLevel} riskScore={riskAssessment.riskScore} size="lg" />
             </div>
             <p className="mt-1 text-sm text-muted">{tip.stock.name}</p>
           </div>
@@ -157,20 +183,20 @@ export default async function TipPage({
         {/* Price details grid */}
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <div className="rounded-lg bg-bg-alt/50 p-3">
-            <p className="text-xs text-muted">Entry Price</p>
+            <p className="text-xs text-muted"><GlossaryTooltip termId="entry-price">Entry Price</GlossaryTooltip></p>
             <p className="mt-1 text-sm font-semibold tabular-nums text-text">
               {formatPrice(tip.entryPrice)}
             </p>
           </div>
           <div className="rounded-lg bg-bg-alt/50 p-3">
-            <p className="text-xs text-muted">Target 1</p>
+            <p className="text-xs text-muted"><GlossaryTooltip termId="target-price">Target 1</GlossaryTooltip></p>
             <p className="mt-1 text-sm font-semibold tabular-nums text-emerald-600">
               {formatPrice(tip.target1)}
             </p>
           </div>
           {tip.target2 !== null && (
             <div className="rounded-lg bg-bg-alt/50 p-3">
-              <p className="text-xs text-muted">Target 2</p>
+              <p className="text-xs text-muted"><GlossaryTooltip termId="target-price">Target 2</GlossaryTooltip></p>
               <p className="mt-1 text-sm font-semibold tabular-nums text-emerald-600">
                 {formatPrice(tip.target2)}
               </p>
@@ -178,14 +204,14 @@ export default async function TipPage({
           )}
           {tip.target3 !== null && (
             <div className="rounded-lg bg-bg-alt/50 p-3">
-              <p className="text-xs text-muted">Target 3</p>
+              <p className="text-xs text-muted"><GlossaryTooltip termId="target-price">Target 3</GlossaryTooltip></p>
               <p className="mt-1 text-sm font-semibold tabular-nums text-emerald-600">
                 {formatPrice(tip.target3)}
               </p>
             </div>
           )}
           <div className="rounded-lg bg-bg-alt/50 p-3">
-            <p className="text-xs text-muted">Stop Loss</p>
+            <p className="text-xs text-muted"><GlossaryTooltip termId="stop-loss">Stop Loss</GlossaryTooltip></p>
             <p className="mt-1 text-sm font-semibold tabular-nums text-red-600">
               {formatPrice(tip.stopLoss)}
             </p>
@@ -213,11 +239,11 @@ export default async function TipPage({
         {/* Details grid */}
         <div className="mt-6 grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
           <div>
-            <p className="text-xs text-muted">Timeframe</p>
+            <p className="text-xs text-muted"><GlossaryTooltip termId={tip.timeframe.toLowerCase() === "intraday" ? "intraday" : tip.timeframe.toLowerCase() === "swing" ? "swing-trade" : "positional"}>Timeframe</GlossaryTooltip></p>
             <p className="mt-0.5 font-medium text-text">{tip.timeframe}</p>
           </div>
           <div>
-            <p className="text-xs text-muted">Conviction</p>
+            <p className="text-xs text-muted"><GlossaryTooltip termId="conviction">Conviction</GlossaryTooltip></p>
             <p className="mt-0.5 font-medium text-text">{tip.conviction}</p>
           </div>
           <div>
@@ -291,6 +317,73 @@ export default async function TipPage({
             </a>
           </div>
         )}
+
+        {/* Beginner Tools Section */}
+        <div className="mt-6 space-y-4 border-t border-border/40 pt-6">
+          {/* Contextual Explanations for Beginners */}
+          <div className="rounded-lg bg-blue-50 dark:bg-blue-950/20 p-4">
+            <h3 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-3">
+              What does this mean?
+            </h3>
+            <div className="space-y-2">
+              {contextExplanations.map((exp) => (
+                <div key={exp.term} className="text-xs text-blue-700 dark:text-blue-400">
+                  <span className="font-medium">{exp.term}:</span> {exp.explanation}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Position Size Calculator */}
+          <PositionCalculator
+            entryPrice={tip.entryPrice}
+            target1={tip.target1}
+            target2={tip.target2 ?? undefined}
+            stopLoss={tip.stopLoss}
+            direction={tip.direction}
+            stockSymbol={tip.stock.symbol}
+          />
+
+          {/* Execution Guide */}
+          {tip.status === "ACTIVE" && (
+            <ExecutionGuide
+              entryPrice={tip.entryPrice}
+              target1={tip.target1}
+              stopLoss={tip.stopLoss}
+              stockSymbol={tip.stock.symbol}
+              direction={tip.direction}
+            />
+          )}
+
+          {/* Risk Assessment Details */}
+          {riskAssessment.factors.length > 0 && (
+            <div className="rounded-lg border border-border/40 p-4">
+              <h3 className="text-sm font-semibold text-text mb-3">
+                Risk Assessment Breakdown
+              </h3>
+              <div className="space-y-2">
+                {riskAssessment.factors.map((factor) => (
+                  <div key={factor.name} className="flex items-center justify-between text-xs">
+                    <span className="text-muted">{factor.name}</span>
+                    <div className="flex items-center gap-2">
+                      <div className="h-1.5 w-24 rounded-full bg-bg-alt overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all ${
+                            factor.score <= 25 ? "bg-emerald-500" :
+                            factor.score <= 50 ? "bg-yellow-500" :
+                            factor.score <= 75 ? "bg-orange-500" : "bg-red-500"
+                          }`}
+                          style={{ width: `${factor.score}%` }}
+                        />
+                      </div>
+                      <span className="text-muted tabular-nums w-8 text-right">{factor.score}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Content hash */}
         <div className="mt-6 border-t border-border/40 pt-4">

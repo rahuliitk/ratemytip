@@ -70,10 +70,10 @@ export async function GET(
       where.assetClass = assetClass;
     }
 
-    const orderBy: Prisma.TipOrderByWithRelationInput =
+    const orderBy: Prisma.TipOrderByWithRelationInput | Prisma.TipOrderByWithRelationInput[] =
       sortBy === "return_pct"
         ? { returnPct: "desc" }
-        : { tipTimestamp: "desc" };
+        : [{ tipTimestamp: "desc" }, { sourcePosition: "asc" }];
 
     const [total, tips] = await Promise.all([
       db.tip.count({ where }),

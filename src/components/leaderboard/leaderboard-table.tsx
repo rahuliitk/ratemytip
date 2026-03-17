@@ -17,7 +17,7 @@ export function LeaderboardTable({ entries }: LeaderboardTableProps): React.Reac
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border/60 bg-surface shadow-sm">
+    <div data-tour="leaderboard" className="overflow-hidden rounded-xl border border-border/60 bg-surface shadow-sm">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[700px] text-left">
           <thead>

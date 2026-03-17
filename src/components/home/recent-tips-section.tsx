@@ -11,7 +11,7 @@ async function getRecentTips() {
         reviewStatus: { in: ["AUTO_APPROVED", "MANUALLY_APPROVED"] },
         status: { not: "REJECTED" },
       },
-      orderBy: { tipTimestamp: "desc" },
+      orderBy: [{ tipTimestamp: "desc" }, { sourcePosition: "asc" }],
       include: {
         stock: { select: { symbol: true, name: true } },
         creator: {

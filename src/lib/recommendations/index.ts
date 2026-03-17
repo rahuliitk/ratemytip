@@ -26,7 +26,7 @@ export async function computeTipRecommendations(userId: string): Promise<Recomme
       },
       stock: { select: { sector: true } },
     },
-    orderBy: { tipTimestamp: "desc" },
+    orderBy: [{ tipTimestamp: "desc" }, { sourcePosition: "asc" }],
     take: 200,
   });
 

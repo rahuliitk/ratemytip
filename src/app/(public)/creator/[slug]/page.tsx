@@ -34,7 +34,7 @@ async function getCreator(slug: string): Promise<CreatorDetail | null> {
         tips: {
           where: { status: { not: "REJECTED" } },
           include: { stock: true },
-          orderBy: { tipTimestamp: "desc" },
+          orderBy: [{ tipTimestamp: "desc" }, { sourcePosition: "asc" }],
           take: 50,
         },
       },

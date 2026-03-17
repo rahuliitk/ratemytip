@@ -2,8 +2,8 @@
 //
 // Specialized parser for MoneyControl brokerage recommendations.
 // Unlike the NLP parser used for tweets, MoneyControl data is already
-// structured, so we bypass the regex/LLM pipeline and directly create
-// ParsedTip objects with high confidence.
+// structured via their JSON API, so we directly create ParsedTip objects
+// with high confidence.
 
 import type { MoneyControlRecommendation } from "./moneycontrol";
 import { normalizeStockName } from "@/lib/parser/normalizer";
@@ -57,21 +57,23 @@ export function parseMoneyControlRecommendation(
   const direction = DIRECTION_MAP[rec.recommendationType.toLowerCase()] ?? null;
 
   if (!direction) {
-    // Hold/Neutral — not an actionable tip
     return null;
   }
 
-  // Validate prices
-  if (rec.currentPrice <= 0 || rec.targetPrice <= 0) {
+  // Use recommendedPrice (CMP at time of recommendation) as entry price,
+  // falling back to currentPrice (live CMP) if not available
+  const entryPrice = rec.recommendedPrice > 0 ? rec.recommendedPrice : rec.currentPrice;
+
+  if (entryPrice <= 0 || rec.targetPrice <= 0) {
     return null;
   }
 
-  // For BUY: target should be above current price
-  // For SELL: target should be below current price
-  if (direction === "BUY" && rec.targetPrice <= rec.currentPrice) {
+  // For BUY: target should be above entry price
+  // For SELL: target should be below entry price
+  if (direction === "BUY" && rec.targetPrice <= entryPrice) {
     return null;
   }
-  if (direction === "SELL" && rec.targetPrice >= rec.currentPrice) {
+  if (direction === "SELL" && rec.targetPrice >= entryPrice) {
     return null;
   }
 
@@ -81,8 +83,8 @@ export function parseMoneyControlRecommendation(
   // Calculate stop-loss (MoneyControl doesn't provide this)
   const stopLoss =
     direction === "BUY"
-      ? Math.round(rec.currentPrice * (1 - DEFAULT_STOP_LOSS_PCT) * 100) / 100
-      : Math.round(rec.currentPrice * (1 + DEFAULT_STOP_LOSS_PCT) * 100) / 100;
+      ? Math.round(entryPrice * (1 - DEFAULT_STOP_LOSS_PCT) * 100) / 100
+      : Math.round(entryPrice * (1 + DEFAULT_STOP_LOSS_PCT) * 100) / 100;
 
   // Determine conviction based on upside percentage
   let conviction: "LOW" | "MEDIUM" | "HIGH";
@@ -98,12 +100,12 @@ export function parseMoneyControlRecommendation(
   return {
     stockSymbol,
     direction,
-    entryPrice: rec.currentPrice,
+    entryPrice,
     target1: rec.targetPrice,
     stopLoss,
     timeframe: "POSITIONAL",
     conviction,
-    confidence: 0.95, // Structured data from brokerage = high confidence
+    confidence: 0.95, // Structured data from brokerage API = high confidence
     brokerageName: rec.brokerageName,
     sourceUrl: rec.sourceUrl,
   };
