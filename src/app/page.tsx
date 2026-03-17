@@ -29,16 +29,24 @@ const CATEGORIES = [
 
 async function getTopCreators() {
   try {
-    const creators = await db.creator.findMany({
+    // First try creators with scores
+    let creators = await db.creator.findMany({
       where: { isActive: true, currentScore: { isNot: null } },
-      include: {
-        currentScore: true,
-      },
-      orderBy: {
-        currentScore: { rmtScore: "desc" },
-      },
+      include: { currentScore: true },
+      orderBy: { currentScore: { rmtScore: "desc" } },
       take: 10,
     });
+
+    // Fallback: if no scored creators, show by total tips
+    if (creators.length === 0) {
+      creators = await db.creator.findMany({
+        where: { isActive: true },
+        include: { currentScore: true },
+        orderBy: { totalTips: "desc" },
+        take: 10,
+      });
+    }
+
     return creators;
   } catch {
     return [];
