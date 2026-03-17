@@ -73,9 +73,9 @@ interface CreatorDetail {
 // ──── Leaderboard entry (one row on the leaderboard table) ────
 
 interface LeaderboardScoreSummary {
-  readonly rmtScore: number;
-  readonly accuracyRate: number;
-  readonly avgReturnPct: number;
+  readonly rmtScore: number | null;
+  readonly accuracyRate: number | null;
+  readonly avgReturnPct: number | null;
   readonly confidenceInterval: number;
 }
 

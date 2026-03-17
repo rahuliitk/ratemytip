@@ -78,9 +78,9 @@ async function getLeaderboardData(params: {
         specializations: creator.specializations,
       },
       score: {
-        rmtScore: creator.currentScore?.rmtScore ?? 0,
-        accuracyRate: creator.currentScore?.accuracyRate ?? 0,
-        avgReturnPct: creator.currentScore?.avgReturnPct ?? 0,
+        rmtScore: creator.currentScore?.rmtScore ?? null,
+        accuracyRate: creator.currentScore?.accuracyRate ?? null,
+        avgReturnPct: creator.currentScore?.avgReturnPct ?? null,
         confidenceInterval: creator.currentScore?.confidenceInterval ?? 0,
       },
       totalTips: creator.totalTips,
@@ -197,10 +197,18 @@ export default async function LeaderboardPage({
                 )}
                 <p className="mt-3 text-sm font-semibold text-text">{entry.creator.displayName}</p>
                 <div className="mt-3">
-                  <ScoreRing score={entry.score.rmtScore} size="sm" />
+                  {entry.score.rmtScore != null ? (
+                    <ScoreRing score={entry.score.rmtScore} size="sm" />
+                  ) : (
+                    <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-bg-alt text-xs font-medium text-muted">
+                      Pending
+                    </span>
+                  )}
                 </div>
                 <p className="mt-2 text-xs text-muted">
-                  {(entry.score.accuracyRate * 100).toFixed(1)}% accuracy
+                  {entry.score.accuracyRate != null
+                    ? `${(entry.score.accuracyRate * 100).toFixed(1)}% accuracy`
+                    : `${entry.totalTips} tips tracked`}
                 </p>
               </a>
             );

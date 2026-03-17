@@ -93,19 +93,31 @@ export function LeaderboardRow({ entry }: LeaderboardRowProps): React.ReactEleme
         </Link>
       </td>
       <td className="px-4 py-3.5 text-right">
-        <ScoreBadge score={entry.score.rmtScore} size="sm" />
+        {entry.score.rmtScore != null ? (
+          <ScoreBadge score={entry.score.rmtScore} size="sm" />
+        ) : (
+          <span className="inline-flex items-center rounded-md bg-bg-alt px-2 py-0.5 text-xs font-medium text-muted">
+            Pending
+          </span>
+        )}
       </td>
       <td className="px-4 py-3.5 text-right text-sm tabular-nums text-text">
-        {(entry.score.accuracyRate * 100).toFixed(1)}%
+        {entry.score.accuracyRate != null
+          ? `${(entry.score.accuracyRate * 100).toFixed(1)}%`
+          : "—"}
       </td>
       <td className="px-4 py-3.5 text-right text-sm tabular-nums">
-        <span
-          className={
-            entry.score.avgReturnPct >= 0 ? "text-success" : "text-danger"
-          }
-        >
-          {formatPercent(entry.score.avgReturnPct)}
-        </span>
+        {entry.score.avgReturnPct != null ? (
+          <span
+            className={
+              entry.score.avgReturnPct >= 0 ? "text-success" : "text-danger"
+            }
+          >
+            {formatPercent(entry.score.avgReturnPct)}
+          </span>
+        ) : (
+          <span className="text-muted">—</span>
+        )}
       </td>
       <td className="px-4 py-3.5 text-right text-sm tabular-nums text-muted">
         {entry.totalTips}
