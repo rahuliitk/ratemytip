@@ -301,9 +301,9 @@ export class MoneyControlScraper {
 
     const upsidePct = cmp > 0 ? ((targetPrice - cmp) / cmp) * 100 : 0;
 
-    const sourceUrl = item.stk_url
-      ? `https://www.moneycontrol.com/${item.stk_url}`
-      : DEFAULT_REFERER;
+    // Use the stock-ideas page filtered by stock as the source URL
+    // Direct stk_url links are blocked by MoneyControl's Akamai CDN
+    const sourceUrl = `https://www.moneycontrol.com/stocks/marketinfo/stock-ideas`;
 
     return {
       id: item.id,

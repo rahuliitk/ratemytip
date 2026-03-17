@@ -313,7 +313,7 @@ export default async function TipPage({
               rel="noopener noreferrer"
               className="text-xs font-medium text-accent hover:underline"
             >
-              View original post
+              View on MoneyControl
             </a>
           </div>
         )}
