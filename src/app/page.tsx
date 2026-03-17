@@ -204,13 +204,15 @@ export default async function HomePage(): Promise<React.ReactElement> {
                             size="sm"
                           />
                         ) : (
-                          <span className="text-xs text-muted">Unrated</span>
+                          <span className="inline-flex items-center rounded-md bg-bg-alt px-2 py-0.5 text-xs font-medium text-muted">
+                            Pending
+                          </span>
                         )}
                       </td>
                       <td className="px-4 py-3.5 text-right text-sm tabular-nums text-text">
                         {creator.currentScore
                           ? `${(creator.currentScore.accuracyRate * 100).toFixed(1)}%`
-                          : "-"}
+                          : "Awaiting data"}
                       </td>
                       <td className="px-4 py-3.5 text-right text-sm tabular-nums text-muted">
                         {creator.totalTips}
