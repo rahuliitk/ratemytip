@@ -1,6 +1,6 @@
 # RateMyTip — Complete Testing Guide
 
-> This guide covers testing for the Phase 1 core platform + Phase 1.5A beginner features.
+> This guide covers testing for the Phase 1 core platform + Phase 1.5A-D beginner features.
 > Follow each section in order for a comprehensive test of the entire application.
 
 ---
@@ -14,10 +14,7 @@
 docker compose up -d          # PostgreSQL + Redis
 
 # Verify database connection
-PGPASSWORD=ratemytip psql -h localhost -p 5435 -U ratemytip -d ratemytip -c "SELECT 1;"
-
-# Verify Redis connection
-redis-cli -p 6379 ping        # Should return PONG
+docker exec ratemytip-postgres-1 psql -U ratemytip -d ratemytip -c "SELECT 1;"
 
 # Ensure .env is configured
 cat .env | grep -E "DATABASE_URL|REDIS_URL|NEXTAUTH_URL|NEXTAUTH_SECRET"
@@ -31,16 +28,18 @@ npx prisma db push
 
 # Generate Prisma client
 npx prisma generate
-
-# Verify tables exist
-PGPASSWORD=ratemytip psql -h localhost -p 5435 -U ratemytip -d ratemytip \
-  -c "SELECT tablename FROM pg_tables WHERE schemaname='public' ORDER BY tablename;"
 ```
 
 ### 3. Start Dev Server
 
 ```bash
-npm run dev                    # Starts Next.js on http://localhost:3001
+npm run dev                    # Starts Next.js on http://localhost:3000
+```
+
+### 4. Populate Data (run crawler)
+
+```bash
+npx tsx scripts/test-moneycontrol-scrape.ts --full
 ```
 
 ---
@@ -50,15 +49,13 @@ npm run dev                    # Starts Next.js on http://localhost:3001
 ### A1. Full Crawl — Fetch ALL Tips
 
 ```bash
-# Run the MoneyControl scraper
-npx tsx scripts/test-moneycontrol-scrape.ts
+npx tsx scripts/test-moneycontrol-scrape.ts --full
 ```
 
 **Expected:**
 - Logs show page-by-page progress: "Fetched page of MoneyControl recommendations"
 - Continues until API returns no more data (no artificial limit)
-- Final log shows total: "API returned X items total, Y valid recommendations, Z skipped"
-- Zero errors at the end
+- Final log shows total: tips created, brokerages, stocks, 0 errors
 
 **Verify in database:**
 
@@ -72,7 +69,7 @@ FROM tips t JOIN creators c ON t.creator_id = c.id
 GROUP BY c.display_name
 ORDER BY tip_count DESC;
 
--- Verify sourcePosition is sequential (no gaps within same date)
+-- Verify sourcePosition is sequential
 SELECT tip_timestamp::date AS date,
        MIN(source_position) AS min_pos,
        MAX(source_position) AS max_pos,
@@ -81,15 +78,6 @@ FROM tips
 GROUP BY tip_timestamp::date
 ORDER BY date DESC
 LIMIT 10;
-
--- Verify ordering matches MoneyControl
-SELECT source_position, c.display_name AS brokerage, s.symbol, t.direction,
-       t.entry_price, t.target1, t.stop_loss, t.tip_timestamp::date
-FROM tips t
-JOIN creators c ON t.creator_id = c.id
-JOIN stocks s ON t.stock_id = s.id
-ORDER BY t.tip_timestamp DESC, t.source_position ASC
-LIMIT 30;
 ```
 
 ### A2. Ordering Verification
@@ -111,8 +99,6 @@ ORDER BY t.tip_timestamp DESC, t.source_position ASC
 LIMIT 20;
 ```
 
-**Expected:** The order should match MoneyControl's page exactly (same brokerage, same stock, same date for each row).
-
 ### A3. Deduplication Test
 
 ```bash
@@ -120,116 +106,62 @@ LIMIT 20;
 npx tsx scripts/test-moneycontrol-scrape.ts
 ```
 
-**Expected:**
-- Should report 0 new tips created (all deduplicated by contentHash)
-- No duplicate tips in the database:
-
-```sql
-SELECT content_hash, COUNT(*) AS cnt
-FROM tips
-GROUP BY content_hash
-HAVING COUNT(*) > 1;
--- Should return 0 rows
-```
-
-### A4. No Missing Tips
-
-```sql
--- Count RawPosts vs Tips
-SELECT
-  (SELECT COUNT(*) FROM raw_posts) AS raw_posts,
-  (SELECT COUNT(*) FROM tips) AS tips,
-  (SELECT COUNT(*) FROM raw_posts) - (SELECT COUNT(*) FROM tips) AS difference;
-
--- The difference should only be Hold/Neutral items (check):
-SELECT COUNT(*) FROM raw_posts rp
-WHERE NOT EXISTS (
-  SELECT 1 FROM tips t WHERE t.raw_post_id = rp.id
-);
-```
-
-### A5. Hold/Neutral Handling
-
-```sql
--- Verify Hold/Neutral are stored as RawPosts but NOT as Tips
-SELECT rp.content, rp.metadata->>'recommendationType' AS rec_type
-FROM raw_posts rp
-WHERE rp.metadata->>'recommendationType' ILIKE '%hold%'
-   OR rp.metadata->>'recommendationType' ILIKE '%neutral%'
-LIMIT 10;
--- Should return rows (stored as RawPosts)
-
--- But no Tips should have Hold/Neutral
-SELECT * FROM tips WHERE rationale ILIKE '%hold%' OR rationale ILIKE '%neutral%';
--- Should return 0 rows
-```
+**Expected:** 0 new tips created (all deduplicated by contentHash).
 
 ---
 
 ## SECTION B: Public Pages Testing
 
-### B1. Homepage (http://localhost:3001/)
+### B1. Homepage (http://localhost:3000/)
 
-**Test:**
 - [ ] Page loads without errors
-- [ ] Top 10 creators leaderboard preview displays
+- [ ] Top 10 creators leaderboard preview displays (sorted by totalTips if no scores)
+- [ ] Shows "Pending" for RMT Score and "Awaiting data" for accuracy (when no scores yet)
 - [ ] Stats bar shows correct numbers (tips tracked, creators scored)
 - [ ] Recent tips section shows latest tips
 - [ ] All links work (Leaderboard, Tips, Stocks, Search)
 
-### B2. Leaderboard (http://localhost:3001/leaderboard)
+### B2. Leaderboard (http://localhost:3000/leaderboard)
 
-**Test:**
 - [ ] Table renders with all creators from crawl
-- [ ] Columns: Rank, Creator, RMT Score, Accuracy, Avg Return, Total Tips
-- [ ] Sorting works (click column headers)
+- [ ] Shows "Pending" badge instead of 0 for unscored creators
+- [ ] Shows "—" for accuracy and avg return when no scores
 - [ ] Category tabs work (All, Intraday, Swing, Positional, Long Term)
 - [ ] Pagination works (if >50 creators)
-- [ ] `data-tour="leaderboard"` attribute present on table (inspect element)
 - [ ] Creator rows link to `/creator/{slug}`
 
-### B3. Browse Tips (http://localhost:3001/tips)
+### B3. Browse Tips (http://localhost:3000/tips)
 
-**Test:**
 - [ ] All tips display in correct order (newest first, then by sourcePosition)
-- [ ] Filters work: Status, Timeframe, Direction, Date Range
+- [ ] Filters work: Status, Timeframe, Direction
 - [ ] Pagination works
-- [ ] Each tip card shows: Stock symbol, BUY/SELL badge, Entry, T1, T2, SL, Timeframe, Date
+- [ ] Each tip card shows: Stock symbol, BUY/SELL badge, Entry, T1, SL, Timeframe, Date
 - [ ] Tip cards link to `/tip/{id}`
-- [ ] `data-tour="tip-card"` attribute present on first tip card
+- [ ] **Beginner Mode:** switching to Beginner hides intraday tips, shows LiteTipCard
 
-### B4. Creator Profile (http://localhost:3001/creator/{slug})
+### B4. Creator Profile (http://localhost:3000/creator/{slug})
 
-Replace `{slug}` with an actual brokerage slug from the crawl (e.g., `motilal-oswal`, `hdfc-securities`).
-
-**Test:**
-- [ ] Header shows: Name, Tier badge, Bio
-- [ ] Stats grid: Accuracy, Avg Return, Total Tips, Win Streak
-- [ ] Score chart renders (if enough data for scoring)
+- [ ] Header shows: Name, Tier badge
+- [ ] Stats grid: Total Tips, Active Tips
 - [ ] Tip feed shows all tips from this creator
-- [ ] Tips ordered by date DESC, sourcePosition ASC
+- [ ] **Max Drawdown Card** displays (if creator has completed tips)
+- [ ] **Creator Review Form** displays below the tip feed
+- [ ] **Review List** shows submitted reviews
 - [ ] Share button works
-- [ ] SEO metadata correct (view page source)
 
-### B5. Stock Page (http://localhost:3001/stock/{SYMBOL})
+### B5. Stock Page (http://localhost:3000/stock/{SYMBOL})
 
-Replace `{SYMBOL}` with a stock from the crawl (e.g., `RELIANCE`, `TCS`, `INFY`).
-
-**Test:**
 - [ ] Stock header shows: Symbol, Name, Exchange, Sector
 - [ ] Consensus widget shows bullish vs bearish count
+- [ ] **Conflicting Tips Panel** shows BUY vs SELL breakdown with proportional bar
 - [ ] All tips for this stock display
 - [ ] Top creators for this stock display
-- [ ] Price chart renders (if price data available)
 
-### B6. Search (http://localhost:3001/search)
+### B6. Search (http://localhost:3000/search)
 
-**Test:**
-- [ ] Search bar has `data-tour="search-bar"` attribute
-- [ ] Typing a stock name (e.g., "Reliance") shows autocomplete results
-- [ ] Typing a creator name (e.g., "Motilal") shows results
+- [ ] Typing a stock name shows autocomplete results
+- [ ] Typing a creator name shows results
 - [ ] Clicking a result navigates to correct page
-- [ ] Empty state displays for no-match queries
 
 ---
 
@@ -239,386 +171,390 @@ Replace `{SYMBOL}` with a stock from the crawl (e.g., `RELIANCE`, `TCS`, `INFY`)
 
 **Location:** Visible below the header on all public pages.
 
-**Test:**
 - [ ] Bar shows NIFTY 50 level with daily change (green/red)
-- [ ] VIX indicator with color-coded badge (LOW/MODERATE/HIGH/EXTREME)
+- [ ] VIX indicator with color-coded badge
 - [ ] Market Mood badge (BULLISH/NEUTRAL/BEARISH)
-- [ ] "Market Closed" indicator shows outside IST 9:15-15:30 Mon-Fri
 - [ ] Responsive: stacks on mobile, horizontal on desktop
-- [ ] Verify API: `curl http://localhost:3001/api/v1/market-context | jq .`
+- [ ] Verify API: `curl http://localhost:3000/api/v1/market-context | jq .`
 
 ### C2. Welcome Modal (First Visit)
 
-**Test:**
-- [ ] Clear localStorage: `localStorage.removeItem('ratemytip-welcome-shown')` in browser console
+- [ ] Clear localStorage: `localStorage.clear()` in browser console
 - [ ] Refresh the page
 - [ ] Welcome modal appears with backdrop blur
-- [ ] Title: "Welcome to RateMyTip!"
-- [ ] Three bullet points about the platform
-- [ ] "Take a Quick Tour" button starts the guided tour
-- [ ] "Skip, I'll explore on my own" closes modal
-- [ ] Modal does NOT appear on subsequent visits (localStorage persisted)
+- [ ] "Take a Quick Tour" button starts guided tour
+- [ ] "Skip" closes modal
+- [ ] Modal does NOT appear on subsequent visits
 
 ### C3. Guided Onboarding Tour
 
-**Test:**
-- [ ] Clear localStorage: `localStorage.removeItem('ratemytip-onboarding-done')` and `localStorage.removeItem('ratemytip-welcome-shown')`
-- [ ] Refresh → Welcome modal → Click "Take a Quick Tour"
-- [ ] Step 1: Highlights leaderboard area with explanation
-- [ ] Step 2: Highlights RMT Score badge with explanation
-- [ ] Step 3: Highlights a tip card with explanation
-- [ ] Step 4: Highlights search bar with explanation
-- [ ] Step 5: Highlights beginner mode toggle with explanation
+- [ ] Clear localStorage and refresh → Welcome modal → Click "Take a Quick Tour"
+- [ ] Step 1-5 highlight different page elements
 - [ ] Next/Previous buttons work
-- [ ] Skip button ends tour
-- [ ] Step dots indicator shows current step
-- [ ] Keyboard: ArrowRight = next, ArrowLeft = prev, Escape = skip
 - [ ] Tour does NOT appear on subsequent visits
 
-### C4. Beginner Mode Toggle
+### C4. Getting Started Checklist (NEW)
+
+**Location:** Floating widget in bottom-right corner.
+
+- [ ] Clear localStorage and refresh
+- [ ] Checklist widget appears with 5 items:
+  - Visit the leaderboard
+  - View a creator profile
+  - Read a tip detail page
+  - Try the position size calculator
+  - Set your experience level
+- [ ] Progress bar shows 0/5 initially
+- [ ] Navigate to `/leaderboard` → "Visit the leaderboard" gets checked
+- [ ] Navigate to `/creator/{slug}` → "View a creator profile" gets checked
+- [ ] Navigate to `/tip/{id}` → "Read a tip detail page" gets checked
+- [ ] Use position size calculator → "Try the position size calculator" gets checked
+- [ ] Change experience level toggle → "Set your experience level" gets checked
+- [ ] Checklist can be minimized to a compact pill
+- [ ] Shows congratulations when all 5 are done
+- [ ] State persists across page refreshes
+
+### C5. Beginner Mode Toggle
 
 **Location:** In the header navigation bar.
 
-**Test:**
-- [ ] Toggle visible in the header (desktop nav)
 - [ ] Three options: Beginner (green), Standard (blue), Advanced (gray)
-- [ ] Selecting a level changes the chip color/text
-- [ ] Selection persists after page refresh (localStorage `ratemytip-experience-level`)
-- [ ] Default is INTERMEDIATE (Standard)
-- [ ] Toggle has `id="beginner-mode-toggle"` for the onboarding tour
+- [ ] Selection persists after page refresh (localStorage)
+- [ ] **In Beginner mode on /tips page:**
+  - Intraday tips are hidden
+  - Info banner shows "X intraday tips hidden in Beginner mode"
+  - LiteTipCard renders instead of regular TipCard
 
-### C5. Tip Detail Page — Beginner Features
+### C6. Transparency Meter (NEW)
 
-Navigate to any tip: http://localhost:3001/tip/{tipId}
+**Location:** Creator profile pages.
 
-Get a tip ID:
-```sql
-SELECT id FROM tips LIMIT 1;
-```
-
-**Test Glossary Tooltips:**
-- [ ] "Entry Price" label has dashed underline
-- [ ] Hovering shows tooltip with definition + example
-- [ ] "Stop Loss" label has tooltip
-- [ ] "Target 1" / "Target 2" labels have tooltips
-- [ ] "Timeframe" label has tooltip (maps to correct term: intraday/swing/positional)
-- [ ] "Conviction" label has tooltip
-- [ ] Tooltips position above the trigger text
-- [ ] Tooltips have a small arrow/caret pointing down
-- [ ] Tapping on mobile toggles the tooltip
-
-**Test Risk Badge:**
-- [ ] Risk badge visible next to the status badge (e.g., "LOW", "MEDIUM", "HIGH", "VERY_HIGH")
-- [ ] Color-coded: green (LOW), yellow (MEDIUM), orange (HIGH), red (VERY_HIGH)
-- [ ] "Risk Assessment Breakdown" section shows factor bars
-- [ ] Three factors: SL Distance, Timeframe, Market Cap
-- [ ] Each bar colored by severity and shows a 0-100 score
-
-**Test Contextual Explanations ("What does this mean?"):**
-- [ ] Blue info box shows below the price grid
-- [ ] "Stop Loss" explanation with actual tip numbers (e.g., "Your stop loss is ₹70 below entry...")
-- [ ] "Target 1" explanation with profit calculation
-- [ ] "Risk-Reward" explanation with ratio
-- [ ] "Position Size Hint" with 2% rule example
-
-**Test Position Size Calculator:**
-- [ ] Collapsible section with "Position Size Calculator" header
-- [ ] Click to expand
-- [ ] Input: "Your Capital" field (number input)
-- [ ] Input: "Risk Per Trade" slider (1-5%, default 2%)
-- [ ] Output displays: Max Shares, Total Investment, Max Loss, Risk/Reward
-- [ ] Capital usage bar: green (<20%), yellow (20-50%), red (>50%)
-- [ ] Warnings appear for high concentration
-- [ ] "Save my capital" persists to localStorage
-- [ ] Reloading the page shows previously saved capital
-- [ ] Values update in real-time as inputs change
-
-**Test Execution Guide (only on ACTIVE tips):**
-- [ ] Collapsible section "How to Execute This Tip"
-- [ ] Click to expand
-- [ ] Broker dropdown: Zerodha, Groww, Angel One, Upstox, ICICI Direct
-- [ ] Steps change per broker
-- [ ] Step text includes actual stock symbol and prices from the tip
-- [ ] Warning footer about risk
-- [ ] Preferred broker persists in localStorage
-- [ ] Only visible when tip status is ACTIVE
-
-### C6. Red Flag Badge (on Creator Profiles)
-
-The red flag system computes flags based on creator data. For testing, verify the detection logic:
-
-```bash
-# Check if any creator has red flag data
-PGPASSWORD=ratemytip psql -h localhost -p 5435 -U ratemytip -d ratemytip \
-  -c "SELECT slug, display_name, transparency_score, red_flag_count FROM creators LIMIT 10;"
-```
-
-**Manual test of detection logic:**
-```typescript
-// In a Node REPL or test script:
-import { detectRedFlags } from "@/lib/red-flags/detector";
-
-const report = detectRedFlags("test-id", {
-  totalTips: 50,
-  recentAccuracy30d: 0.30,  // Low recent accuracy
-  allTimeAccuracy: 0.70,    // Much higher all-time
-  smallCapPct: 0.80,        // 80% small cap
-  tipsWithoutSLPct: 0.40,   // 40% missing SL
-  avgTipsPerDay: 8,         // Very high frequency
-  avgStockVolumeLakhs: 5,   // Low volume
-  buyPct: 0.95,             // Almost all BUY
-});
-// Should return multiple red flags
-```
+- [ ] Shows shield icon with score (0-100)
+- [ ] Color-coded: Excellent (80+), Good (60+), Fair (40+), Poor (<40)
+- [ ] Click to expand → shows 5 criteria breakdown:
+  - Provides stop loss (0-25)
+  - Provides rationale (0-20)
+  - Frequency consistency (0-20)
+  - Stock variety (0-20)
+  - Clean record (0-15)
+- [ ] Each criterion has individual progress bar
 
 ---
 
-## SECTION D: API Endpoint Testing
+## SECTION D: Tip Detail Page Features
 
-### D1. Public API Endpoints
+Navigate to any tip: http://localhost:3000/tip/{tipId}
+
+### D1. Glossary Tooltips
+
+- [ ] "Entry Price", "Stop Loss", "Target", "Timeframe", "Conviction" labels have dashed underline
+- [ ] Hovering shows tooltip with definition + example
+- [ ] Tapping on mobile toggles the tooltip
+
+### D2. Contextual Explanations ("What does this mean?")
+
+- [ ] Blue info box shows below the price grid
+- [ ] Stop Loss explanation with actual ₹ amounts
+- [ ] Target 1 explanation with profit calculation
+- [ ] **Target 2 / Target 3 explanations** (if tip has multiple targets) (NEW)
+- [ ] **10-Share Scenario**: "If you buy 10 shares at ₹X, your investment is ₹Y, max loss ₹Z, profit at T1 ₹W" (NEW)
+- [ ] Risk-Reward explanation with ratio
+- [ ] Position Size Hint with 2% rule
+
+### D3. Risk Badge
+
+- [ ] Color-coded: green (LOW), yellow (MEDIUM), orange (HIGH), red (VERY_HIGH)
+- [ ] Breakdown shows: SL Distance, Timeframe, Market Cap factors
+
+### D4. Position Size Calculator
+
+- [ ] Collapsible section — click to expand
+- [ ] Input: Capital, Risk Per Trade (1-5%)
+- [ ] Output: Max Shares, Total Investment, Max Loss, Risk/Reward
+- [ ] Capital usage bar with color coding
+- [ ] Capital persists in localStorage
+
+### D5. Brokerage Cost Calculator (NEW)
+
+- [ ] Collapsible section — click to expand
+- [ ] 5 broker tabs: Zerodha, Groww, Angel One, Upstox, ICICI Direct
+- [ ] Trade type toggle: Intraday / Delivery CNC
+- [ ] Quantity input
+- [ ] Breakdown table: Brokerage, STT, Exchange charges, GST, SEBI, Stamp duty, Total
+- [ ] Net profit after costs displayed
+- [ ] "Costs eat X% of your profit" with color coding
+- [ ] Warning if costs > 10% of profit
+- [ ] Selected broker persists in localStorage
+
+### D6. Execution Guide (ACTIVE tips only)
+
+- [ ] 5 broker step-by-step guides
+- [ ] Steps include actual stock symbol and prices
+- [ ] Preferred broker persists in localStorage
+
+### D7. Entry Timing Insights (NEW — ACTIVE tips only)
+
+- [ ] Shows "This tip was posted X hours/days ago"
+- [ ] Shows stock movement from entry: "+Y% from suggested entry"
+- [ ] Risk-reward recalculation at current price
+- [ ] Color-coded guidance:
+  - Green: "Good timing — stock is near entry"
+  - Yellow: "Caution — stock moved below entry"
+  - Red: "May have passed — stock moved >1.5% above entry"
+
+### D8. Similar Past Tips (NEW)
+
+- [ ] Collapsible panel: "Similar Past Tips from {Creator}"
+- [ ] Click to expand → fetches from `/api/v1/similar-tips/{tipId}`
+- [ ] Shows mini-table: Date, Direction, Entry, Target, Status, Return%
+- [ ] Summary: "Y of X hit target (Z%), avg return W%"
+- [ ] If no similar tips: "This is the first tip from this creator on this stock"
+
+### D9. Tip Feedback (NEW)
+
+- [ ] Thumbs up / thumbs down buttons
+- [ ] "Did you follow this tip?" checkbox
+- [ ] Feedback persists in localStorage
+- [ ] Shows "X% found this helpful"
+
+### D10. Tip Post-Mortem (NEW — resolved tips only)
+
+- [ ] Only shows for TARGET_HIT, STOPLOSS_HIT, or EXPIRED tips
+- [ ] "What Happened?" card with:
+  - Summary of what occurred
+  - Return % prominently displayed
+  - Educational "Takeaway" box
+- [ ] Color-coded: green border (profit), red (loss), gray (expired)
+
+---
+
+## SECTION E: New Pages Testing
+
+### E1. Quiz — Who Should I Follow (http://localhost:3000/quiz) (NEW)
+
+- [ ] Page loads with title "Find Your Ideal Creators"
+- [ ] 6-step quiz:
+  1. Capital amount (4 options)
+  2. Market availability (3 options)
+  3. Risk appetite (3 options)
+  4. Holding period (4 options)
+  5. Sectors (multi-select with "No preference")
+  6. Trading experience (4 options)
+- [ ] Progress bar advances with each step
+- [ ] Back/Next buttons work
+- [ ] On submit → shows matched creators with explanations
+- [ ] "Retake Quiz" and "View Full Leaderboard" buttons work
+- [ ] Answers persist in localStorage
+
+### E2. Creator Comparison (http://localhost:3000/compare) (NEW)
+
+- [ ] Page loads with creator search/selector
+- [ ] Search input finds creators by name
+- [ ] Can select 2-3 creators
+- [ ] "Compare" button generates comparison table
+- [ ] Table shows side-by-side: RMT Score, Accuracy, Total Tips, Tier, Preferred Timeframe, Avg SL Distance
+- [ ] Best value highlighted in each row
+- [ ] Creator names link to profiles
+
+### E3. Market Overview / Sector Strength (http://localhost:3000/market) (NEW)
+
+- [ ] Page loads with stats summary (active tips, creators, stocks)
+- [ ] Sector heatmap grid shows 10 sectors:
+  - IT, Banking, Pharma, Auto, FMCG, Oil & Gas, Metals, Realty, Infra, Telecom
+- [ ] Cards colored: green (>65% BUY), red (>65% SELL), gray (neutral)
+- [ ] Each card shows: sector name, tip count, BUY/SELL ratio bar
+- [ ] "Most Active Stocks" section below
+
+### E4. Learning Hub (http://localhost:3000/learn) (NEW)
+
+- [ ] Page shows grid of 6 learning modules
+- [ ] Each card shows: title, description, estimated time, difficulty badge
+- [ ] Progress tracking: "X of 6 completed"
+- [ ] Click a module → opens module page with content sections
+- [ ] Quiz at end of each module
+- [ ] "Mark as Complete" button saves to localStorage
+- [ ] Modules:
+  1. Understanding Stock Tips in 10 Minutes
+  2. What Makes a Good Tip Creator? Reading the RMT Score
+  3. Risk Management 101: Why Stop Loss is Your Best Friend
+  4. Intraday vs Swing vs Positional
+  5. How to Read a Stock Chart (Basics)
+  6. Common Scams in the Finfluencer Space
+
+### E5. Scam Protection Guide (http://localhost:3000/protect-yourself) (NEW)
+
+- [ ] Page loads with 7 detailed sections:
+  1. 10 Most Common Stock Market Scams in India
+  2. How to Spot a Fake Trading Screenshot
+  3. Why Free Telegram Groups Are Not Really Free
+  4. What Is Front-Running and How It Hurts You
+  5. Red Flags: When a Finfluencer is Probably Lying
+  6. How to File a SEBI Complaint
+  7. Cyber Crime Reporting Guide
+- [ ] Links to external resources (SEBI, cybercrime portals) work
+- [ ] Well-formatted with readable typography
+
+---
+
+## SECTION F: API Endpoint Testing
+
+### F1. Existing Endpoints
 
 ```bash
 # Leaderboard
-curl -s http://localhost:3001/api/v1/leaderboard | jq '.data | length'
-
-# Creators list
-curl -s http://localhost:3001/api/v1/creators | jq '.data | length'
-
-# Single creator (replace with actual slug)
-curl -s http://localhost:3001/api/v1/creators/motilal-oswal | jq '.data.displayName'
+curl -s http://localhost:3000/api/v1/leaderboard | jq '.data | length'
 
 # Tips list
-curl -s http://localhost:3001/api/v1/tips | jq '.data | length'
-
-# Tips with filters
-curl -s "http://localhost:3001/api/v1/tips?status=ACTIVE&timeframe=POSITIONAL&direction=BUY" | jq '.data | length'
+curl -s http://localhost:3000/api/v1/tips | jq '.data | length'
 
 # Search
-curl -s "http://localhost:3001/api/v1/search?q=reliance" | jq '.'
+curl -s "http://localhost:3000/api/v1/search?q=reliance" | jq '.'
 
 # Market context
-curl -s http://localhost:3001/api/v1/market-context | jq '.'
+curl -s http://localhost:3000/api/v1/market-context | jq '.'
+```
 
-# Stock details (replace with actual symbol)
-curl -s http://localhost:3001/api/v1/stocks/RELIANCE | jq '.data.symbol'
+### F2. New Endpoints (NEW)
+
+```bash
+# Quiz — submit quiz answers
+curl -s -X POST http://localhost:3000/api/v1/quiz \
+  -H "Content-Type: application/json" \
+  -d '{"capital":"25k_1l","availability":"partial","risk":"moderate","holdingPeriod":"few_days","sectors":["no_preference"],"experience":"less_6m"}' | jq '.'
+
+# Similar tips (replace TIP_ID with actual tip ID)
+curl -s http://localhost:3000/api/v1/similar-tips/TIP_ID | jq '.'
+
+# Post-mortem (replace TIP_ID — only works for resolved tips)
+curl -s http://localhost:3000/api/v1/post-mortem/TIP_ID | jq '.'
 ```
 
 **Expected:** All return `{ "success": true, "data": ... }` with correct data.
 
-### D2. Response Format Validation
+---
 
-Every API response should have:
-- `success: true` for 200 responses
-- `data` field with the payload
-- `meta` field for paginated responses (page, pageSize, total, hasMore)
-- `success: false` and `error: { code, message }` for error responses
+## SECTION G: Lite Mode / Beginner Experience Testing (NEW)
 
-### D3. Rate Limiting
+### G1. Full Beginner Flow
 
-```bash
-# Fire 70 requests rapidly — should get 429 after 60
-for i in $(seq 1 70); do
-  curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3001/api/v1/tips &
-done
-wait
-```
-
-**Expected:** First 60 return 200, remaining return 429.
+1. [ ] Clear all localStorage: `localStorage.clear()`
+2. [ ] Visit http://localhost:3000
+3. [ ] Welcome modal appears → click "Take a Quick Tour"
+4. [ ] Complete the 5-step tour
+5. [ ] Getting Started checklist appears in bottom-right
+6. [ ] Set experience to "Beginner" in header toggle
+7. [ ] Navigate to `/tips` → intraday tips hidden, LiteTipCard shown
+8. [ ] LiteTipCard shows: creator, stock, BUY/SELL, entry/target/SL, risk level, one-sentence summary
+9. [ ] Navigate to `/quiz` → complete quiz → see recommended creators
+10. [ ] Navigate to `/learn` → start a learning module → complete quiz → mark complete
+11. [ ] Navigate to `/protect-yourself` → read through scam guide
+12. [ ] Check Getting Started checklist → items should be checked off
+13. [ ] Visit a tip → see contextual explanations with real numbers
+14. [ ] Try position calculator → brokerage cost calculator → execution guide
+15. [ ] Submit tip feedback (thumbs up)
+16. [ ] Visit creator profile → submit a review
 
 ---
 
-## SECTION E: Database Integrity
+## SECTION H: UI Responsive Testing
 
-### E1. Schema Validation
-
-```sql
--- Verify new Phase 1.5A columns exist
-SELECT column_name, data_type
-FROM information_schema.columns
-WHERE table_name = 'tips' AND column_name IN ('risk_level', 'risk_score');
-
-SELECT column_name, data_type
-FROM information_schema.columns
-WHERE table_name = 'creators' AND column_name IN ('transparency_score', 'red_flag_count', 'red_flag_data');
-```
-
-### E2. Tip Immutability
-
-```sql
--- Verify content hashes are unique
-SELECT COUNT(*) AS total, COUNT(DISTINCT content_hash) AS unique_hashes FROM tips;
--- total should equal unique_hashes
-
--- Verify no tip has been modified after creation (updatedAt close to createdAt)
-SELECT COUNT(*) FROM tips
-WHERE updated_at > created_at + INTERVAL '1 minute';
--- Should be 0 or very small
-```
-
-### E3. Foreign Key Integrity
-
-```sql
--- All tips reference valid creators
-SELECT COUNT(*) FROM tips t
-WHERE NOT EXISTS (SELECT 1 FROM creators c WHERE c.id = t.creator_id);
--- Should be 0
-
--- All tips reference valid stocks
-SELECT COUNT(*) FROM tips t
-WHERE NOT EXISTS (SELECT 1 FROM stocks s WHERE s.id = t.stock_id);
--- Should be 0
-```
-
-### E4. Source Position Integrity
-
-```sql
--- Verify sourcePosition values are assigned
-SELECT COUNT(*) AS with_position FROM tips WHERE source_position IS NOT NULL;
-SELECT COUNT(*) AS without_position FROM tips WHERE source_position IS NULL;
--- without_position should be 0 for MoneyControl-scraped tips
-
--- Verify no duplicate positions within same scrape batch
-SELECT tip_timestamp::date, source_position, COUNT(*)
-FROM tips
-GROUP BY tip_timestamp::date, source_position
-HAVING COUNT(*) > 1;
--- May have some duplicates across different dates (that's OK)
-```
-
----
-
-## SECTION F: UI Responsive Testing
-
-### F1. Mobile (375px width)
-
-Open Chrome DevTools → Toggle device toolbar → iPhone SE (375px)
+### H1. Mobile (375px width)
 
 - [ ] Header collapses to hamburger menu
 - [ ] Market bar stacks vertically
 - [ ] Leaderboard table scrolls horizontally
-- [ ] Tip cards stack vertically
-- [ ] Position calculator fits on screen
-- [ ] Glossary tooltips open on tap (not hover)
-- [ ] Welcome modal fits screen with no overflow
+- [ ] LiteTipCard fits on small screen
+- [ ] Quiz wizard steps fit on mobile
+- [ ] Getting Started checklist minimizes to pill
+- [ ] Brokerage cost calculator scrolls properly
 
-### F2. Tablet (768px width)
+### H2. Desktop (1440px width)
 
-- [ ] Header shows full navigation
-- [ ] Market bar fits in one row
-- [ ] Leaderboard shows all columns
-- [ ] Tip detail page has comfortable spacing
-
-### F3. Desktop (1440px width)
-
-- [ ] Max-width container (7xl = 1280px) centers content
+- [ ] Max-width container centers content
 - [ ] No horizontal scrollbar
-- [ ] All features visible without scrolling excessively
+- [ ] Comparison table renders fully
+- [ ] Sector heatmap shows in grid layout
 
 ---
 
-## SECTION G: Performance
+## SECTION I: Performance
 
-### G1. Page Load Times
+### I1. Page Load Times
 
-Test with Lighthouse (Chrome DevTools → Lighthouse tab):
+| Page | Target LCP |
+|------|-----------|
+| Homepage | < 2.0s |
+| Leaderboard | < 2.5s |
+| Tip Detail | < 2.0s |
+| Learn Hub | < 1.5s |
+| Market Overview | < 2.5s |
+| Compare | < 2.0s |
 
-| Page | Target LCP | Target FID |
-|------|-----------|-----------|
-| Homepage | < 2.0s | < 100ms |
-| Leaderboard | < 2.5s | < 100ms |
-| Creator Profile | < 2.5s | < 100ms |
-| Tip Detail | < 2.0s | < 100ms |
-| Search | < 1.5s | < 50ms |
-
-### G2. API Response Times
+### I2. API Response Times
 
 ```bash
-# Measure response time for key endpoints
-curl -s -o /dev/null -w "Leaderboard: %{time_total}s\n" http://localhost:3001/api/v1/leaderboard
-curl -s -o /dev/null -w "Tips: %{time_total}s\n" http://localhost:3001/api/v1/tips
-curl -s -o /dev/null -w "Market: %{time_total}s\n" http://localhost:3001/api/v1/market-context
-curl -s -o /dev/null -w "Search: %{time_total}s\n" "http://localhost:3001/api/v1/search?q=reliance"
+curl -s -o /dev/null -w "Leaderboard: %{time_total}s\n" http://localhost:3000/api/v1/leaderboard
+curl -s -o /dev/null -w "Tips: %{time_total}s\n" http://localhost:3000/api/v1/tips
+curl -s -o /dev/null -w "Market: %{time_total}s\n" http://localhost:3000/api/v1/market-context
+curl -s -o /dev/null -w "Quiz: %{time_total}s\n" -X POST http://localhost:3000/api/v1/quiz -H "Content-Type: application/json" -d '{"capital":"25k_1l","availability":"partial","risk":"moderate","holdingPeriod":"few_days","sectors":["no_preference"],"experience":"less_6m"}'
 ```
 
 **Expected:** All < 500ms on local development.
 
 ---
 
-## SECTION H: SEO Verification
+## SECTION J: Error Handling
 
-### H1. Meta Tags
-
-```bash
-# Check homepage meta
-curl -s http://localhost:3001 | grep -E '<title>|<meta name="description"|og:title|og:description'
-
-# Check creator page meta (replace slug)
-curl -s http://localhost:3001/creator/motilal-oswal | grep -E '<title>|<meta name="description"'
-
-# Check stock page meta (replace symbol)
-curl -s http://localhost:3001/stock/RELIANCE | grep -E '<title>|<meta name="description"'
-```
-
-### H2. Sitemap
-
-```bash
-curl -s http://localhost:3001/sitemap.xml | head -30
-```
-
-**Expected:** XML sitemap with URLs for all creators, stocks, and leaderboard pages.
-
-### H3. Robots.txt
-
-```bash
-curl -s http://localhost:3001/robots.txt
-```
-
-**Expected:** Allows search engine crawling with sitemap reference.
-
----
-
-## SECTION I: Error Handling
-
-### I1. 404 Pages
+### J1. 404 Pages
 
 - [ ] `/creator/nonexistent-slug` shows 404 page
 - [ ] `/stock/XXXXXXX` shows 404 page
 - [ ] `/tip/nonexistent-id` shows 404 page
+- [ ] `/learn/nonexistent-module` shows 404 or "module not found"
 
-### I2. Invalid API Requests
+### J2. Invalid API Requests
 
 ```bash
-# Invalid pagination
-curl -s "http://localhost:3001/api/v1/tips?page=-1" | jq '.error'
+# Invalid quiz data
+curl -s -X POST http://localhost:3000/api/v1/quiz \
+  -H "Content-Type: application/json" \
+  -d '{"capital":"invalid"}' | jq '.error'
 
-# Invalid filter value
-curl -s "http://localhost:3001/api/v1/tips?status=INVALID" | jq '.error'
+# Non-existent similar tips
+curl -s http://localhost:3000/api/v1/similar-tips/nonexistent-id | jq '.'
 
-# Missing required param
-curl -s "http://localhost:3001/api/v1/search" | jq '.error'
+# Post-mortem on active tip (should fail)
+# Replace TIP_ID with an active tip's ID
+curl -s http://localhost:3000/api/v1/post-mortem/TIP_ID | jq '.error'
 ```
 
 ---
 
-## SECTION J: Quick Smoke Test Checklist
+## SECTION K: Quick Smoke Test Checklist
 
-Run through this 5-minute checklist for a quick sanity check:
+Run through this 10-minute checklist for a quick sanity check:
 
 1. [ ] `npm run dev` starts without errors
-2. [ ] Homepage loads at http://localhost:3001
+2. [ ] Homepage loads with creators in leaderboard
 3. [ ] Market bar visible below header
 4. [ ] Welcome modal appears (clear localStorage first)
-5. [ ] Leaderboard shows creators with scores
-6. [ ] Click a creator → profile page loads
-7. [ ] Click a tip → tip detail page loads
-8. [ ] Glossary tooltips appear on hover (Entry Price, Stop Loss)
-9. [ ] Risk badge visible on tip detail
-10. [ ] Position calculator expands and calculates
-11. [ ] Beginner Mode toggle works in header
-12. [ ] Search finds a stock by name
-13. [ ] `curl http://localhost:3001/api/v1/market-context` returns JSON
-14. [ ] No console errors in browser DevTools
-15. [ ] No TypeScript errors: `npx tsc --noEmit`
+5. [ ] Getting Started checklist appears
+6. [ ] Leaderboard shows creators with "Pending" or actual scores
+7. [ ] Click a creator → profile page loads with drawdown card and review form
+8. [ ] Click a tip → tip detail loads with all beginner tools
+9. [ ] Glossary tooltips work on hover
+10. [ ] Risk badge visible, position calculator works
+11. [ ] Brokerage cost calculator shows charge breakdown
+12. [ ] Entry timing card shows on active tips
+13. [ ] Similar tips panel loads data
+14. [ ] Tip feedback (thumbs up/down) works
+15. [ ] Beginner Mode toggle hides intraday tips on /tips
+16. [ ] `/quiz` → complete quiz → see recommendations
+17. [ ] `/compare` → select 2 creators → see comparison table
+18. [ ] `/market` → sector heatmap displays
+19. [ ] `/learn` → module cards display, can open a module
+20. [ ] `/protect-yourself` → scam guide renders
+21. [ ] No console errors in browser DevTools
 
 ---
 
@@ -632,11 +568,12 @@ Run through this 5-minute checklist for a quick sanity check:
 | `ECONNREFUSED` on Redis | `docker compose up -d` to start Redis |
 | Prisma client outdated | `npx prisma generate` |
 | Schema mismatch | `npx prisma db push` |
-| Port 3001 in use | `lsof -i :3001` then kill the process |
+| Port 3000 in use | `lsof -i :3000` then kill the process |
 | Stale cache | Clear Redis: `redis-cli FLUSHALL` |
-| Welcome modal won't appear | Clear `ratemytip-welcome-shown` from localStorage |
-| Tour won't start | Clear `ratemytip-onboarding-done` from localStorage |
-| Crawler fetches 0 tips | Check `ENABLE_MONEYCONTROL_SCRAPER=true` in .env |
+| Welcome modal won't appear | `localStorage.clear()` in browser console |
+| Crawler timeout | MoneyControl may be blocked on your network — run on EC2 instead |
+| 0 tips after crawl | Check Docker postgres is running: `docker compose ps` |
+| Leaderboard shows 0 creators | All creators have 0 tips — run the crawler first |
 
 ---
 
