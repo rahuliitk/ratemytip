@@ -5,7 +5,7 @@
 
 import { describe, it, expect, beforeEach } from "vitest";
 import { calculateRiskAdjustedReturn } from "@/lib/scoring/risk-adjusted";
-import { TIP_STATUS, TIP_DIRECTION, SCORING } from "@/lib/constants";
+import { TIP_STATUS } from "@/lib/constants";
 import {
   buildCompletedTip,
   buildLosingTip,
@@ -13,7 +13,6 @@ import {
   buildSellTip,
   buildMultiTargetTip,
   buildWinningTips,
-  buildLosingTips,
   resetTipCounter,
   BASE_DATE,
 } from "../../fixtures/scoring";
@@ -346,5 +345,184 @@ describe("calculateRiskAdjustedReturn", () => {
       expect(typeof detail.riskPct).toBe("number");
       expect(typeof detail.riskRewardRatio).toBe("number");
     }
+  });
+
+  // ──── Zero-risk edge case (Sprint 4 fix) ────
+
+  it("returns neutral positive R:R (1.0) when entryPrice === stopLoss and tip hit target", () => {
+    const tip = buildCompletedTip({
+      entryPrice: 1000,
+      target1: 1100,
+      stopLoss: 1000,
+      closedPrice: 1100,
+      status: TIP_STATUS.TARGET_1_HIT,
+    });
+    const result = calculateRiskAdjustedReturn({ tips: [tip] });
+    const detail = result.tipDetails[0]!;
+    expect(detail.riskPct).toBe(0);
+    expect(detail.riskRewardRatio).toBe(1.0);
+    expect(result.avgReturnPct).toBeCloseTo(10, 2);
+  });
+
+  it("returns neutral negative R:R (-1.0) when entryPrice === stopLoss and tip expired at a loss", () => {
+    const tip = buildExpiredTip({
+      entryPrice: 1000,
+      stopLoss: 1000,
+      closedPrice: 980,
+    });
+    const result = calculateRiskAdjustedReturn({ tips: [tip] });
+    const detail = result.tipDetails[0]!;
+    expect(detail.riskPct).toBe(0);
+    expect(detail.riskRewardRatio).toBe(-1.0);
+  });
+
+  it("returns neutral R:R (0) when entryPrice === stopLoss and tip expired at break-even", () => {
+    const tip = buildExpiredTip({
+      entryPrice: 1000,
+      stopLoss: 1000,
+      closedPrice: 1000,
+    });
+    const result = calculateRiskAdjustedReturn({ tips: [tip] });
+    const detail = result.tipDetails[0]!;
+    expect(detail.riskPct).toBe(0);
+    expect(detail.riskRewardRatio).toBe(0);
+    expect(detail.returnPct).toBe(0);
+  });
+
+  it("does not inflate riskPct to 0.01 for zero-risk tips (old behavior)", () => {
+    const tip = buildCompletedTip({
+      entryPrice: 1000,
+      target1: 1100,
+      stopLoss: 1000,
+      closedPrice: 1100,
+      status: TIP_STATUS.TARGET_1_HIT,
+    });
+    const result = calculateRiskAdjustedReturn({ tips: [tip] });
+    expect(result.tipDetails[0]!.riskPct).toBe(0);
+  });
+
+  // ────────────────────────────────────────
+  // SELL direction: expired and multi-target
+  // ────────────────────────────────────────
+
+  it("calculates return for an expired SELL tip based on closed price", () => {
+    // SELL Entry: 1000, SL: 1050, ClosedPrice: 980 (price dropped = profit for SELL)
+    const tip = buildSellTip({
+      entryPrice: 1000,
+      target1: 900,
+      stopLoss: 1050,
+      closedPrice: 980,
+      status: TIP_STATUS.EXPIRED,
+    });
+    const result = calculateRiskAdjustedReturn({ tips: [tip] });
+
+    // Return (SELL expired): (1000 - 980) / 1000 * 100 = 2%
+    expect(result.avgReturnPct).toBeCloseTo(2, 2);
+    // Risk: (1050 - 1000) / 1000 * 100 = 5%
+    // R:R = 2 / 5 = 0.4
+    expect(result.avgRiskRewardRatio).toBeCloseTo(0.4, 2);
+  });
+
+  it("calculates return for SELL multi-target tip with 2 targets, T1 hit", () => {
+    const tip = buildMultiTargetTip({
+      direction: "SELL",
+      entryPrice: 1000,
+      target1: 900,
+      target2: 800,
+      target3: null,
+      stopLoss: 1050,
+      status: TIP_STATUS.TARGET_1_HIT,
+      closedPrice: 900,
+    });
+    const result = calculateRiskAdjustedReturn({ tips: [tip] });
+
+    // SELL T1 return: (1000 - 900) / 1000 * 100 = 10%
+    expect(result.avgReturnPct).toBeCloseTo(10, 2);
+  });
+
+  it("calculates weighted return for SELL multi-target tip with 2 targets, T2 hit", () => {
+    const tip = buildMultiTargetTip({
+      direction: "SELL",
+      entryPrice: 1000,
+      target1: 900,
+      target2: 800,
+      target3: null,
+      stopLoss: 1050,
+      status: TIP_STATUS.TARGET_2_HIT,
+      closedPrice: 800,
+    });
+    const result = calculateRiskAdjustedReturn({ tips: [tip] });
+
+    // SELL T1 return: (1000-900)/1000*100 = 10%, T2: (1000-800)/1000*100 = 20%
+    // Weighted: 0.5 * 10 + 0.5 * 20 = 15%
+    expect(result.avgReturnPct).toBeCloseTo(15, 2);
+  });
+
+  it("calculates weighted return for SELL 3-target tip with T2 hit", () => {
+    const tip = buildMultiTargetTip({
+      direction: "SELL",
+      entryPrice: 1000,
+      target1: 900,
+      target2: 800,
+      target3: 700,
+      stopLoss: 1050,
+      status: TIP_STATUS.TARGET_2_HIT,
+      closedPrice: 800,
+    });
+    const result = calculateRiskAdjustedReturn({ tips: [tip] });
+
+    // SELL: T1 return = 10%, T2 return = 20%
+    // Weighted: 0.5 * 10 + 0.5 * 20 = 15%
+    expect(result.avgReturnPct).toBeCloseTo(15, 2);
+  });
+
+  it("calculates weighted return for SELL 3-target tip with all targets hit", () => {
+    const tip = buildMultiTargetTip({
+      direction: "SELL",
+      entryPrice: 1000,
+      target1: 900,
+      target2: 800,
+      target3: 700,
+      stopLoss: 1050,
+      status: TIP_STATUS.ALL_TARGETS_HIT,
+      closedPrice: 700,
+    });
+    const result = calculateRiskAdjustedReturn({ tips: [tip] });
+
+    // SELL: T1=10%, T2=20%, T3=30%
+    // Weighted: 0.33*10 + 0.33*20 + 0.34*30 = 3.3 + 6.6 + 10.2 = 20.1%
+    expect(result.avgReturnPct).toBeCloseTo(20.1, 1);
+  });
+
+  it("uses fallback return for BUY when target2 is null but target3 is set", () => {
+    const tip = buildCompletedTip({
+      entryPrice: 1000,
+      target1: 1100,
+      target2: null,
+      target3: 1300,
+      stopLoss: 950,
+      closedPrice: 1100,
+      status: TIP_STATUS.TARGET_1_HIT,
+    });
+    const result = calculateRiskAdjustedReturn({ tips: [tip] });
+
+    // Fallback BUY: (1100 - 1000) / 1000 * 100 = 10%
+    expect(result.avgReturnPct).toBeCloseTo(10, 2);
+  });
+
+  it("uses fallback return for SELL when target2 is null but target3 is set", () => {
+    const tip = buildSellTip({
+      entryPrice: 1000,
+      target1: 900,
+      target2: null,
+      target3: 700,
+      stopLoss: 1050,
+      closedPrice: 900,
+      status: TIP_STATUS.TARGET_1_HIT,
+    });
+    const result = calculateRiskAdjustedReturn({ tips: [tip] });
+
+    // Fallback SELL: (1000 - 900) / 1000 * 100 = 10%
+    expect(result.avgReturnPct).toBeCloseTo(10, 2);
   });
 });

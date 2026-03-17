@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
 import { ScoreBadge } from "@/components/shared/score-badge";
-import { User, Calendar, Users } from "lucide-react";
+import { Calendar, Users, MessageSquare, UserCheck } from "lucide-react";
 
 interface PageProps {
   params: Promise<{ username: string }>;
@@ -78,50 +79,83 @@ export default async function PublicProfilePage({
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
-      {/* Profile header */}
-      <div className="flex items-center gap-4">
-        {user.avatarUrl ? (
-          <img
-            src={user.avatarUrl}
-            alt={user.displayName}
-            className="h-16 w-16 rounded-full object-cover"
-          />
-        ) : (
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent/10 text-xl font-bold text-accent">
-            {user.displayName.charAt(0).toUpperCase()}
+    <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
+      {/* Profile Card */}
+      <div className="rounded-xl border border-border/60 bg-surface p-6 shadow-sm sm:p-8">
+        {/* Avatar + Name */}
+        <div className="flex items-center gap-5">
+          {user.avatarUrl ? (
+            <Image
+              src={user.avatarUrl}
+              alt={user.displayName}
+              width={72}
+              height={72}
+              className="h-[72px] w-[72px] rounded-full object-cover ring-2 ring-border/40 ring-offset-2"
+              unoptimized
+            />
+          ) : (
+            <div className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-accent/10 text-2xl font-bold text-accent ring-2 ring-border/40 ring-offset-2">
+              {user.displayName.charAt(0).toUpperCase()}
+            </div>
+          )}
+          <div>
+            <h1 className="text-2xl font-bold text-text">
+              {user.displayName}
+            </h1>
+            <p className="text-sm text-muted">@{user.username}</p>
           </div>
-        )}
-        <div>
-          <h1 className="text-2xl font-bold text-primary">{user.displayName}</h1>
-          <p className="text-sm text-muted">@{user.username}</p>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="mt-8 grid grid-cols-3 gap-4">
+          <div className="rounded-xl border border-border/60 bg-bg-alt/50 p-4 text-center">
+            <div className="flex items-center justify-center gap-1.5 text-muted">
+              <UserCheck className="h-4 w-4" />
+            </div>
+            <p className="mt-1.5 text-xl font-bold tabular-nums text-text">
+              {user._count.follows}
+            </p>
+            <p className="text-xs text-muted">Following</p>
+          </div>
+          <div className="rounded-xl border border-border/60 bg-bg-alt/50 p-4 text-center">
+            <div className="flex items-center justify-center gap-1.5 text-muted">
+              <MessageSquare className="h-4 w-4" />
+            </div>
+            <p className="mt-1.5 text-xl font-bold tabular-nums text-text">
+              {user._count.comments}
+            </p>
+            <p className="text-xs text-muted">Comments</p>
+          </div>
+          <div className="rounded-xl border border-border/60 bg-bg-alt/50 p-4 text-center">
+            <div className="flex items-center justify-center gap-1.5 text-muted">
+              <Calendar className="h-4 w-4" />
+            </div>
+            <p className="mt-1.5 text-sm font-semibold text-text">
+              {new Date(user.createdAt).toLocaleDateString("en-US", {
+                month: "short",
+                year: "numeric",
+              })}
+            </p>
+            <p className="text-xs text-muted">Joined</p>
+          </div>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="mt-6 flex gap-6">
-        <div className="flex items-center gap-1.5 text-sm text-muted">
-          <Users className="h-4 w-4" />
-          <span className="font-medium text-text">{user._count.follows}</span> following
-        </div>
-        <div className="flex items-center gap-1.5 text-sm text-muted">
-          <Calendar className="h-4 w-4" />
-          Joined {new Date(user.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
-        </div>
-      </div>
-
-      {/* Followed creators */}
+      {/* Following Section */}
       <div className="mt-8">
-        <h2 className="text-lg font-bold text-primary">
-          Following ({user._count.follows})
+        <h2 className="text-lg font-semibold text-text">
+          Following{" "}
+          <span className="text-sm font-normal text-muted">
+            ({user._count.follows})
+          </span>
         </h2>
         {user.follows.length > 0 ? (
-          <div className="mt-3 space-y-2">
+          <div className="mt-4 space-y-2">
             {user.follows.map((f) => (
               <Link
                 key={f.creator.slug}
                 href={`/creator/${f.creator.slug}`}
-                className="flex items-center justify-between rounded-lg border border-gray-200 bg-surface p-3 transition-colors hover:bg-bg"
+                className="flex items-center justify-between rounded-xl border border-border/60 bg-surface p-4 shadow-sm transition-all duration-200 hover:border-accent/30 hover:shadow-md"
               >
                 <div>
                   <p className="text-sm font-medium text-text">
@@ -136,33 +170,49 @@ export default async function PublicProfilePage({
             ))}
           </div>
         ) : (
-          <p className="mt-3 text-sm text-muted">Not following any creators yet.</p>
+          <div className="mt-4 rounded-xl border border-border/60 bg-surface p-8 text-center shadow-sm">
+            <Users className="mx-auto h-8 w-8 text-muted" />
+            <p className="mt-2 text-sm text-muted">
+              Not following any creators yet.
+            </p>
+          </div>
         )}
       </div>
 
-      {/* Recent comments */}
+      {/* Recent Comments Section */}
       <div className="mt-8">
-        <h2 className="text-lg font-bold text-primary">
-          Recent Comments ({user._count.comments})
+        <h2 className="text-lg font-semibold text-text">
+          Recent Comments{" "}
+          <span className="text-sm font-normal text-muted">
+            ({user._count.comments})
+          </span>
         </h2>
         {user.comments.length > 0 ? (
-          <div className="mt-3 space-y-3">
+          <div className="mt-4 space-y-2">
             {user.comments.map((c) => (
               <Link
                 key={c.id}
                 href={`/tip/${c.tip.id}`}
-                className="block rounded-lg border border-gray-200 bg-surface p-3 transition-colors hover:bg-bg"
+                className="block rounded-xl border border-border/60 bg-surface p-4 shadow-sm transition-all duration-200 hover:border-accent/30 hover:shadow-md"
               >
-                <p className="text-xs text-muted">
-                  On {c.tip.stock.symbol} &middot;{" "}
-                  {new Date(c.createdAt).toLocaleDateString()}
+                <div className="flex items-center gap-2 text-xs text-muted">
+                  <span className="rounded-md bg-bg-alt px-1.5 py-0.5 font-medium text-text-secondary">
+                    {c.tip.stock.symbol}
+                  </span>
+                  <span>&middot;</span>
+                  <span>{new Date(c.createdAt).toLocaleDateString()}</span>
+                </div>
+                <p className="mt-2 text-sm leading-relaxed text-text-secondary line-clamp-2">
+                  {c.content}
                 </p>
-                <p className="mt-1 text-sm text-text line-clamp-2">{c.content}</p>
               </Link>
             ))}
           </div>
         ) : (
-          <p className="mt-3 text-sm text-muted">No comments yet.</p>
+          <div className="mt-4 rounded-xl border border-border/60 bg-surface p-8 text-center shadow-sm">
+            <MessageSquare className="mx-auto h-8 w-8 text-muted" />
+            <p className="mt-2 text-sm text-muted">No comments yet.</p>
+          </div>
         )}
       </div>
     </div>

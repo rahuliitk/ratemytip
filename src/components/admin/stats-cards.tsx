@@ -20,15 +20,15 @@ export function StatsCards({ cards }: StatsCardsProps): React.ReactElement {
         return (
           <div
             key={card.label}
-            className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] p-5"
+            className="rounded-xl border border-border/60 bg-surface p-5 shadow-sm"
           >
-            <div className="flex items-center gap-3">
-              <div className={`rounded-lg p-2 ${card.bgColor}`}>
+            <div className="flex items-center gap-4">
+              <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${card.bgColor}`}>
                 <Icon className={`h-5 w-5 ${card.color}`} />
               </div>
               <div>
                 <p className="text-xs font-medium text-muted">{card.label}</p>
-                <p className="text-2xl font-bold tabular-nums text-text">
+                <p className="text-2xl font-bold text-text tabular-nums">
                   {card.value}
                 </p>
               </div>

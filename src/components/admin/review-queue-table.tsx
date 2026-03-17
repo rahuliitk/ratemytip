@@ -33,9 +33,15 @@ export function ReviewQueueTable({
 }: ReviewQueueTableProps): React.ReactElement {
   if (tips.length === 0) {
     return (
-      <div className="rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] py-16 text-center">
-        <p className="text-sm text-muted">
-          No tips pending review. All caught up!
+      <div className="rounded-xl border border-border/60 bg-surface py-16 text-center shadow-sm">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50">
+          <svg className="h-6 w-6 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <p className="mt-3 text-sm font-medium text-text">All caught up!</p>
+        <p className="mt-1 text-xs text-muted">
+          No tips pending review.
         </p>
       </div>
     );

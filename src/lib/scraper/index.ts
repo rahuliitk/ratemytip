@@ -60,8 +60,7 @@ export async function scrapeCreator(
 
   if (creatorPlatform.platform === "TWITTER") {
     posts = await scrapeTwitterCreator(
-      creatorPlatform.platformUserId,
-      creatorPlatform.lastScrapedAt
+      creatorPlatform.platformUserId
     );
   } else if (creatorPlatform.platform === "YOUTUBE") {
     posts = await scrapeYouTubeCreator(
@@ -77,7 +76,7 @@ export async function scrapeCreator(
   }
 
   // Store raw posts in database
-  const storeResult = await storeRawPosts(creatorPlatform.id, posts);
+  await storeRawPosts(creatorPlatform.id, posts);
 
   // Update last scraped timestamp
   await db.creatorPlatform.update({
@@ -151,8 +150,7 @@ export async function scrapeAllCreators(
  * Scrape a single Twitter user's recent tweets.
  */
 async function scrapeTwitterCreator(
-  platformUserId: string,
-  lastScrapedAt: Date | null
+  platformUserId: string
 ): Promise<ScrapedPost[]> {
   const bearerToken = process.env.TWITTER_BEARER_TOKEN;
   if (!bearerToken) {

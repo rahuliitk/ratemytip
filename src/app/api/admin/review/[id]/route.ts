@@ -242,7 +242,7 @@ export async function PATCH(
       },
       { status: 400 }
     );
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         success: false,

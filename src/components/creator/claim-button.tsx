@@ -52,7 +52,7 @@ export function ClaimButton({ creatorId, creatorName }: ClaimButtonProps): React
 
   if (result?.success) {
     return (
-      <div className="rounded-xl bg-[#276749]/10 px-3 py-2 text-sm text-[#276749]">
+      <div className="rounded-lg bg-success-light px-3 py-2 text-sm text-success">
         {result.message}
       </div>
     );
@@ -73,15 +73,15 @@ export function ClaimButton({ creatorId, creatorName }: ClaimButtonProps): React
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-2xl bg-white p-4 shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)]">
-      <h3 className="text-sm font-bold text-gradient-primary">
+    <form onSubmit={handleSubmit} className="rounded-xl border border-border/60 bg-surface p-5 shadow-sm">
+      <h3 className="text-sm font-semibold text-text">
         Claim {creatorName}&apos;s profile
       </h3>
       <p className="mt-1 text-xs text-muted">
         Provide a link to your social media profile that matches this creator to verify ownership.
       </p>
 
-      <div className="mt-3 space-y-3">
+      <div className="mt-4 space-y-3">
         <div>
           <label htmlFor="proof-url" className="block text-xs font-medium text-text">
             Proof URL *
@@ -93,7 +93,7 @@ export function ClaimButton({ creatorId, creatorName }: ClaimButtonProps): React
             placeholder="https://twitter.com/yourusername"
             value={proofUrl}
             onChange={(e) => setProofUrl(e.target.value)}
-            className="mt-1 w-full rounded-xl border border-gray-100 px-3 py-2 text-sm transition-colors duration-200 focus:border-[#2B6CB0] focus:outline-none focus:ring-1 focus:ring-[#2B6CB0]/20"
+            className="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
           />
         </div>
 
@@ -107,7 +107,7 @@ export function ClaimButton({ creatorId, creatorName }: ClaimButtonProps): React
             placeholder="Any additional information to help verify your identity..."
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            className="mt-1 w-full rounded-xl border border-gray-100 px-3 py-2 text-sm transition-colors duration-200 focus:border-[#2B6CB0] focus:outline-none focus:ring-1 focus:ring-[#2B6CB0]/20"
+            className="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
             maxLength={1000}
           />
         </div>

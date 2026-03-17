@@ -193,17 +193,17 @@ export function CommentCard({
   const displayName = comment.user.displayName || comment.user.username || "User";
 
   return (
-    <div className={`${depth > 0 ? "ml-8 border-l-2 border-gray-100 pl-4" : ""}`}>
+    <div className={`${depth > 0 ? "ml-8 border-l-2 border-border/60 pl-4" : ""}`}>
       <div className="py-3">
         {/* Header */}
         <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#2B6CB0]/10 text-xs font-semibold text-[#2B6CB0]">
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-accent/10 text-xs font-semibold text-accent">
             {displayName.charAt(0).toUpperCase()}
           </div>
-          <span className="text-sm font-medium text-primary">{displayName}</span>
+          <span className="text-sm font-medium text-text">{displayName}</span>
           <TimeAgo date={comment.createdAt} className="text-xs" />
           {comment.isPinned && (
-            <span className="rounded-md bg-[#C05621]/10 px-1.5 py-0.5 text-xs font-medium text-[#C05621]">
+            <span className="rounded-md bg-warning/10 px-1.5 py-0.5 text-xs font-medium text-warning">
               Pinned
             </span>
           )}
@@ -218,7 +218,7 @@ export function CommentCard({
               <textarea
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
-                className="w-full rounded-xl border border-gray-200/60 px-3 py-2 text-sm focus:border-[#2B6CB0]/40 focus:outline-none focus:ring-2 focus:ring-[#2B6CB0]/10"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm text-text focus:border-accent/40 focus:outline-none focus:ring-2 focus:ring-accent/10"
                 rows={3}
                 maxLength={1000}
               />
@@ -234,17 +234,17 @@ export function CommentCard({
               </div>
             </div>
           ) : (
-            <p className="text-sm text-primary whitespace-pre-wrap">{comment.content}</p>
+            <p className="text-sm text-text whitespace-pre-wrap">{comment.content}</p>
           )}
 
           {/* Actions */}
           {!comment.isDeleted && !editing && (
-            <div className="mt-2 flex items-center gap-3">
+            <div className="mt-2 flex items-center gap-1">
               <button
                 type="button"
                 onClick={() => handleVote("UPVOTE")}
-                className={`flex items-center gap-1 text-xs transition-colors ${
-                  userVote === "UPVOTE" ? "text-green-600" : "text-muted hover:text-green-600"
+                className={`flex items-center gap-1 rounded px-1.5 py-1 text-xs transition-colors duration-150 hover:bg-bg-alt ${
+                  userVote === "UPVOTE" ? "text-emerald-600" : "text-muted"
                 }`}
               >
                 <ThumbsUp className="h-3.5 w-3.5" />
@@ -253,8 +253,8 @@ export function CommentCard({
               <button
                 type="button"
                 onClick={() => handleVote("DOWNVOTE")}
-                className={`flex items-center gap-1 text-xs transition-colors ${
-                  userVote === "DOWNVOTE" ? "text-red-600" : "text-muted hover:text-red-600"
+                className={`flex items-center gap-1 rounded px-1.5 py-1 text-xs transition-colors duration-150 hover:bg-bg-alt ${
+                  userVote === "DOWNVOTE" ? "text-red-600" : "text-muted"
                 }`}
               >
                 <ThumbsDown className="h-3.5 w-3.5" />
@@ -271,7 +271,7 @@ export function CommentCard({
                     }
                     setShowReply(!showReply);
                   }}
-                  className="flex items-center gap-1 text-xs text-muted transition-colors hover:text-blue-600"
+                  className="flex items-center gap-1 rounded px-1.5 py-1 text-xs text-muted transition-colors duration-150 hover:bg-bg-alt hover:text-text"
                 >
                   <MessageSquare className="h-3.5 w-3.5" />
                   Reply
@@ -283,7 +283,7 @@ export function CommentCard({
                   <button
                     type="button"
                     onClick={() => setEditing(true)}
-                    className="flex items-center gap-1 text-xs text-muted transition-colors hover:text-blue-600"
+                    className="flex items-center gap-1 rounded px-1.5 py-1 text-xs text-muted transition-colors duration-150 hover:bg-bg-alt hover:text-text"
                   >
                     <Pencil className="h-3 w-3" />
                     Edit
@@ -291,7 +291,7 @@ export function CommentCard({
                   <button
                     type="button"
                     onClick={handleDelete}
-                    className="flex items-center gap-1 text-xs text-muted transition-colors hover:text-red-600"
+                    className="flex items-center gap-1 rounded px-1.5 py-1 text-xs text-muted transition-colors duration-150 hover:bg-bg-alt hover:text-red-600"
                   >
                     <Trash2 className="h-3 w-3" />
                     Delete
@@ -303,14 +303,14 @@ export function CommentCard({
                 <button
                   type="button"
                   onClick={handleReport}
-                  className="flex items-center gap-1 text-xs text-muted transition-colors hover:text-orange-600"
+                  className="flex items-center gap-1 rounded px-1.5 py-1 text-xs text-muted transition-colors duration-150 hover:bg-bg-alt hover:text-warning"
                 >
                   <Flag className="h-3 w-3" />
                   Report
                 </button>
               )}
               {reported && (
-                <span className="text-xs text-orange-600">Reported</span>
+                <span className="px-1.5 py-1 text-xs text-warning">Reported</span>
               )}
             </div>
           )}
@@ -322,7 +322,7 @@ export function CommentCard({
                 value={replyContent}
                 onChange={(e) => setReplyContent(e.target.value)}
                 placeholder="Write a reply..."
-                className="w-full rounded-xl border border-gray-200/60 px-3 py-2 text-sm focus:border-[#2B6CB0]/40 focus:outline-none focus:ring-2 focus:ring-[#2B6CB0]/10"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm text-text placeholder:text-muted-light focus:border-accent/40 focus:outline-none focus:ring-2 focus:ring-accent/10"
                 rows={2}
                 maxLength={1000}
               />

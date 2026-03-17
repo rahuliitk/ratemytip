@@ -138,44 +138,51 @@ export default async function CategoryLeaderboardPage({
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <h1 className="text-3xl font-bold text-primary">
-        {config.label} Leaderboard
-      </h1>
-      <p className="mt-2 text-sm text-muted">
-        Top {config.label.toLowerCase()} tip creators ranked by performance
-      </p>
+      {/* Page Header */}
+      <div>
+        <h1 className="text-3xl font-bold text-text">
+          {config.label} Leaderboard
+        </h1>
+        <p className="mt-2 text-sm text-muted">
+          Top {config.label.toLowerCase()} tip creators ranked by performance
+        </p>
+      </div>
 
+      {/* Category Tabs */}
       <div className="mt-6">
         <CategoryTabs />
       </div>
 
+      {/* Filters */}
       <div className="mt-4">
         <Suspense fallback={null}>
           <LeaderboardFilters />
         </Suspense>
       </div>
 
+      {/* Leaderboard Table */}
       <div className="mt-6">
         <LeaderboardTable entries={entries} />
       </div>
 
+      {/* Pagination */}
       {totalPages > 1 && (
         <div className="mt-6 flex items-center justify-center gap-2">
           {page > 1 && (
             <a
               href={`?page=${page - 1}&sortBy=${sortBy}&minTips=${minTips}`}
-              className="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-muted hover:bg-bg"
+              className="rounded-lg border border-border px-4 py-1.5 text-sm font-medium text-muted transition-colors duration-200 hover:bg-bg-alt hover:text-text"
             >
               Previous
             </a>
           )}
-          <span className="text-sm text-muted">
+          <span className="text-sm text-muted tabular-nums">
             Page {page} of {totalPages}
           </span>
           {page < totalPages && (
             <a
               href={`?page=${page + 1}&sortBy=${sortBy}&minTips=${minTips}`}
-              className="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-muted hover:bg-bg"
+              className="rounded-lg border border-border px-4 py-1.5 text-sm font-medium text-muted transition-colors duration-200 hover:bg-bg-alt hover:text-text"
             >
               Next
             </a>

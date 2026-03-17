@@ -43,11 +43,13 @@ export function BookmarkButton({ tipId, initialSaved }: BookmarkButtonProps): Re
       type="button"
       onClick={handleToggle}
       disabled={loading}
-      className="rounded-xl p-2 text-muted transition-colors hover:bg-[#F7FAFC] hover:text-primary disabled:cursor-not-allowed"
+      className="rounded-lg p-2 transition-colors duration-150 hover:bg-bg-alt disabled:cursor-not-allowed"
       aria-label={saved ? "Unsave tip" : "Save tip"}
     >
       <Bookmark
-        className={`h-5 w-5 ${saved ? "fill-accent text-accent" : ""}`}
+        className={`h-5 w-5 transition-colors duration-150 ${
+          saved ? "fill-accent text-accent" : "text-muted hover:text-text"
+        }`}
       />
     </button>
   );

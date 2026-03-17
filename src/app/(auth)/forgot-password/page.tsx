@@ -2,17 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 
 export default function ForgotPasswordPage(): React.ReactElement {
   const [email, setEmail] = useState("");
@@ -36,58 +29,69 @@ export default function ForgotPasswordPage(): React.ReactElement {
 
   if (submitted) {
     return (
-      <Card>
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Check your email</CardTitle>
-          <CardDescription>
-            If an account exists with that email, we&apos;ve sent password reset instructions.
-          </CardDescription>
-        </CardHeader>
-        <CardFooter className="justify-center">
-          <Link href="/login" className="text-sm text-accent hover:underline">
+      <div className="text-center">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-50">
+          <CheckCircle2 className="h-6 w-6 text-success" />
+        </div>
+        <h1 className="text-2xl font-bold text-text">Check your email</h1>
+        <p className="mt-2 text-sm text-muted">
+          If an account exists with that email, we&apos;ve sent password reset
+          instructions.
+        </p>
+        <div className="mt-8">
+          <Link
+            href="/login"
+            className="text-sm text-accent hover:text-accent-hover hover:underline"
+          >
             Back to sign in
           </Link>
-        </CardFooter>
-      </Card>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardHeader className="text-center">
-        <CardTitle className="text-2xl">Forgot password?</CardTitle>
-        <CardDescription>
+    <div>
+      <div className="mb-8 text-center">
+        <h1 className="text-2xl font-bold text-text">Forgot password?</h1>
+        <p className="mt-2 text-sm text-muted">
           Enter your email and we&apos;ll send you a reset link
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-              autoFocus
-            />
-          </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Sending..." : "Send reset link"}
-          </Button>
-        </form>
-      </CardContent>
-      <CardFooter className="justify-center">
-        <p className="text-sm text-muted">
-          Remember your password?{" "}
-          <Link href="/login" className="font-medium text-accent hover:underline">
-            Sign in
-          </Link>
         </p>
-      </CardFooter>
-    </Card>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            autoComplete="email"
+            autoFocus
+          />
+        </div>
+        <Button
+          type="submit"
+          variant="glow"
+          className="w-full"
+          disabled={loading}
+        >
+          {loading ? "Sending..." : "Send reset link"}
+        </Button>
+      </form>
+
+      <p className="mt-8 text-center text-sm text-muted">
+        Remember your password?{" "}
+        <Link
+          href="/login"
+          className="font-medium text-accent hover:text-accent-hover hover:underline"
+        >
+          Sign in
+        </Link>
+      </p>
+    </div>
   );
 }

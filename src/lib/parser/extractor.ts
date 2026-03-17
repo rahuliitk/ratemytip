@@ -182,7 +182,17 @@ export function buildTipFromExtraction(extraction: RawExtraction): ParsedTip | n
   const exchange = inferExchange(stockSymbol);
 
   // Calculate confidence
-  const confidence = calculateConfidence(extraction);
+  let confidence = calculateConfidence(extraction);
+
+  // Validate price relationships — penalize confidence if invalid
+  if (
+    entryPrice > 0 &&
+    target1 > 0 &&
+    stopLoss > 0 &&
+    !validatePriceRelationships(direction, entryPrice, target1, target2, target3, stopLoss)
+  ) {
+    confidence = Math.max(0, confidence - 0.20);
+  }
 
   return {
     stockSymbol,
@@ -198,6 +208,33 @@ export function buildTipFromExtraction(extraction: RawExtraction): ParsedTip | n
     isTip: true,
     confidence,
   };
+}
+
+/**
+ * Validates that price relationships are consistent with the tip direction.
+ * For BUY: target > entry > stopLoss, and targets are ascending.
+ * For SELL: stopLoss > entry > target, and targets are descending.
+ */
+function validatePriceRelationships(
+  direction: ParsedDirection,
+  entryPrice: number,
+  target1: number,
+  target2: number | null,
+  target3: number | null,
+  stopLoss: number,
+): boolean {
+  if (direction === "BUY") {
+    if (target1 <= entryPrice) return false;
+    if (stopLoss >= entryPrice) return false;
+    if (target2 !== null && target2 <= target1) return false;
+    if (target3 !== null && target3 <= (target2 ?? target1)) return false;
+  } else {
+    if (target1 >= entryPrice) return false;
+    if (stopLoss <= entryPrice) return false;
+    if (target2 !== null && target2 >= target1) return false;
+    if (target3 !== null && target3 >= (target2 ?? target1)) return false;
+  }
+  return true;
 }
 
 /**

@@ -8,9 +8,11 @@
 import { createLogger } from "@/lib/logger";
 import { db } from "@/lib/db";
 import { TIP_STATUS } from "@/lib/constants";
+import { invalidateStockCache } from "@/lib/utils/cache-invalidation";
 
 const log = createLogger("market-data/price-monitor");
 
+import { NseService } from "./nse";
 import { YahooFinanceService } from "./yahoo-finance";
 import type { CurrentPrice, TipStatusUpdate } from "./types";
 
@@ -56,9 +58,11 @@ interface ActiveTipRow {
  */
 export class PriceMonitor {
   private readonly yahoo: YahooFinanceService;
+  private readonly nse: NseService;
 
-  constructor(yahoo?: YahooFinanceService) {
+  constructor(yahoo?: YahooFinanceService, nse?: NseService) {
     this.yahoo = yahoo ?? new YahooFinanceService();
+    this.nse = nse ?? new NseService();
   }
 
   /**
@@ -283,6 +287,9 @@ export class PriceMonitor {
       "Tip resolved"
     );
 
+    // Invalidate stock page cache after tip resolution
+    await invalidateStockCache(tip.stock.symbol);
+
     return {
       tipId: tip.id,
       oldStatus: tip.status,
@@ -395,6 +402,7 @@ export class PriceMonitor {
 
   /**
    * Fetch current prices for all unique stocks in the active tips set.
+   * Uses NSE as primary source for Indian equities, falling back to Yahoo.
    */
   private async fetchPricesForStocks(
     stocks: Map<string, { symbol: string; exchange: string }>
@@ -402,10 +410,27 @@ export class PriceMonitor {
     const priceMap = new Map<string, CurrentPrice>();
 
     for (const [symbol, stock] of stocks) {
-      const price = await this.yahoo.getCurrentPrice(
-        stock.symbol,
-        stock.exchange
-      );
+      let price: CurrentPrice | null = null;
+
+      // Try NSE first for Indian equities only (INDEX may include global indices)
+      if (stock.exchange === "NSE") {
+        try {
+          price = await this.nse.getCurrentPrice(stock.symbol);
+        } catch {
+          // NSE unavailable — fall through to Yahoo
+        }
+        if (!price) {
+          log.warn({ symbol }, "NSE price unavailable, falling back to Yahoo");
+        }
+      }
+
+      // Fallback to Yahoo Finance
+      if (!price) {
+        price = await this.yahoo.getCurrentPrice(
+          stock.symbol,
+          stock.exchange
+        );
+      }
 
       if (price) {
         priceMap.set(symbol, price);

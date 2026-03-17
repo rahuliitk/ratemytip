@@ -18,41 +18,53 @@ async function getModerationLog() {
   }
 }
 
+const ACTION_COLORS: Record<string, string> = {
+  ACTIVATED: "bg-emerald-50 text-emerald-700",
+  DEACTIVATED: "bg-red-50 text-red-700",
+  FLAGGED: "bg-amber-50 text-amber-700",
+  UNFLAGGED: "bg-blue-50 text-blue-700",
+  NOTE_ADDED: "bg-bg-alt text-muted",
+};
+
 export default async function AdminModerationPage(): Promise<React.ReactElement> {
   const actions = await getModerationLog();
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-gradient-primary">Moderation Log</h1>
-      <p className="mt-1 text-sm text-muted">
-        History of moderation actions taken on creators
-      </p>
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div>
+        <h1 className="text-2xl font-bold text-text">Moderation Log</h1>
+        <p className="mt-1 text-sm text-muted">
+          History of moderation actions taken on creators
+        </p>
+      </div>
 
-      <div className="mt-6 overflow-x-auto rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)]">
+      {/* Table */}
+      <div className="overflow-x-auto rounded-xl border border-border/60 bg-surface shadow-sm">
         <table className="w-full min-w-[600px] text-left">
           <thead>
-            <tr className="border-b border-gray-200 bg-bg">
-              <th className="px-4 py-3 text-xs font-semibold uppercase text-muted">
+            <tr className="border-b border-border/60 bg-bg-alt/80">
+              <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted">
                 Date
               </th>
-              <th className="px-4 py-3 text-xs font-semibold uppercase text-muted">
+              <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted">
                 Action
               </th>
-              <th className="px-4 py-3 text-xs font-semibold uppercase text-muted">
+              <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted">
                 Creator
               </th>
-              <th className="px-4 py-3 text-xs font-semibold uppercase text-muted">
+              <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted">
                 Admin
               </th>
-              <th className="px-4 py-3 text-xs font-semibold uppercase text-muted">
+              <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted">
                 Reason
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-border/40">
             {actions.map((action) => (
-              <tr key={action.id} className="hover:bg-[#2B6CB0]/5">
-                <td className="px-4 py-3 text-xs text-muted">
+              <tr key={action.id} className="transition-colors hover:bg-bg-alt/50">
+                <td className="px-5 py-3.5 text-xs text-muted tabular-nums">
                   {new Date(action.createdAt).toLocaleString("en-IN", {
                     day: "numeric",
                     month: "short",
@@ -61,18 +73,20 @@ export default async function AdminModerationPage(): Promise<React.ReactElement>
                     minute: "2-digit",
                   })}
                 </td>
-                <td className="px-4 py-3">
-                  <span className="rounded bg-gray-100 px-2 py-0.5 text-xs font-medium text-text">
+                <td className="px-5 py-3.5">
+                  <span className={`rounded-md px-2.5 py-0.5 text-xs font-medium ${
+                    ACTION_COLORS[action.action] ?? "bg-bg-alt text-muted"
+                  }`}>
                     {action.action}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-sm text-text">
+                <td className="px-5 py-3.5 text-sm font-medium text-text">
                   {action.creator.displayName}
                 </td>
-                <td className="px-4 py-3 text-sm text-muted">
+                <td className="px-5 py-3.5 text-sm text-muted">
                   {action.admin.name}
                 </td>
-                <td className="max-w-[300px] truncate px-4 py-3 text-xs text-muted">
+                <td className="max-w-[300px] truncate px-5 py-3.5 text-xs text-muted">
                   {action.reason}
                 </td>
               </tr>
@@ -81,7 +95,7 @@ export default async function AdminModerationPage(): Promise<React.ReactElement>
         </table>
 
         {actions.length === 0 && (
-          <div className="py-12 text-center text-sm text-muted">
+          <div className="py-16 text-center text-sm text-muted">
             No moderation actions recorded yet.
           </div>
         )}

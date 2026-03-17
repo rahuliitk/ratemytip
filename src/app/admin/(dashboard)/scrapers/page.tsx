@@ -17,11 +17,11 @@ interface ScrapeJob {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  QUEUED: "bg-yellow-100 text-yellow-800",
-  RUNNING: "bg-blue-100 text-blue-800",
-  COMPLETED: "bg-green-100 text-green-800",
-  FAILED: "bg-red-100 text-red-800",
-  CANCELLED: "bg-gray-100 text-gray-600",
+  QUEUED: "bg-amber-50 text-amber-700",
+  RUNNING: "bg-blue-50 text-blue-700",
+  COMPLETED: "bg-emerald-50 text-emerald-700",
+  FAILED: "bg-red-50 text-red-700",
+  CANCELLED: "bg-bg-alt text-muted",
 };
 
 export default function AdminScrapersPage(): React.ReactElement {
@@ -66,10 +66,11 @@ export default function AdminScrapersPage(): React.ReactElement {
   }
 
   return (
-    <div>
+    <div className="space-y-6">
+      {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gradient-primary">Scraper Jobs</h1>
+          <h1 className="text-2xl font-bold text-text">Scraper Jobs</h1>
           <p className="mt-1 text-sm text-muted">
             Manage and monitor scraping jobs
           </p>
@@ -79,7 +80,7 @@ export default function AdminScrapersPage(): React.ReactElement {
             type="button"
             onClick={() => triggerScrape("TWITTER")}
             disabled={isTriggering}
-            className="inline-flex items-center gap-2 rounded-md bg-accent px-3 py-2 text-sm font-medium text-white hover:bg-accent/90 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:opacity-50"
           >
             {isTriggering ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -92,7 +93,7 @@ export default function AdminScrapersPage(): React.ReactElement {
             type="button"
             onClick={() => triggerScrape("YOUTUBE")}
             disabled={isTriggering}
-            className="inline-flex items-center gap-2 rounded-md bg-accent px-3 py-2 text-sm font-medium text-white hover:bg-accent/90 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:opacity-50"
           >
             {isTriggering ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -104,7 +105,7 @@ export default function AdminScrapersPage(): React.ReactElement {
           <button
             type="button"
             onClick={fetchJobs}
-            className="inline-flex items-center gap-2 rounded-md border border-gray-200 px-3 py-2 text-sm font-medium text-muted hover:bg-[#2B6CB0]/5"
+            className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text transition-colors hover:bg-bg-alt"
           >
             <RotateCw className="h-4 w-4" />
             Refresh
@@ -113,62 +114,65 @@ export default function AdminScrapersPage(): React.ReactElement {
       </div>
 
       {isLoading ? (
-        <div className="mt-8 flex items-center justify-center py-12">
+        <div className="flex items-center justify-center py-20">
           <Loader2 className="h-6 w-6 animate-spin text-muted" />
         </div>
       ) : (
-        <div className="mt-6 overflow-x-auto rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)]">
+        <div className="overflow-x-auto rounded-xl border border-border/60 bg-surface shadow-sm">
           <table className="w-full min-w-[700px] text-left">
             <thead>
-              <tr className="border-b border-gray-200 bg-bg">
-                <th className="px-4 py-3 text-xs font-semibold uppercase text-muted">
+              <tr className="border-b border-border/60 bg-bg-alt/80">
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted">
                   Platform
                 </th>
-                <th className="px-4 py-3 text-xs font-semibold uppercase text-muted">
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted">
                   Type
                 </th>
-                <th className="px-4 py-3 text-xs font-semibold uppercase text-muted">
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted">
                   Status
                 </th>
-                <th className="px-4 py-3 text-right text-xs font-semibold uppercase text-muted">
+                <th className="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted">
                   Posts Found
                 </th>
-                <th className="px-4 py-3 text-right text-xs font-semibold uppercase text-muted">
+                <th className="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted">
                   Tips Extracted
                 </th>
-                <th className="px-4 py-3 text-xs font-semibold uppercase text-muted">
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted">
                   Started
                 </th>
-                <th className="px-4 py-3 text-xs font-semibold uppercase text-muted">
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted">
                   Error
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border/40">
               {jobs.map((job) => (
-                <tr key={job.id} className="hover:bg-[#2B6CB0]/5">
-                  <td className="px-4 py-3 text-sm font-medium text-text">
+                <tr key={job.id} className="transition-colors hover:bg-bg-alt/50">
+                  <td className="px-5 py-3.5 text-sm font-medium text-text">
                     {job.platform}
                   </td>
-                  <td className="px-4 py-3 text-sm text-muted">
+                  <td className="px-5 py-3.5 text-sm text-muted">
                     {job.jobType}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-5 py-3.5">
                     <span
-                      className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                        STATUS_COLORS[job.status] ?? "bg-gray-100 text-gray-600"
+                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                        STATUS_COLORS[job.status] ?? "bg-bg-alt text-muted"
                       }`}
                     >
+                      {job.status === "RUNNING" && (
+                        <span className="mr-1.5 h-1.5 w-1.5 animate-pulse rounded-full bg-blue-500" />
+                      )}
                       {job.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-right text-sm tabular-nums text-muted">
+                  <td className="px-5 py-3.5 text-right text-sm font-medium tabular-nums text-text">
                     {job.postsFound}
                   </td>
-                  <td className="px-4 py-3 text-right text-sm tabular-nums text-muted">
+                  <td className="px-5 py-3.5 text-right text-sm font-medium tabular-nums text-text">
                     {job.tipsExtracted}
                   </td>
-                  <td className="px-4 py-3 text-xs text-muted">
+                  <td className="px-5 py-3.5 text-xs text-muted tabular-nums">
                     {job.startedAt
                       ? new Date(job.startedAt).toLocaleString("en-IN", {
                           day: "numeric",
@@ -178,7 +182,7 @@ export default function AdminScrapersPage(): React.ReactElement {
                         })
                       : "-"}
                   </td>
-                  <td className="max-w-[200px] truncate px-4 py-3 text-xs text-danger">
+                  <td className="max-w-[200px] truncate px-5 py-3.5 text-xs text-red-600">
                     {job.errorMessage ?? "-"}
                   </td>
                 </tr>
@@ -187,8 +191,10 @@ export default function AdminScrapersPage(): React.ReactElement {
           </table>
 
           {jobs.length === 0 && (
-            <div className="py-12 text-center text-sm text-muted">
-              No scrape jobs found. Trigger a scrape to get started.
+            <div className="py-16 text-center">
+              <p className="text-sm text-muted">
+                No scrape jobs found. Trigger a scrape to get started.
+              </p>
             </div>
           )}
         </div>

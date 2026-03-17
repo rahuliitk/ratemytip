@@ -8,7 +8,7 @@ interface LeaderboardTableProps {
 export function LeaderboardTable({ entries }: LeaderboardTableProps): React.ReactElement {
   if (entries.length === 0) {
     return (
-      <div className="rounded-2xl border border-gray-100 bg-white px-4 py-16 text-center shadow-[0_1px_2px_0_rgba(26,54,93,0.04)]">
+      <div className="rounded-xl border border-border/60 bg-surface px-4 py-16 text-center shadow-sm">
         <p className="text-sm text-muted">
           No creators match the current filters. Try adjusting your criteria.
         </p>
@@ -17,11 +17,11 @@ export function LeaderboardTable({ entries }: LeaderboardTableProps): React.Reac
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_1px_2px_0_rgba(26,54,93,0.04)]">
+    <div className="overflow-hidden rounded-xl border border-border/60 bg-surface shadow-sm">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[700px] text-left">
           <thead>
-            <tr className="bg-gradient-to-r from-gray-50 to-gray-50/50">
+            <tr className="bg-bg-alt/80">
               <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted">
                 Rank
               </th>

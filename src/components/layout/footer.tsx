@@ -5,30 +5,32 @@ export function Footer(): React.ReactElement {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-gradient-to-b from-white to-[#F7FAFC]">
-      {/* Gradient separator */}
-      <div className="h-px bg-gradient-to-r from-transparent via-[#2B6CB0]/20 to-transparent" />
-
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    <footer className="bg-surface border-t border-border/60">
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-[#1A365D] to-[#2B6CB0]">
-              <BarChart3 className="h-3.5 w-3.5 text-white" />
+          <div className="flex flex-col items-center gap-3 sm:items-start">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent">
+                <BarChart3 className="h-3.5 w-3.5 text-white" />
+              </div>
+              <span className="font-semibold text-text">
+                Every Call. Rated.
+              </span>
             </div>
-            <span className="text-sm font-semibold text-gradient-primary">
-              Every Call. Rated.
-            </span>
+            <p className="text-sm text-muted">
+              Track, verify, and score stock market tips.
+            </p>
           </div>
           <nav className="flex items-center gap-6">
             <Link
               href="/about"
-              className="text-sm text-muted transition-all duration-200 hover:text-primary"
+              className="text-sm text-muted hover:text-text transition-colors duration-200"
             >
               About
             </Link>
             <Link
               href="/privacy"
-              className="text-sm text-muted transition-all duration-200 hover:text-primary"
+              className="text-sm text-muted hover:text-text transition-colors duration-200"
             >
               Privacy
             </Link>
@@ -36,16 +38,18 @@ export function Footer(): React.ReactElement {
               href="https://github.com/rahuliitk/ratemytip"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-sm text-muted transition-all duration-200 hover:text-primary"
+              className="flex items-center gap-1.5 text-sm text-muted hover:text-text transition-colors duration-200"
             >
               <Github className="h-4 w-4" />
               GitHub
             </a>
           </nav>
         </div>
-        <p className="mt-6 text-center text-xs text-muted/70">
-          &copy; {currentYear} RateMyTip. All rights reserved. Track, verify, and score stock market tips from influencers and analysts.
-        </p>
+        <div className="mt-8 border-t border-border/60 pt-6">
+          <p className="text-center text-xs text-muted/60">
+            &copy; {currentYear} RateMyTip. All rights reserved. Track, verify, and score stock market tips from influencers and analysts.
+          </p>
+        </div>
       </div>
     </footer>
   );

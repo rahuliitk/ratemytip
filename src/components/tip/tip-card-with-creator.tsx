@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { TipStatusBadge } from "./tip-status-badge";
 import { ScoreBadge } from "@/components/shared/score-badge";
 import { formatPrice, formatPercent } from "@/lib/utils/format";
@@ -13,20 +14,21 @@ export function TipCardWithCreator({ tip }: TipCardWithCreatorProps): React.Reac
   const { creator } = tip;
 
   return (
-    <div className={`rounded-2xl border border-gray-100 bg-white p-4 shadow-[0_1px_2px_0_rgba(26,54,93,0.04)] card-hover gradient-border-hover ${
-      isBuy ? "border-l-4 border-l-green-400" : "border-l-4 border-l-red-400"
-    }`}>
+    <div className="rounded-xl border border-border/60 bg-surface p-4 shadow-sm transition-shadow duration-150 hover:shadow-md">
       {/* Creator row */}
       <div className="flex items-center gap-2">
         <Link
           href={`/creator/${creator.slug}`}
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#1A365D]/10 to-[#2B6CB0]/10 text-xs font-bold text-accent ring-1 ring-gray-100"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent/10 text-xs font-bold text-accent"
         >
           {creator.profileImageUrl ? (
-            <img
+            <Image
               src={creator.profileImageUrl}
               alt={creator.displayName}
+              width={28}
+              height={28}
               className="h-7 w-7 rounded-full object-cover"
+              unoptimized
             />
           ) : (
             creator.displayName.charAt(0).toUpperCase()
@@ -38,7 +40,7 @@ export function TipCardWithCreator({ tip }: TipCardWithCreatorProps): React.Reac
         >
           {creator.displayName}
         </Link>
-        <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-muted">
+        <span className="rounded-md bg-bg-alt px-2 py-0.5 text-[10px] font-medium text-muted">
           {creator.tier}
         </span>
         {creator.rmtScore !== null && (
@@ -46,19 +48,17 @@ export function TipCardWithCreator({ tip }: TipCardWithCreatorProps): React.Reac
         )}
       </div>
 
-      {/* Tip content — links to tip detail */}
+      {/* Tip content -- links to tip detail */}
       <Link href={`/tip/${tip.id}`} className="mt-3 block">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-primary">
+              <span className="text-sm font-bold text-text">
                 {tip.stockSymbol}
               </span>
               <span
-                className={`rounded-full px-2 py-0.5 text-[10px] font-bold text-white ${
-                  isBuy
-                    ? "bg-gradient-to-r from-green-500 to-emerald-400"
-                    : "bg-gradient-to-r from-red-500 to-rose-400"
+                className={`rounded-md px-2 py-0.5 text-[10px] font-bold text-white ${
+                  isBuy ? "bg-emerald-500" : "bg-red-500"
                 }`}
               >
                 {tip.direction}
@@ -68,17 +68,17 @@ export function TipCardWithCreator({ tip }: TipCardWithCreatorProps): React.Reac
 
             <p className="mt-1 text-xs text-muted">{tip.stockName}</p>
 
-            <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted tabular-nums">
+            <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1 text-xs tabular-nums text-muted">
               <span>Entry: {formatPrice(tip.entryPrice)}</span>
-              <span>T1: {formatPrice(tip.target1)}</span>
+              <span className="text-emerald-600">T1: {formatPrice(tip.target1)}</span>
               {tip.target2 !== null && (
-                <span>T2: {formatPrice(tip.target2)}</span>
+                <span className="text-emerald-600">T2: {formatPrice(tip.target2)}</span>
               )}
-              <span>SL: {formatPrice(tip.stopLoss)}</span>
+              <span className="text-red-600">SL: {formatPrice(tip.stopLoss)}</span>
             </div>
 
             <div className="mt-2 flex items-center gap-3 text-xs text-muted">
-              <span className="rounded-full bg-gray-100 px-2 py-0.5">{tip.timeframe.replace("_", " ")}</span>
+              <span className="rounded-md bg-bg-alt px-2 py-0.5">{tip.timeframe.replace("_", " ")}</span>
               <span>{new Date(tip.tipTimestamp).toLocaleDateString("en-IN")}</span>
             </div>
           </div>
@@ -86,10 +86,10 @@ export function TipCardWithCreator({ tip }: TipCardWithCreatorProps): React.Reac
           {tip.returnPct !== null && (
             <div className="text-right">
               <span
-                className={`inline-block rounded-xl px-2.5 py-1 text-lg font-bold tabular-nums ${
+                className={`inline-block rounded-lg px-2.5 py-1 text-lg font-bold tabular-nums ${
                   tip.returnPct >= 0
-                    ? "bg-green-50 text-success"
-                    : "bg-red-50 text-danger"
+                    ? "bg-emerald-50 text-emerald-600"
+                    : "bg-red-50 text-red-600"
                 }`}
               >
                 {formatPercent(tip.returnPct)}

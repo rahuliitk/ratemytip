@@ -97,10 +97,11 @@ export default function ClaimsPage(): React.ReactElement {
   const pendingCount = claims.filter((c) => c.status === "PENDING").length;
 
   return (
-    <div>
+    <div className="space-y-6">
+      {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gradient-primary">Claim Requests</h1>
+          <h1 className="text-2xl font-bold text-text">Claim Requests</h1>
           <p className="mt-1 text-sm text-muted">
             {total} total &middot; {pendingCount} pending review
           </p>
@@ -108,16 +109,16 @@ export default function ClaimsPage(): React.ReactElement {
       </div>
 
       {/* Status filter tabs */}
-      <div className="mt-4 flex gap-2">
+      <div className="flex gap-1.5 rounded-lg border border-border/60 bg-surface p-1 shadow-sm w-fit">
         {STATUS_FILTERS.map((status) => (
           <button
             key={status}
             type="button"
             onClick={() => setStatusFilter(status)}
-            className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+            className={`rounded-md px-3.5 py-1.5 text-xs font-medium transition-all ${
               statusFilter === status
-                ? "bg-accent text-white"
-                : "bg-bg text-muted hover:bg-gray-200"
+                ? "bg-primary text-white shadow-sm"
+                : "text-muted hover:bg-bg-alt hover:text-text"
             }`}
           >
             {status === "ALL" ? "All" : status.charAt(0) + status.slice(1).toLowerCase()}
@@ -126,24 +127,24 @@ export default function ClaimsPage(): React.ReactElement {
       </div>
 
       {isLoading ? (
-        <div className="mt-8 flex items-center justify-center py-12">
+        <div className="flex items-center justify-center py-20">
           <Loader2 className="h-6 w-6 animate-spin text-muted" />
         </div>
       ) : claims.length === 0 ? (
-        <div className="mt-8 rounded-2xl bg-white shadow-[0_1px_3px_0_rgba(26,54,93,0.06),0_1px_2px_-1px_rgba(26,54,93,0.06)] py-16 text-center">
+        <div className="rounded-xl border border-border/60 bg-surface py-20 text-center shadow-sm">
           <p className="text-sm text-muted">No claim requests found.</p>
         </div>
       ) : (
-        <div className="mt-6 space-y-3">
+        <div className="space-y-3">
           {claims.map((claim) => {
             const isExpanded = expandedId === claim.id;
             return (
               <div
                 key={claim.id}
-                className="rounded-2xl bg-white shadow-[0_1px_2px_0_rgba(26,54,93,0.04)]"
+                className="rounded-xl border border-border/60 bg-surface shadow-sm"
               >
                 {/* Summary row */}
-                <div className="flex items-center justify-between px-4 py-3">
+                <div className="flex items-center justify-between px-5 py-3.5">
                   <button
                     type="button"
                     className="flex flex-1 items-center gap-3 text-left"
@@ -158,11 +159,11 @@ export default function ClaimsPage(): React.ReactElement {
                       {claim.user.displayName ?? claim.user.username ?? claim.user.email}
                     </span>
                     <span className="text-xs text-muted">&rarr;</span>
-                    <span className="text-sm font-semibold text-primary">
+                    <span className="text-sm font-semibold text-text">
                       {claim.creator?.displayName ?? "Unknown creator"}
                     </span>
                     <StatusBadge status={claim.status} />
-                    <span className="text-xs text-muted">
+                    <span className="text-xs text-muted tabular-nums">
                       {new Date(claim.createdAt).toLocaleDateString("en-IN")}
                     </span>
                   </button>
@@ -173,7 +174,7 @@ export default function ClaimsPage(): React.ReactElement {
                         type="button"
                         onClick={() => handleAction(claim.id, "APPROVED")}
                         disabled={actionLoading === claim.id}
-                        className="inline-flex items-center gap-1 rounded-md bg-success px-3 py-1.5 text-xs font-medium text-white hover:bg-success/90 disabled:opacity-50"
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-emerald-600 disabled:opacity-50"
                       >
                         {actionLoading === claim.id ? (
                           <Loader2 className="h-3 w-3 animate-spin" />
@@ -186,7 +187,7 @@ export default function ClaimsPage(): React.ReactElement {
                         type="button"
                         onClick={() => handleAction(claim.id, "REJECTED")}
                         disabled={actionLoading === claim.id}
-                        className="inline-flex items-center gap-1 rounded-md bg-danger px-3 py-1.5 text-xs font-medium text-white hover:bg-danger/90 disabled:opacity-50"
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-red-500 px-3.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-red-600 disabled:opacity-50"
                       >
                         <X className="h-3 w-3" />
                         Reject
@@ -197,39 +198,39 @@ export default function ClaimsPage(): React.ReactElement {
 
                 {/* Expanded detail */}
                 {isExpanded && (
-                  <div className="border-t border-gray-200 px-4 py-4">
+                  <div className="border-t border-border/60 px-5 py-4">
                     <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
                       <div>
-                        <p className="text-xs font-medium text-muted">Claiming User</p>
-                        <p className="mt-0.5 font-medium text-text">
-                          {claim.user.displayName ?? claim.user.username ?? "—"}
+                        <p className="text-xs font-semibold text-muted">Claiming User</p>
+                        <p className="mt-1 font-medium text-text">
+                          {claim.user.displayName ?? claim.user.username ?? "--"}
                         </p>
                         <p className="text-xs text-muted">{claim.user.email}</p>
                       </div>
                       <div>
-                        <p className="text-xs font-medium text-muted">Creator Profile</p>
+                        <p className="text-xs font-semibold text-muted">Creator Profile</p>
                         {claim.creator ? (
                           <a
                             href={`/creator/${claim.creator.slug}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="mt-0.5 inline-flex items-center gap-1 font-medium text-accent hover:underline"
+                            className="mt-1 inline-flex items-center gap-1.5 font-medium text-accent hover:underline"
                           >
                             {claim.creator.displayName}
                             <ExternalLink className="h-3 w-3" />
                           </a>
                         ) : (
-                          <p className="mt-0.5 text-muted">Creator not found</p>
+                          <p className="mt-1 text-muted">Creator not found</p>
                         )}
                       </div>
                       {claim.proofUrl && (
                         <div>
-                          <p className="text-xs font-medium text-muted">Proof URL</p>
+                          <p className="text-xs font-semibold text-muted">Proof URL</p>
                           <a
                             href={claim.proofUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="mt-0.5 inline-flex items-center gap-1 text-sm text-accent hover:underline"
+                            className="mt-1 inline-flex items-center gap-1.5 text-sm text-accent hover:underline"
                           >
                             {claim.proofUrl.length > 60
                               ? claim.proofUrl.slice(0, 60) + "..."
@@ -240,20 +241,20 @@ export default function ClaimsPage(): React.ReactElement {
                       )}
                       {claim.verificationNote && (
                         <div>
-                          <p className="text-xs font-medium text-muted">Verification Note</p>
-                          <p className="mt-0.5 text-sm text-text">{claim.verificationNote}</p>
+                          <p className="text-xs font-semibold text-muted">Verification Note</p>
+                          <p className="mt-1 text-sm text-text">{claim.verificationNote}</p>
                         </div>
                       )}
                       {claim.reviewNote && (
                         <div>
-                          <p className="text-xs font-medium text-muted">Review Note</p>
-                          <p className="mt-0.5 text-sm text-text">{claim.reviewNote}</p>
+                          <p className="text-xs font-semibold text-muted">Review Note</p>
+                          <p className="mt-1 text-sm text-text">{claim.reviewNote}</p>
                         </div>
                       )}
                       {claim.reviewer && (
                         <div>
-                          <p className="text-xs font-medium text-muted">Reviewed By</p>
-                          <p className="mt-0.5 text-sm text-text">
+                          <p className="text-xs font-semibold text-muted">Reviewed By</p>
+                          <p className="mt-1 text-sm text-text">
                             {claim.reviewer.name} &middot;{" "}
                             {claim.reviewedAt
                               ? new Date(claim.reviewedAt).toLocaleDateString("en-IN")
@@ -266,7 +267,7 @@ export default function ClaimsPage(): React.ReactElement {
                     {/* Review note input for pending claims */}
                     {claim.status === "PENDING" && (
                       <div className="mt-4">
-                        <label htmlFor={`note-${claim.id}`} className="text-xs font-medium text-muted">
+                        <label htmlFor={`note-${claim.id}`} className="text-xs font-semibold text-muted">
                           Review Note (optional)
                         </label>
                         <textarea
@@ -274,7 +275,7 @@ export default function ClaimsPage(): React.ReactElement {
                           value={reviewNote}
                           onChange={(e) => setReviewNote(e.target.value)}
                           rows={2}
-                          className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-accent focus:outline-none"
+                          className="mt-1.5 w-full rounded-lg border border-border bg-surface px-3.5 py-2.5 text-sm text-text placeholder:text-muted/60 focus:border-border focus:outline-none focus:ring-2 focus:ring-primary/10"
                           placeholder="Add a note about your decision..."
                         />
                       </div>
@@ -292,12 +293,12 @@ export default function ClaimsPage(): React.ReactElement {
 
 function StatusBadge({ status }: { readonly status: string }): React.ReactElement {
   const styles: Record<string, string> = {
-    PENDING: "bg-yellow-100 text-yellow-800",
-    APPROVED: "bg-green-100 text-green-800",
-    REJECTED: "bg-red-100 text-red-800",
+    PENDING: "bg-amber-50 text-amber-700",
+    APPROVED: "bg-emerald-50 text-emerald-700",
+    REJECTED: "bg-red-50 text-red-700",
   };
   return (
-    <span className={`rounded px-1.5 py-0.5 text-xs font-medium ${styles[status] ?? "bg-gray-100 text-gray-700"}`}>
+    <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${styles[status] ?? "bg-bg-alt text-muted"}`}>
       {status}
     </span>
   );
