@@ -16,6 +16,11 @@ import { GlossaryTooltip } from "@/components/beginner/glossary-tooltip";
 import { PositionCalculator } from "@/components/beginner/position-calculator";
 import { RiskBadge } from "@/components/beginner/risk-badge";
 import { ExecutionGuide } from "@/components/beginner/execution-guide";
+import { BrokerageCostCard } from "@/components/beginner/brokerage-cost-card";
+import { PostMortemCard } from "@/components/post-mortem/post-mortem-card";
+import { EntryTimingCard } from "@/components/beginner/entry-timing-card";
+import { SimilarTipsPanel } from "@/components/beginner/similar-tips-panel";
+import { TipFeedback } from "@/components/feedback/tip-feedback";
 import { assessTipRisk } from "@/lib/risk/risk-scorer";
 import { buildContextualExplanations } from "@/lib/glossary/context-builder";
 import { formatPrice, formatPercent } from "@/lib/utils/format";
@@ -304,19 +309,7 @@ export default async function TipPage({
           </div>
         )}
 
-        {/* Source */}
-        {tip.sourceUrl && (
-          <div className="mt-4">
-            <a
-              href={tip.sourceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs font-medium text-accent hover:underline"
-            >
-              View on MoneyControl
-            </a>
-          </div>
-        )}
+        {/* Source removed — MoneyControl CDN blocks direct links */}
 
         {/* Beginner Tools Section */}
         <div className="mt-6 space-y-4 border-t border-border/40 pt-6">
@@ -341,6 +334,13 @@ export default async function TipPage({
             target2={tip.target2 ?? undefined}
             stopLoss={tip.stopLoss}
             direction={tip.direction}
+            stockSymbol={tip.stock.symbol}
+          />
+
+          {/* Brokerage Cost Calculator */}
+          <BrokerageCostCard
+            entryPrice={tip.entryPrice}
+            target1={tip.target1}
             stockSymbol={tip.stock.symbol}
           />
 
@@ -393,6 +393,25 @@ export default async function TipPage({
         </div>
       </div>
 
+      {/* Post-Mortem Analysis (only for resolved tips) */}
+      <div className="mt-6">
+        <PostMortemCard
+          tip={{
+            status: tip.status,
+            entryPrice: tip.entryPrice,
+            target1: tip.target1,
+            stopLoss: tip.stopLoss,
+            closedPrice: tip.closedPrice,
+            closedAt: tip.closedAt?.toISOString() ?? null,
+            tipTimestamp: tip.tipTimestamp.toISOString(),
+            direction: tip.direction,
+            timeframe: tip.timeframe,
+            conviction: tip.conviction,
+            stockSymbol: tip.stock.symbol,
+          }}
+        />
+      </div>
+
       {/* Creator's Explanation */}
       {tip.explanation && (
         <div className="mt-6">
@@ -439,6 +458,32 @@ export default async function TipPage({
             <ScoreBadge score={tip.creator.currentScore.rmtScore} />
           )}
         </Link>
+      </div>
+
+      {/* Entry Timing Insights (only for active tips) */}
+      <EntryTimingCard
+        tip={{
+          entryPrice: tip.entryPrice,
+          target1: tip.target1,
+          stopLoss: tip.stopLoss,
+          tipTimestamp: tip.tipTimestamp.toISOString(),
+          direction: tip.direction,
+          status: tip.status,
+          priceAtTip: tip.priceAtTip,
+        }}
+      />
+
+      {/* Similar Past Tips */}
+      <div className="mt-6">
+        <SimilarTipsPanel
+          tipId={tip.id}
+          creatorName={tip.creator.displayName}
+        />
+      </div>
+
+      {/* Tip Feedback */}
+      <div className="mt-6">
+        <TipFeedback tipId={tip.id} />
       </div>
 
       {/* Comments */}

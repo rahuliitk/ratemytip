@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { db } from "@/lib/db";
 import { PAGINATION } from "@/lib/constants";
 import { mapTipRow } from "@/lib/utils/map-tip";
-import { TipCardWithCreator } from "@/components/tip/tip-card-with-creator";
+import { FilteredTips } from "@/components/beginner/filtered-tips";
 import { TipBrowseFilters } from "@/components/tip/tip-browse-filters";
 import { ShareButton } from "@/components/shared/share-button";
 import type { TipStatus } from "@/types";
@@ -183,18 +183,10 @@ export default async function TipsPage({
         </Suspense>
       </div>
 
-      {/* Tip cards */}
-      <div className="stagger-children mt-6 space-y-3">
-        {tips.map((tip) => (
-          <TipCardWithCreator key={tip.id} tip={tip} />
-        ))}
+      {/* Tip cards (filtered by experience level in Beginner Mode) */}
+      <div className="mt-6">
+        <FilteredTips tips={tips} />
       </div>
-
-      {tips.length === 0 && (
-        <div className="py-16 text-center text-sm text-muted">
-          No tips match your filters. Try adjusting the criteria above.
-        </div>
-      )}
 
       {/* Pagination */}
       {totalPages > 1 && (

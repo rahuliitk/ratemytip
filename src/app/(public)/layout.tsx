@@ -3,6 +3,7 @@ import { Footer } from "@/components/layout/footer";
 import { MarketBar } from "@/components/market-context/market-bar";
 import { WelcomeModal } from "@/components/onboarding/welcome-modal";
 import { OnboardingTour } from "@/components/onboarding/onboarding-tour";
+import { GettingStartedChecklist } from "@/components/onboarding/getting-started-checklist";
 
 export default function PublicLayout({
   children,
@@ -17,6 +18,7 @@ export default function PublicLayout({
       <Footer />
       <WelcomeModal />
       <OnboardingTour />
+      <GettingStartedChecklist />
     </div>
   );
 }

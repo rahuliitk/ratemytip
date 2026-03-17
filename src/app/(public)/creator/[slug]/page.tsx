@@ -12,6 +12,9 @@ import { ShareButton } from "@/components/shared/share-button";
 import { FollowButton } from "@/components/creator/follow-button";
 import { ClaimButton } from "@/components/creator/claim-button";
 import { ReviewSection } from "@/components/creator/review-section";
+import { CreatorReviewForm } from "@/components/feedback/creator-review-form";
+import { ReviewList } from "@/components/feedback/review-list";
+import { DrawdownCard } from "@/components/analytics/drawdown-card";
 import type { CreatorDetail, TipSummary } from "@/types";
 
 export const revalidate = 600; // 10 minutes
@@ -238,6 +241,11 @@ export default async function CreatorPage({
         </div>
       )}
 
+      {/* Max Drawdown Analysis */}
+      <div className="mt-8">
+        <DrawdownCard creatorId={creator.id} />
+      </div>
+
       {/* Tip Feed */}
       <div className="mt-8">
         <CreatorTipFeed
@@ -249,6 +257,12 @@ export default async function CreatorPage({
       {/* Creator Reviews */}
       <div className="mt-8">
         <ReviewSection creatorId={creator.id} />
+      </div>
+
+      {/* Community Feedback */}
+      <div className="mt-8 grid gap-6 lg:grid-cols-2">
+        <CreatorReviewForm creatorId={creator.id} />
+        <ReviewList creatorId={creator.id} />
       </div>
 
       {/* JSON-LD Structured Data */}

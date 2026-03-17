@@ -101,6 +101,17 @@ export function PositionCalculator({
         )
       : null;
 
+  // Dispatch custom event when the calculator is meaningfully used (capital entered)
+  React.useEffect(() => {
+    if (capitalNumber > 0 && result) {
+      try {
+        window.dispatchEvent(new CustomEvent("ratemytip:position-calculator-used"));
+      } catch {
+        // Ignore dispatch errors
+      }
+    }
+  }, [capitalNumber, result]);
+
   function handleSaveCapital(): void {
     try {
       localStorage.setItem(LOCAL_STORAGE_KEY, String(capitalNumber));

@@ -105,6 +105,12 @@ export function ExperienceLevelProvider({
     } catch {
       // Silently ignore storage errors
     }
+    // Notify other components (e.g., Getting Started checklist) that level was set
+    try {
+      window.dispatchEvent(new CustomEvent("ratemytip:experience-level-set"));
+    } catch {
+      // Ignore dispatch errors
+    }
   }, []);
 
   const value = useMemo<ExperienceLevelContextValue>(

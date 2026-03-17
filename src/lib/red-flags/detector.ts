@@ -14,6 +14,7 @@ export interface CreatorRedFlagReport {
   readonly creatorId: string;
   readonly flags: readonly RedFlag[];
   readonly transparencyScore: number; // 0-100 (higher = more transparent)
+  readonly transparencyBreakdown: TransparencyBreakdown;
   readonly overallRisk: "LOW" | "MODERATE" | "HIGH";
 }
 
@@ -140,14 +141,105 @@ function checkOneSided(data: CreatorAnalysisData): RedFlag | null {
 
 // ──── Transparency Score Calculation ────
 
-function calculateTransparencyScore(flags: readonly RedFlag[]): number {
-  let penalty = 0;
+/**
+ * Breakdown of the transparency score for display in the UI.
+ * Each criterion contributes up to its max points.
+ */
+export interface TransparencyBreakdown {
+  /** Does the creator consistently provide stop losses? Max +25 */
+  readonly stopLossScore: number;
+  /** Does the creator provide rationale/analysis? Max +20 */
+  readonly rationaleScore: number;
+  /** Is the tip frequency consistent (not erratic)? Max +20 */
+  readonly frequencyConsistencyScore: number;
+  /** Does the creator tip a variety of stocks (not only small-cap)? Max +20 */
+  readonly stockVarietyScore: number;
+  /** Are there zero red flags detected? Max +15 */
+  readonly cleanRecordScore: number;
+  /** Final transparency score (0-100) */
+  readonly total: number;
+}
 
-  for (const flag of flags) {
-    penalty += SEVERITY_PENALTY[flag.severity];
+/**
+ * Calculates a detailed transparency score (0-100) based on five
+ * weighted criteria that reflect how transparent and responsible
+ * a creator is with their tips.
+ *
+ * Criteria:
+ *   1. Stop loss provision     (+25)  — inverse of tipsWithoutSL percentage
+ *   2. Rationale provided      (+20)  — inferred from tip frequency & data quality
+ *   3. Frequency consistency   (+20)  — lower avgTipsPerDay variance = better
+ *   4. Stock variety           (+20)  — lower smallCapPct = more diverse picks
+ *   5. No red flags            (+15)  — zero flags = full points
+ */
+function calculateTransparencyScore(
+  data: CreatorAnalysisData,
+  flags: readonly RedFlag[],
+): TransparencyBreakdown {
+  // 1. Stop loss score: 25 points max
+  //    tipsWithoutSL is 0-1 (fraction without SL)
+  //    Score = (1 - tipsWithoutSL) * 25
+  const stopLossScore = Math.round((1 - data.tipsWithoutSL) * 25);
+
+  // 2. Rationale score: 20 points max
+  //    We don't have a direct "rationale" field on CreatorAnalysisData, so we
+  //    use a heuristic: creators with moderate frequency (not spamming) and
+  //    decent accuracy are more likely to provide quality analysis.
+  //    If avgTipsPerDay <= 3 and allTimeAccuracy >= 0.5, give full points.
+  //    Scale linearly otherwise.
+  let rationaleScore = 20;
+  if (data.avgTipsPerDay > 5) {
+    // High-volume creators are less likely to provide rationale
+    rationaleScore = Math.max(0, Math.round(20 * (1 - (data.avgTipsPerDay - 5) / 10)));
+  }
+  if (data.allTimeAccuracy < 0.4) {
+    rationaleScore = Math.max(0, rationaleScore - 5);
   }
 
-  return Math.max(0, 100 - penalty);
+  // 3. Frequency consistency: 20 points max
+  //    avgTipsPerDay <= 3 → full score
+  //    avgTipsPerDay 3-5 → partial
+  //    avgTipsPerDay > 5 → low
+  let frequencyConsistencyScore: number;
+  if (data.avgTipsPerDay <= 3) {
+    frequencyConsistencyScore = 20;
+  } else if (data.avgTipsPerDay <= 5) {
+    frequencyConsistencyScore = Math.round(20 * (1 - (data.avgTipsPerDay - 3) / 4));
+  } else {
+    frequencyConsistencyScore = Math.max(0, Math.round(20 * (1 - (data.avgTipsPerDay - 5) / 10)));
+  }
+
+  // 4. Stock variety: 20 points max
+  //    Lower small-cap percentage = more variety = higher score
+  //    smallCapPct is 0-1
+  //    0% small-cap → 20 points
+  //    100% small-cap → 0 points
+  const stockVarietyScore = Math.round((1 - data.smallCapPct) * 20);
+
+  // 5. Clean record: 15 points max
+  //    Zero flags → 15, each flag deducts based on severity
+  let cleanRecordScore = 15;
+  for (const flag of flags) {
+    cleanRecordScore -= SEVERITY_PENALTY[flag.severity] >= 20 ? 10 : 5;
+  }
+  cleanRecordScore = Math.max(0, cleanRecordScore);
+
+  const total = Math.min(
+    100,
+    Math.max(
+      0,
+      stopLossScore + rationaleScore + frequencyConsistencyScore + stockVarietyScore + cleanRecordScore,
+    ),
+  );
+
+  return {
+    stopLossScore,
+    rationaleScore,
+    frequencyConsistencyScore,
+    stockVarietyScore,
+    cleanRecordScore,
+    total,
+  };
 }
 
 // ──── Overall Risk Assessment ────
@@ -193,13 +285,14 @@ export async function detectRedFlags(
     }
   }
 
-  const transparencyScore = calculateTransparencyScore(flags);
+  const transparencyBreakdown = calculateTransparencyScore(creatorData, flags);
   const overallRisk = assessOverallRisk(flags);
 
   return {
     creatorId,
     flags,
-    transparencyScore,
+    transparencyScore: transparencyBreakdown.total,
+    transparencyBreakdown,
     overallRisk,
   };
 }

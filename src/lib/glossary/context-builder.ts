@@ -112,7 +112,48 @@ export function buildContextualExplanations(
       `That gives a risk-reward ratio of 1:${rrRatio.toFixed(1)}. ${rrQuality}`,
   });
 
-  // ──── 4. Position Size hint ────
+  // ──── 4. Target 2 explanation (if present) ────
+  if (tip.target2 !== null) {
+    const t2Reward = isBuy
+      ? tip.target2 - tip.entryPrice
+      : tip.entryPrice - tip.target2;
+    const t2RewardPct = (t2Reward / tip.entryPrice) * 100;
+
+    let t2Explanation =
+      `Target 2 at ${formatINR(tip.target2)} gives you ${formatINR(t2Reward)} per share (${t2RewardPct.toFixed(1)}%) ` +
+      `from your entry at ${formatINR(tip.entryPrice)}.`;
+
+    if (tip.target3 !== null) {
+      t2Explanation +=
+        ` Consider booking another portion of your position here and trailing the stop loss for the rest toward Target 3 at ${formatINR(tip.target3)}.`;
+    } else {
+      t2Explanation +=
+        ` Since this is the final target, consider exiting your remaining position here.`;
+    }
+
+    explanations.push({
+      term: "Target 2",
+      explanation: t2Explanation,
+    });
+  }
+
+  // ──── 5. Target 3 explanation (if present) ────
+  if (tip.target3 !== null) {
+    const t3Reward = isBuy
+      ? tip.target3 - tip.entryPrice
+      : tip.entryPrice - tip.target3;
+    const t3RewardPct = (t3Reward / tip.entryPrice) * 100;
+
+    explanations.push({
+      term: "Target 3",
+      explanation:
+        `Target 3 at ${formatINR(tip.target3)} is the most optimistic profit level. ` +
+        `If all targets are hit, your gain from entry would be ${formatINR(t3Reward)} per share (${t3RewardPct.toFixed(1)}%). ` +
+        `This is the final target — exit your full remaining position here.`,
+    });
+  }
+
+  // ──── 6. Position Size hint ────
   // Using a simple 2% portfolio risk rule as an illustration.
   const EXAMPLE_PORTFOLIO = 100_000; // ₹1,00,000
   const MAX_RISK_PCT = 2; // 2% risk per trade
@@ -129,6 +170,32 @@ export function buildContextualExplanations(
       `you could buy approximately ${suggestedQty} shares ` +
       `(position value: ${formatINR(positionValue)}). ` +
       `Adjust this number based on your actual portfolio size and risk appetite.`,
+  });
+
+  // ──── 7. Scenario P&L (concrete money example with 10 shares) ────
+  const EXAMPLE_QTY = 10;
+  const maxLossTotal = slRisk * EXAMPLE_QTY;
+  const t1ProfitTotal = t1Reward * EXAMPLE_QTY;
+
+  let scenarioText =
+    `If you buy ${EXAMPLE_QTY} shares at ${formatINR(tip.entryPrice)}, ` +
+    `your total investment would be ${formatINR(EXAMPLE_QTY * tip.entryPrice)}. ` +
+    `Your maximum loss (if stop loss is hit) would be ${formatINR(maxLossTotal)}. ` +
+    `If Target 1 is hit, your profit would be ${formatINR(t1ProfitTotal)}.`;
+
+  if (tip.target2 !== null) {
+    const t2ProfitTotal = (isBuy ? tip.target2 - tip.entryPrice : tip.entryPrice - tip.target2) * EXAMPLE_QTY;
+    scenarioText += ` If Target 2 is also hit, your profit would be ${formatINR(t2ProfitTotal)}.`;
+  }
+
+  if (tip.target3 !== null) {
+    const t3ProfitTotal = (isBuy ? tip.target3 - tip.entryPrice : tip.entryPrice - tip.target3) * EXAMPLE_QTY;
+    scenarioText += ` If all three targets are hit, your profit would be ${formatINR(t3ProfitTotal)}.`;
+  }
+
+  explanations.push({
+    term: "Scenario (10 Shares)",
+    explanation: scenarioText,
   });
 
   return explanations;

@@ -8,6 +8,7 @@ import { StockPriceChart } from "@/components/stock/stock-price-chart";
 import { StockTipFeed } from "@/components/stock/stock-tip-feed";
 import { ScoreBadge } from "@/components/shared/score-badge";
 import { ShareButton } from "@/components/shared/share-button";
+import { ConflictingTipsPanel } from "@/components/stock/conflicting-tips-panel";
 import { subDays } from "date-fns";
 
 export const revalidate = 300; // 5 minutes
@@ -179,6 +180,8 @@ export default async function StockPage({
         {/* Sidebar */}
         <div className="space-y-6">
           <StockConsensus bullish={bullish} bearish={bearish} />
+
+          <ConflictingTipsPanel stockId={stock.id} />
 
           {/* Top Creators for this stock */}
           {topCreators.length > 0 && (
