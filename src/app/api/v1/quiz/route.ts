@@ -112,6 +112,10 @@ function buildExplanation(
 
   if (creator.totalTips >= 200) {
     parts.push("Established track record with 200+ tips.");
+  } else if (creator.totalTips >= 50) {
+    parts.push(`Active creator with ${creator.totalTips} tips tracked.`);
+  } else if (creator.totalTips >= 10) {
+    parts.push(`Growing track record with ${creator.totalTips} tips.`);
   }
 
   if (parts.length === 0) {
@@ -158,11 +162,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       totalTips: { gte: 5 },
     };
 
-    // For conservative users, only show creators with good accuracy
+    // For conservative users, only filter by accuracy if scores exist
+    // (scores may not be calculated yet for fresh crawls)
     if (input.risk === "conservative") {
-      where.currentScore = {
-        accuracyRate: { gte: 0.55 },
-      };
+      const scoredCount = await db.creatorScore.count();
+      if (scoredCount > 0) {
+        where.currentScore = {
+          accuracyRate: { gte: 0.55 },
+        };
+      }
     }
 
     const creators = await db.creator.findMany({
